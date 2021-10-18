@@ -144,4 +144,19 @@ public class Exevalator {
 			}
 		}
 	}
+
+
+	/**
+	 * The Exception class thrown in/by this engine.
+	 */
+	@SuppressWarnings("serial")
+	public static class ExevalatorException extends RuntimeException {
+
+		/**
+		 * Create an instance having the specified error message.
+		 */
+		public ExevalatorException(String errorMessage) {
+			super(errorMessage);
+		}
+	}
 }
