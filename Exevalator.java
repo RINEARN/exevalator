@@ -72,4 +72,76 @@ public class Exevalator {
 			return "Operator [symbol=" + symbol + ", precedence=" + precedence + ", type=" + type + "]";
 		}
 	}
+
+
+	/**
+	 * The class storing information of an token.
+	 */
+	private static class Token {
+
+		/**
+		 * The enum representing types of tokens.
+		 */
+		private static enum Type {
+
+			/** Represents number literal tokens, for example: 1.23 */
+			NUMBER_LITERAL,
+
+			/** Represents operator tokens, for example: + */
+			OPERATOR,
+
+			/** Represents parenthesis, for example: ( and ) of (1*(2+3)) */
+			PARENTHESIS,
+
+			/** Represents identifier tokens, for example: x */
+			IDENTIFIER
+		}
+
+		/** The type of this token. */
+		public final Type type;
+
+		/** The text representation of this token. */
+		public final String word;
+
+		/** The detailed information of the operator, if the type of this token is OPERATOR. */
+		public final Operator operator;
+
+		/**
+		 * Create an Token instance storing specified information.
+		 *
+		 * @param type The type of this token
+		 * @param word The text representation of this token
+		 */
+		public Token(Type type, String word) {
+			this.type = type;
+			this.word = word;
+			this.operator = null;
+		}
+
+		/**
+		 * Create an Token instance storing specified information.
+		 *
+		 * @param type The type of this token
+		 * @param word The text representation of this token
+		 * @param operator The detailed information of the operator, for OPERATOR type tokens
+		 */
+		public Token(Type type, String word, Operator operator) {
+			this.type = type;
+			this.word = word;
+			this.operator = operator;
+		}
+
+		/**
+		 * Returns the String representation of this Token instance.
+		 */
+		@Override
+		public String toString() {
+			if (this.operator == null) {
+				return "Token [type=" + type + ", word=" + word + "]";
+			} else {
+				return "Token [type=" + type + ", word=" + word +
+					", operator.type=" + operator.type + ", operator.precedence=" + operator.precedence + "]";
+			}
+		}
+	}
 }
