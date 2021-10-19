@@ -247,7 +247,13 @@ public class Exevalator {
 			add("/");
 		}};
 
-		/** Search an available Operator having specified information. */
+		/**
+		 * Search an available Operator having specified information.
+		 *
+		 * @param type The type of the operator to be searched
+		 * @param symbol The symbol of the operator to be searched
+		 * @return The Operator matching specified conditions
+		 */
 		private static final Operator searchOperator(Operator.Type type, String symbol) {
 			for (Operator operator: OPERATOR_LIST) {
 				if (operator.type == type && operator.symbol.equals(symbol)) {
@@ -267,6 +273,8 @@ public class Exevalator {
 
 		/**
 		 * Create an instance having the specified error message.
+		 *
+		 * @param errorMessage The error message explaining the cause of this exception
 		 */
 		public ExevalatorException(String errorMessage) {
 			super(errorMessage);
