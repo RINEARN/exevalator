@@ -25,7 +25,74 @@ public class Exevalator {
 	 * @return The evaluated value
 	 */
 	public double eval(String expression) {
+		/*
+		// Temporary, for debugging
+		Token[] tokens = new LexicalAnalyzer().analyze(expression);
+		for (Token token: tokens) {
+			System.out.println(token.toString());
+		}
+		*/
 		return Double.NaN;
+	}
+
+
+	/**
+	 * The class performing functions of a lexical analyzer.
+	 */
+	private static class LexicalAnalyzer {
+
+		/**
+		 * Splits (tokenizes) the expression into tokens, and analyze them.
+		 *
+		 * @param expression The expression to be tokenized/analyzed
+		 * @return Analyzed tokens
+		 */
+		public Token[] analyze(String expression) {
+
+			// Split (tokenize) the expression into token words.
+			expression = expression.trim();
+			for (Operator operator: StaticSettings.OPERATOR_LIST) {
+				String symbol = operator.symbol;
+				expression = expression.replace(symbol, " " + symbol + " ");
+			}
+			String[] tokenWords = expression.trim().split("\\s+");
+			int tokenCount = tokenWords.length;
+
+			// Create Token instances.
+			Token[] tokens = new Token[tokenCount];
+			for (int itoken=0; itoken<tokenCount; itoken++) {
+				String word = tokenWords[itoken];
+
+				if (word.equals("(") || word.equals(")")) {
+					tokens[itoken] = new Token(Token.Type.PARENTHESIS, word);
+				} else if (StaticSettings.OPERATOR_SYMBOL_SET.contains(word)) {
+					tokens[itoken] = new Token(Token.Type.OPERATOR, word);
+				} else if (word.matches(StaticSettings.NUMBER_LITERAL_REGEX)) {
+					tokens[itoken] = new Token(Token.Type.NUMBER_LITERAL, word);
+				} else {
+					tokens[itoken] = new Token(Token.Type.IDENTIFIER, word);
+				}
+			}
+
+			// Analyze detailed information for operator tokens.
+			Token.Type lastTokenType = null;
+			for (int itoken=0; itoken<tokenCount; itoken++) {
+				Token token = tokens[itoken];
+				if (token.type != Token.Type.OPERATOR) {
+					lastTokenType = token.type;
+					continue;
+				}
+				Operator operator = null;
+				if (lastTokenType == Token.Type.NUMBER_LITERAL || lastTokenType == Token.Type.IDENTIFIER) {
+					operator = StaticSettings.searchOperator(Operator.Type.BINARY, token.word);
+				} else {
+					operator = StaticSettings.searchOperator(Operator.Type.UNARY, token.word);
+				}
+				tokens[itoken] = new Token(token.type, token.word, operator);
+				lastTokenType = token.type;
+			}
+			return tokens;
+		}
 	}
 
 
