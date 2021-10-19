@@ -8,6 +8,10 @@
  */
 // package your.projects.package.anywhere;
 
+import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
+
 
 /**
  * Interpreter Engine of Exevalator.
@@ -142,6 +146,48 @@ public class Exevalator {
 				return "Token [type=" + type + ", word=" + word +
 					", operator.type=" + operator.type + ", operator.precedence=" + operator.precedence + "]";
 			}
+		}
+	}
+
+
+	/**
+	 * The class defining static setting values.
+	 */
+	private static class StaticSettings {
+
+		/** The regular expression of number literals. */
+		private static final String NUMBER_LITERAL_REGEX =
+			"^" +                       // Begin
+			"([0-9]+\\.?[0-9]+)" +      // Significand part
+			"((e|E)(\\+|-)?[0-9]+)?" +  // Exponent part
+			"$";                        // End
+
+		/** The list of available operators. */
+		private static final List<Operator> OPERATOR_LIST = List.of(
+			new Operator(Operator.Type.BINARY, "+", 300), // Addition
+			new Operator(Operator.Type.BINARY, "-", 300), // Subtraction
+			new Operator(Operator.Type.BINARY, "*", 200), // Multiplication
+			new Operator(Operator.Type.BINARY, "/", 200), // Division
+			new Operator(Operator.Type.UNARY,  "-", 100)  // Unary Minus
+		);
+
+		/** The set of symbols of available operators. */
+		@SuppressWarnings("serial")
+		private static final Set<String> OPERATOR_SYMBOL_SET = new HashSet<String>() {{
+			add("+");
+			add("-");
+			add("*");
+			add("/");
+		}};
+
+		/** Search an available Operator having specified information. */
+		private static final Operator searchOperator(Operator.Type type, String symbol) {
+			for (Operator operator: OPERATOR_LIST) {
+				if (operator.type == type && operator.symbol.equals(symbol)) {
+					return operator;
+				}
+			}
+			throw new ExevalatorException("No operator found: (" + type + ", " + symbol + ")");
 		}
 	}
 
