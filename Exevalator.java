@@ -10,6 +10,7 @@
 
 import java.util.List;
 import java.util.Set;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 
@@ -168,7 +169,10 @@ public class Exevalator {
 			PARENTHESIS,
 
 			/** Represents identifier tokens, for example: x */
-			IDENTIFIER
+			IDENTIFIER,
+
+			/** Represents temporary token for isolating partial expressions in the stack, in parser */
+			STACK_LID
 		}
 
 		/** The type of this token. */
@@ -221,9 +225,93 @@ public class Exevalator {
 
 
 	/**
+	 * The class storing information of an node of an AST.
+	 */
+	private static class AstNode {
+
+		/** The token corresponding with this AST node. */
+		public final Token token;
+
+		/** The list of child nodes of this node. */
+		public final List<AstNode> childNodeList;
+
+		/**
+		 * Create an AST node instance storing specified information.
+		 *
+		 * @param token The token corresponding with this AST node
+		 */
+		public AstNode(Token token) {
+			this.token = token;
+			this.childNodeList = new ArrayList<AstNode>();
+		}
+
+		/**
+		 * Expresses the AST under this node in XML-like text format.
+		 *
+		 * @returns XML-like text representation of the AST under this node
+		 */
+		@Override
+		public String toString() {
+			return this.toMarkupText(0);
+		}
+
+		/**
+		 * Expresses the AST under this node in XML-like text format.
+		 *
+		 * @param indentStage The stage of indent of this node
+		 * @return XML-like text representation of the AST under this node
+		 */
+		private String toMarkupText(int indentStage) {
+			StringBuilder indentBuilder = new StringBuilder();
+			for (int istage=0; istage<indentStage; istage++) {
+				indentBuilder.append(StaticSettings.AST_INDENT);
+			}
+			final String indent = indentBuilder.toString();
+			final String eol = System.getProperty("line.separator");
+			StringBuilder resultBuilder = new StringBuilder();
+
+			resultBuilder.append(indent);
+			resultBuilder.append("<");
+			resultBuilder.append(this.token.type);
+			resultBuilder.append(" word=\"");
+			resultBuilder.append(this.token.word);
+			resultBuilder.append("\"");
+			if (this.token.type == Token.Type.OPERATOR) {
+				resultBuilder.append(" optype=\"");
+				resultBuilder.append(this.token.operator.type);
+				resultBuilder.append("\" precedence=\"");
+				resultBuilder.append(this.token.operator.precedence);
+				resultBuilder.append("\"");
+			}
+
+			if (0 < this.childNodeList.size()) {
+				resultBuilder.append(">");
+				for (AstNode childNode: this.childNodeList) {
+					resultBuilder.append(eol);
+					resultBuilder.append(childNode.toMarkupText(indentStage + 1));
+				}
+				resultBuilder.append(eol);
+				resultBuilder.append(indent);
+				resultBuilder.append("</");
+				resultBuilder.append(this.token.type);
+				resultBuilder.append(">");
+
+			} else {
+				resultBuilder.append(" />");
+			}
+
+			return resultBuilder.toString();
+		}
+	}
+
+
+	/**
 	 * The class defining static setting values.
 	 */
 	private static class StaticSettings {
+
+		/** The indent used in text representations of ASTs. */
+		private static final String AST_INDENT = "  ";
 
 		/** The regular expression of number literals. */
 		private static final String NUMBER_LITERAL_REGEX =
