@@ -497,6 +497,214 @@ public class Exevalator {
 
 
 	/**
+	 * The class providing various types of evaluator units
+	 * which evaluate values of operators, literals, etc.
+	 */
+	private static class Evaluator {
+
+		/**
+		 * The super class of evaluator units.
+		 */
+		private static abstract class EvaluatorUnit {
+
+			/**
+			 * Performs the evaluation.
+			 *
+			 * @return The evaluated value.
+			 */
+			public abstract double evaluate();
+		}
+
+		/**
+		 * The super class of evaluator units of binary operations.
+		 */
+		private static abstract class BinaryOperationEvaluatorUnit extends EvaluatorUnit {
+
+			/** The unit for evaluating the right-side operand. */
+			protected final EvaluatorUnit leftOperandUnit;
+
+			/** The unit for evaluating the left-side operand. */
+			protected final EvaluatorUnit rightOperandUnit;
+
+			/**
+			 * Initializes operands.
+			 *
+			 * @param leftOperandUnit The unit for evaluating the left-side operand
+			 * @param rightOperandUnit The unit for evaluating the right-side operand
+			 */
+			protected BinaryOperationEvaluatorUnit(EvaluatorUnit leftOperandUnit, EvaluatorUnit rightOperandUnit) {
+				this.leftOperandUnit = leftOperandUnit;
+				this.rightOperandUnit = rightOperandUnit;
+			}
+		}
+
+		/**
+		 * The evaluator unit for evaluating the value of a addition operator.
+		 */
+		private static final class AdditionEvaluatorUnit extends BinaryOperationEvaluatorUnit {
+
+			/**
+			 * Initializes operands.
+			 *
+			 * @param leftOperandUnit The unit for evaluating the left-side operand
+			 * @param rightOperandUnit The unit for evaluating the right-side operand
+			 */
+			public AdditionEvaluatorUnit(EvaluatorUnit leftOperandUnit, EvaluatorUnit rightOperandUnit) {
+				super(leftOperandUnit, rightOperandUnit);
+			}
+
+			/**
+			 * Performs the addition.
+			 *
+			 * @return The result value of the addition
+			 */
+			@Override
+			public double evaluate() {
+				return this.leftOperandUnit.evaluate() + this.rightOperandUnit.evaluate();
+			}
+		}
+
+		/**
+		 * The evaluator unit for evaluating the value of a subtraction operator.
+		 */
+		private static final class SubtractionEvaluatorUnit extends BinaryOperationEvaluatorUnit {
+
+			/**
+			 * Initializes operands.
+			 *
+			 * @param leftOperandUnit The unit for evaluating the left-side operand
+			 * @param rightOperandUnit The unit for evaluating the right-side operand
+			 */
+			public SubtractionEvaluatorUnit(EvaluatorUnit leftOperandUnit, EvaluatorUnit rightOperandUnit) {
+				super(leftOperandUnit, rightOperandUnit);
+			}
+
+			/**
+			 * Performs the subtraction.
+			 *
+			 * @return The result value of the subtraction
+			 */
+			@Override
+			public double evaluate() {
+				return this.leftOperandUnit.evaluate() - this.rightOperandUnit.evaluate();
+			}
+		}
+
+		/**
+		 * The evaluator unit for evaluating the value of a multiplication operator.
+		 */
+		private static final class MultiplicateionEvaluatorUnit extends BinaryOperationEvaluatorUnit {
+
+			/**
+			 * Initializes operands.
+			 *
+			 * @param leftOperandUnit The unit for evaluating the left-side operand
+			 * @param rightOperandUnit The unit for evaluating the right-side operand
+			 */
+			public MultiplicateionEvaluatorUnit(EvaluatorUnit leftOperandUnit, EvaluatorUnit rightOperandUnit) {
+				super(leftOperandUnit, rightOperandUnit);
+			}
+
+			/**
+			 * Performs the multiplication.
+			 *
+			 * @return The result value of the multiplication
+			 */
+			@Override
+			public double evaluate() {
+				return this.leftOperandUnit.evaluate() * this.rightOperandUnit.evaluate();
+			}
+		}
+
+		/**
+		 * The evaluator unit for evaluating the value of a division operator.
+		 */
+		private static final class DivisionEvaluatorUnit extends BinaryOperationEvaluatorUnit {
+
+			/**
+			 * Initializes operands.
+			 *
+			 * @param leftOperandUnit The unit for evaluating the left-side operand
+			 * @param rightOperandUnit The unit for evaluating the right-side operand
+			 */
+			public DivisionEvaluatorUnit(EvaluatorUnit leftOperandUnit, EvaluatorUnit rightOperandUnit) {
+				super(leftOperandUnit, rightOperandUnit);
+			}
+
+			/**
+			 * Performs the division.
+			 *
+			 * @return The result value of the division
+			 */
+			@Override
+			public double evaluate() {
+				return this.leftOperandUnit.evaluate() / this.rightOperandUnit.evaluate();
+			}
+		}
+
+		/**
+		 * The evaluator unit for evaluating the value of a unary-minus operator.
+		 */
+		private static final class MinusEvaluatorUnit extends EvaluatorUnit {
+
+			/** The unit for evaluating the operand. */
+			private final EvaluatorUnit operandUnit;
+
+			/**
+			 * Initializes the operand.
+			 *
+			 * @param operandUnit The unit for evaluating the operand
+			 */
+			public MinusEvaluatorUnit(EvaluatorUnit operandUnit) {
+				this.operandUnit = operandUnit;
+			}
+
+			/**
+			 * Performs the division.
+			 *
+			 * @return The result value of the division.
+			 */
+			@Override
+			public double evaluate() {
+				return -this.operandUnit.evaluate();
+			}
+		}
+
+		/**
+		 * The evaluator unit for evaluating the value of a number literal.
+		 */
+		private static final class NumberLiteralEvaluatorUnit extends EvaluatorUnit {
+
+			/** The value of the number literal. */
+			private final double value;
+
+			/**
+			 * Initializes the value of the number literal.
+			 *
+			 * @param literal The number literal
+			 */
+			public NumberLiteralEvaluatorUnit(String literal) {
+				try {
+					this.value = Double.parseDouble(literal);
+				} catch (NumberFormatException nfe) {
+					throw new ExevalatorException("Invalid number literal: " + literal);
+				}
+			}
+
+			/**
+			 * Returns the value of the number literal.
+			 *
+			 * @return The value of the number literal.
+			 */
+			@Override
+			public double evaluate() {
+				return this.value;
+			}
+		}
+	}
+
+
+	/**
 	 * The class defining static setting values.
 	 */
 	private static class StaticSettings {
