@@ -9,8 +9,10 @@
 // package your.projects.package.anywhere;
 
 import java.util.List;
-import java.util.Set;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.ArrayDeque;
+import java.util.Set;
 import java.util.HashSet;
 
 
@@ -26,13 +28,25 @@ public class Exevalator {
 	 * @return The evaluated value
 	 */
 	public double eval(String expression) {
-		/*
-		// Temporary, for debugging
+
+		// Split the expression into tokens, and analyze them.
 		Token[] tokens = new LexicalAnalyzer().analyze(expression);
+
+		// Construct AST (Abstract Syntax Tree) by parsing tokens.
+		AstNode ast = new Parser().parse(tokens);
+
+		/*
+		// Temporary, for debugging tokens
 		for (Token token: tokens) {
 			System.out.println(token.toString());
 		}
 		*/
+
+		/*
+		// Temporary, for debugging AST
+		System.out.println(ast.toString());
+		*/
+
 		return Double.NaN;
 	}
 
@@ -96,6 +110,183 @@ public class Exevalator {
 				lastToken = token;
 			}
 			return tokens;
+		}
+	}
+
+
+	/**
+	 * The class performing functions of a parser.
+	 */
+	private static class Parser {
+
+		/**
+		 * Parses tokens and construct Abstract Syntax Tree (AST).
+		 *
+		 * @param tokens Tokens to be parsed
+		 * @return The root node of the constructed AST
+		 */
+		public AstNode parse(Token[] tokens) {
+
+			/* In this method, we use a non-recursive algorithm for the parsing.
+			 * Processing cost is maybe O(N), where N is the number of tokens. */
+
+			// Number of tokens
+			int tokenCount = tokens.length;
+
+			// Working stack to form multiple AstNode instances into a tree-shape.
+			Deque<AstNode> stack = new ArrayDeque<AstNode>();
+
+			// Temporary node used in the above working stack, for isolating ASTs of partial expressions.
+			AstNode parenthesisStackLid = new AstNode(new Token(Token.Type.STACK_LID, "(PARENTHESIS_STACK_LID)"));
+
+			// The array storing next operator's precedence for each token.
+			// At [i], it is stored that the precedence of the first operator of which token-index is greater than i.
+			int[] nextOperatorPrecedences = this.getNextOperatorPrecedences(tokens);
+
+			// Read tokens from left to right.
+			int itoken = 0;
+			do {
+				Token token = tokens[itoken];
+				AstNode operatorNode = null;
+
+				// Case of operands: "1.23", "x", etc.
+				if (token.type == Token.Type.NUMBER_LITERAL || token.type == Token.Type.IDENTIFIER) {
+					stack.push(new AstNode(token));
+					itoken++;
+					continue;
+
+				// Case of parenthesis: "(" or ")"
+				} else if (token.type == Token.Type.PARENTHESIS) {
+					if (token.word.equals("(")) {
+						stack.push(parenthesisStackLid);
+						itoken++;
+						continue;
+					} else {
+						operatorNode = this.popPartialExprNodes(stack, parenthesisStackLid)[0];
+					}
+
+				// Case of operators: "+", "-", etc.
+				} else if (token.type == Token.Type.OPERATOR) {
+					operatorNode = new AstNode(token);
+					int nextOpPrecedence = nextOperatorPrecedences[itoken];
+
+					// Case of unary-prefix operators:
+					// * Connect the node of right-token as an operand, if necessary (depending the next operator's precedence).
+					if (token.operator.type == Operator.Type.UNARY) {
+						if (this.shouldAddRightOperand(token.operator.precedence, nextOpPrecedence)) {
+							operatorNode.childNodeList.add(new AstNode(tokens[itoken + 1]));
+							itoken++;
+						} // else: Operand will be connected later. See the bottom of this loop.
+
+					// Case of binary operators:
+					// * Always connect the node of left-token as an operand.
+					// * Connect the node of right-token as an operand, if necessary (depending the next operator's precedence).
+					} else if (token.operator.type == Operator.Type.BINARY) {
+						operatorNode.childNodeList.add(stack.pop());
+						if (this.shouldAddRightOperand(token.operator.precedence, nextOpPrecedence)) {
+							operatorNode.childNodeList.add(new AstNode(tokens[itoken + 1]));
+							itoken++;
+						} // else: Right-operand will be connected later. See the bottom of this loop.
+					}
+				}
+
+				// If the precedence of the operator at the top of the stack is stronger than the next operator,
+				// connect all "unconnected yet" operands and operators in the stack.
+				while (this.shouldAddRightOperandToStackedOperator(stack, nextOperatorPrecedences[itoken])) {
+					AstNode oldOperatorNode = operatorNode;
+					operatorNode = stack.pop();
+					operatorNode.childNodeList.add(oldOperatorNode);
+				}
+				stack.push(operatorNode);
+				itoken++;
+
+			} while (itoken < tokenCount);
+
+			// The AST has been constructed on the stack, and only its root node is stored in the stack, so return it.
+			return stack.pop();
+		}
+
+		/**
+		 * Judges whether the right-side token should be connected directly as an operand, to the target operator.
+		 *
+		 * @param targetOperatorPrecedence The precedence of the target operator (smaller value gives higher precedence).
+		 * @param nextOperatorPrecedence The precedence of the next operator (smaller value gives higher precedence).
+		 * @return Returns true if the right-side token (operand) should be connected to the target operator
+		 */
+		private boolean shouldAddRightOperand(int targetOperatorPrecedence, int nextOperatorPrecedence) {
+			return targetOperatorPrecedence <= nextOperatorPrecedence; // left is stronger
+		}
+
+		/**
+		 * Judges whether the right-side token should be connected directly as an operand,
+		 * to the operator at the top of the working stack.
+		 *
+		 * @param stack The working stack used for the parsing
+		 * @param nextOperatorPrecedence The precedence of the next operator (smaller value gives higher precedence).
+		 * @return Returns true if the right-side token (operand) should be connected to the operator at the top of the stack
+		 */
+		private boolean shouldAddRightOperandToStackedOperator(Deque<AstNode> stack, int nextOperatorPrecedence) {
+			if (stack.size() == 0 || stack.peek().token.type != Token.Type.OPERATOR) {
+				return false;
+			}
+			return this.shouldAddRightOperand(stack.peek().token.operator.precedence, nextOperatorPrecedence);
+		}
+
+		/**
+		 * Pops root nodes of ASTs of partial expressions constructed on the stack.
+		 *
+		 * @param stack The working stack used for the parsing
+		 * @param targetStackLidNode The temporary node pushed in the stack, at the end of partial expressions to be popped
+		 * @return Root nodes of ASTs of partial expressions
+		 */
+		private AstNode[] popPartialExprNodes(Deque<AstNode> stack, AstNode endStackLidNode) {
+			if (stack.size() == 0) {
+				throw new ExevalatorException("Unexpected end of a partial expression");
+			}
+			List<AstNode> partialExprNodeList = new ArrayList<AstNode>();
+			while(stack.size() != 0) {
+				if (stack.peek().token.type == Token.Type.STACK_LID) {
+					AstNode stackLidNode = stack.pop();
+					if (stackLidNode == endStackLidNode) {
+						break;
+					}
+				} else {
+					partialExprNodeList.add(stack.pop());
+				}
+			}
+			return partialExprNodeList.toArray(new AstNode[partialExprNodeList.size()]);
+		}
+
+		/**
+		 * Returns an array storing next operator's precedence for each token.
+		 * In the returned array, it will stored at [i] that
+		 * precedence of the first operator of which token-index is greater than i.
+		 *
+		 * @param tokens All tokens to be parsed
+		 * @return The array storing next operator's precedence for each token
+		 */
+		private int[] getNextOperatorPrecedences(Token[] tokens) {
+			int tokenCount = tokens.length;
+			int lastOperatorPrecedence = Integer.MAX_VALUE; // least prior
+			int[] nextOperatorPrecedences = new int[tokenCount];
+
+			for (int itoken=tokenCount-1; 0<=itoken; itoken--) {
+				Token token = tokens[itoken];
+				nextOperatorPrecedences[itoken] = lastOperatorPrecedence;
+
+				if (token.type == Token.Type.OPERATOR) {
+					lastOperatorPrecedence = token.operator.precedence;
+				}
+
+				if (token.type == Token.Type.PARENTHESIS) {
+					if (token.word.equals("(")) {
+						lastOperatorPrecedence = 0; // most prior
+					} else { // case of ")"
+						lastOperatorPrecedence = Integer.MAX_VALUE; // least prior
+					}
+				}
+			}
+			return nextOperatorPrecedences;
 		}
 	}
 
