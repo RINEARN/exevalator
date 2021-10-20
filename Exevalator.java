@@ -50,7 +50,8 @@ public class Exevalator {
 		public Token[] analyze(String expression) {
 
 			// Split (tokenize) the expression into token words.
-			expression = expression.trim();
+			expression = expression.replace("(", " ( ");
+			expression = expression.replace(")", " ) ");
 			for (Operator operator: StaticSettings.OPERATOR_LIST) {
 				String symbol = operator.symbol;
 				expression = expression.replace(symbol, " " + symbol + " ");
@@ -75,21 +76,23 @@ public class Exevalator {
 			}
 
 			// Analyze detailed information for operator tokens.
-			Token.Type lastTokenType = null;
+			Token lastToken = null;
 			for (int itoken=0; itoken<tokenCount; itoken++) {
 				Token token = tokens[itoken];
 				if (token.type != Token.Type.OPERATOR) {
-					lastTokenType = token.type;
+					lastToken = token;
 					continue;
 				}
 				Operator operator = null;
-				if (lastTokenType == Token.Type.NUMBER_LITERAL || lastTokenType == Token.Type.IDENTIFIER) {
+				if (lastToken.type == Token.Type.NUMBER_LITERAL
+						|| lastToken.type == Token.Type.IDENTIFIER
+						|| lastToken.word.equals(")")) {
 					operator = StaticSettings.searchOperator(Operator.Type.BINARY, token.word);
 				} else {
 					operator = StaticSettings.searchOperator(Operator.Type.UNARY, token.word);
 				}
 				tokens[itoken] = new Token(token.type, token.word, operator);
-				lastTokenType = token.type;
+				lastToken = token;
 			}
 			return tokens;
 		}
