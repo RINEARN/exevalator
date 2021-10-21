@@ -1,3 +1,6 @@
+/**
+ * The class for testing Exevalator.
+ */
 public class Test {
 
 	/** The minimum error between two double-type values to regard them almost equal. */
@@ -258,6 +261,7 @@ public class Test {
 	/**
 	 * The Exception class thrown when any test has failed.
 	 */
+	@SuppressWarnings("serial")
 	public static class ExevalatorTestException extends RuntimeException {
 
 		/**
