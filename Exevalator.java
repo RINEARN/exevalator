@@ -723,13 +723,28 @@ public class Exevalator {
 			"((e|E)(\\+|-)?[0-9]+)?" +  // Exponent part
 			"$";                        // End
 
+		/** The instance of addition operator. */
+		private static final Operator ADDITION_OPERATOR = new Operator(Operator.Type.BINARY, "+", 300);
+
+		/** The instance of subtraction operator. */
+		private static final Operator SUBTRACTION_OPERATOR = new Operator(Operator.Type.BINARY, "-", 300);
+
+		/** The instance of multiplication operator. */
+		private static final Operator MULTIPLICATION_OPERATOR = new Operator(Operator.Type.BINARY, "*", 200);
+
+		/** The instance of division operator. */
+		private static final Operator DIVISION_OPERATOR = new Operator(Operator.Type.BINARY, "/", 200);
+
+		/** The instance of unary-minus operator. */
+		private static final Operator MINUS_OPERATOR = new Operator(Operator.Type.UNARY, "-", 100);
+
 		/** The list of available operators. */
 		private static final List<Operator> OPERATOR_LIST = List.of(
-			new Operator(Operator.Type.BINARY, "+", 300), // Addition
-			new Operator(Operator.Type.BINARY, "-", 300), // Subtraction
-			new Operator(Operator.Type.BINARY, "*", 200), // Multiplication
-			new Operator(Operator.Type.BINARY, "/", 200), // Division
-			new Operator(Operator.Type.UNARY,  "-", 100)  // Unary Minus
+			ADDITION_OPERATOR,
+			SUBTRACTION_OPERATOR,
+			MULTIPLICATION_OPERATOR,
+			DIVISION_OPERATOR,
+			MINUS_OPERATOR
 		);
 
 		/** The set of symbols of available operators. */
