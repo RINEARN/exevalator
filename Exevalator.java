@@ -786,13 +786,14 @@ public final class Exevalator {
 		public static final Operator MINUS_OPERATOR = new Operator(Operator.Type.UNARY, "-", 100);
 
 		/** The list of available operators. */
-		public static final List<Operator> OPERATOR_LIST = List.of(
-			ADDITION_OPERATOR,
-			SUBTRACTION_OPERATOR,
-			MULTIPLICATION_OPERATOR,
-			DIVISION_OPERATOR,
-			MINUS_OPERATOR
-		);
+		public static final List<Operator> OPERATOR_LIST = new ArrayList<Operator>();
+		static {
+			OPERATOR_LIST.add(ADDITION_OPERATOR);
+			OPERATOR_LIST.add(SUBTRACTION_OPERATOR);
+			OPERATOR_LIST.add(MULTIPLICATION_OPERATOR);
+			OPERATOR_LIST.add(DIVISION_OPERATOR);
+			OPERATOR_LIST.add(MINUS_OPERATOR);
+		}
 
 		/** The set of symbols of available operators. */
 		@SuppressWarnings("serial")
