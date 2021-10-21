@@ -766,7 +766,7 @@ public final class Exevalator {
 		/** The regular expression of number literals. */
 		public static final String NUMBER_LITERAL_REGEX =
 			"^" +                       // Begin
-			"([0-9]+\\.?[0-9]+)" +      // Significand part
+			"([0-9]+(\\.[0-9]+)?)" +    // Significand part
 			"((e|E)(\\+|-)?[0-9]+)?" +  // Exponent part
 			"$";                        // End
 

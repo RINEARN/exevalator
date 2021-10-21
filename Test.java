@@ -14,11 +14,38 @@ public class Test {
 	 */
 	public static void main(String[] args) {
 		Test test = new Test();
+		test.testNumberLiterals();
 		test.testOperationsOfOperators();
 		test.testPrecedencesOfOperators();
 		test.testParentheses();
 
 		System.out.println("All tests have completed successfully.");
+	}
+
+
+	/**
+	 * Tests number literals.
+	 */
+	private void testNumberLiterals() {
+		Exevalator exevalator = new Exevalator();
+
+		check(
+			"Test of a Simple Number Literal 1",
+			exevalator.eval("1"),
+			1
+		);
+
+		check(
+			"Test of a Simple Number Literal 2",
+			exevalator.eval("2"),
+			2
+		);
+
+		check(
+			"Test of a Simple Number Literal 3",
+			exevalator.eval("1.2"),
+			1.2
+		);
 	}
 
 
