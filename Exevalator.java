@@ -35,6 +35,10 @@ public final class Exevalator {
 		// Construct AST (Abstract Syntax Tree) by parsing tokens.
 		AstNode ast = new Parser().parse(tokens);
 
+		// Evaluate (compute) the value of the root node of the AST.
+		ast.initializeEvaluatorUnit();
+		double evaluatedValue = ast.evaluate();
+
 		/*
 		// Temporary, for debugging tokens
 		for (Token token: tokens) {
@@ -47,7 +51,7 @@ public final class Exevalator {
 		System.out.println(ast.toString());
 		*/
 
-		return Double.NaN;
+		return evaluatedValue;
 	}
 
 
@@ -427,8 +431,11 @@ public final class Exevalator {
 		/** The token corresponding with this AST node. */
 		public final Token token;
 
-		/** The list of child nodes of this node. */
+		/** The list of child nodes of this AST node. */
 		public final List<AstNode> childNodeList;
+
+		/** The evaluator unit for evaluating the value of this AST node. */
+		private Evaluator.EvaluatorUnit evaluatorUnit;
 
 		/**
 		 * Create an AST node instance storing specified information.
@@ -438,6 +445,46 @@ public final class Exevalator {
 		public AstNode(Token token) {
 			this.token = token;
 			this.childNodeList = new ArrayList<AstNode>();
+		}
+
+		/**
+		 * Initializes the evaluator unit for evaluating the value of this AST node.
+		 */
+		public void initializeEvaluatorUnit() {
+
+			// Initialize evaluation units of child nodes, and store then into an array.
+			int childCount = this.childNodeList.size();
+			Evaluator.EvaluatorUnit childNodeUnits[] = new Evaluator.EvaluatorUnit[childCount];
+			for (int ichild=0; ichild<childCount; ichild++) {
+				this.childNodeList.get(ichild).initializeEvaluatorUnit();
+				childNodeUnits[ichild] = this.childNodeList.get(ichild).evaluatorUnit;
+			}
+
+			// Initialize evaluation units of this node.
+			if (this.token.type == Token.Type.NUMBER_LITERAL) {
+				this.evaluatorUnit = new Evaluator.NumberLiteralEvaluatorUnit(this.token.word);
+			} else if (this.token.type == Token.Type.OPERATOR) {
+				if (this.token.operator == StaticSettings.MINUS_OPERATOR) {
+					this.evaluatorUnit = new Evaluator.MinusEvaluatorUnit(childNodeUnits[0]);
+				} else if (this.token.operator == StaticSettings.ADDITION_OPERATOR) {
+					this.evaluatorUnit = new Evaluator.AdditionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+				} else if (this.token.operator == StaticSettings.SUBTRACTION_OPERATOR) {
+					this.evaluatorUnit = new Evaluator.SubtractionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+				} else if (this.token.operator == StaticSettings.MULTIPLICATION_OPERATOR) {
+					this.evaluatorUnit = new Evaluator.MultiplicationEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+				} else if (this.token.operator == StaticSettings.DIVISION_OPERATOR) {
+					this.evaluatorUnit = new Evaluator.DivisionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+				}
+			}
+		}
+
+		/**
+		 * Evaluates the value of this AST node.
+		 *
+		 * @return The evaluated value of this AST node.
+		 */
+		public double evaluate() {
+			return this.evaluatorUnit.evaluate();
 		}
 
 		/**
