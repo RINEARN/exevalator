@@ -597,7 +597,7 @@ public class Exevalator {
 		/**
 		 * The evaluator unit for evaluating the value of a multiplication operator.
 		 */
-		private static final class MultiplicateionEvaluatorUnit extends BinaryOperationEvaluatorUnit {
+		private static final class MultiplicationEvaluatorUnit extends BinaryOperationEvaluatorUnit {
 
 			/**
 			 * Initializes operands.
@@ -605,7 +605,7 @@ public class Exevalator {
 			 * @param leftOperandUnit The unit for evaluating the left-side operand
 			 * @param rightOperandUnit The unit for evaluating the right-side operand
 			 */
-			public MultiplicateionEvaluatorUnit(EvaluatorUnit leftOperandUnit, EvaluatorUnit rightOperandUnit) {
+			public MultiplicationEvaluatorUnit(EvaluatorUnit leftOperandUnit, EvaluatorUnit rightOperandUnit) {
 				super(leftOperandUnit, rightOperandUnit);
 			}
 
