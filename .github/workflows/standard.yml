@@ -1,0 +1,20 @@
+name: Standard Build/Test CI
+on: push
+jobs:
+
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set-up environment
+      uses: actions/setup-java@v1
+      with:
+        java-version: 17
+    - name: Compile Exevalator
+      run: javac Exevalator.java
+    - name: Compile Example Code 1
+      run: javac Example1.java
+    - name: Compile Test Code
+      run: javac Test.java
+    - name: Run Test Code
+      run: java Test
