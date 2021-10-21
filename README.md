@@ -8,6 +8,7 @@ Exevalator (an abbreviation for **Ex**pression-**Eval**u**ator**) is a compact i
 ## English README Index
 - <a href="#license">License</a>
 - <a href="#requirements">Requirements</a>
+- <a href="#test">Build/Test Results of The Latest Version</a>
 - <a href="#how-to-use">How to Use</a>
 - <a href="#how-to-use-example-code">How to Use Example Code</a>
 - <a href="#related">Related Software</a>
@@ -24,6 +25,22 @@ This software is released under the MIT License.
 ## Requirements
 
 * Java&reg; Development Kit (JDK) 8 or later
+
+
+<a id="test"></a>
+## Build/Test Results of The Latest Version
+
+&nbsp;&nbsp;- main branch -
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;![](https://github.com/RINEARN/exevalator/workflows/Standard%20Build%2FTest%20CI/badge.svg?branch=main) on JDK 17
+&nbsp;&nbsp;&nbsp;&nbsp;![](https://github.com/RINEARN/exevalator/workflows/Old-Env%20Build%2FTest%20CI/badge.svg?branch=main) on JDK 8
+<br />
+&nbsp;&nbsp;- develop branch -
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;![](https://github.com/RINEARN/exevalator/workflows/Standard%20Build%2FTest%20CI/badge.svg?branch=develop) on JDK 17
+&nbsp;&nbsp;&nbsp;&nbsp;![](https://github.com/RINEARN/exevalator/workflows/Old-Env%20Build%2FTest%20CI/badge.svg?branch=develop) on JDK 8
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;( Green: OK / Red: NG )
 
 
 <a id="how-to-use"></a>

@@ -8,6 +8,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、アプリケーシ
 ## 日本語版 README 目次
 - <a href="#license">ライセンス</a>
 - <a href="#requirements">必要な環境</a>
+- <a href="#test">最新版のビルド/テスト検証結果</a>
 - <a href="#how-to-use">使用方法</a>
 - <a href="#how-to-use-example-code">サンプルコードの使用方法</a>
 - <a href="#related">関連ソフトウェア</a>
@@ -24,6 +25,22 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、アプリケーシ
 ## 必要な環境
 
 * Java&reg; 開発環境 (JDK) 8 以降
+
+
+<a id="test"></a>
+## 最新版のビルド/テスト検証結果
+
+&nbsp;&nbsp;- main branch -
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;![](https://github.com/RINEARN/exevalator/workflows/Standard%20Build%2FTest%20CI/badge.svg?branch=main) on JDK 17
+&nbsp;&nbsp;&nbsp;&nbsp;![](https://github.com/RINEARN/exevalator/workflows/Old-Env%20Build%2FTest%20CI/badge.svg?branch=main) on JDK 8
+<br />
+&nbsp;&nbsp;- develop branch -
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;![](https://github.com/RINEARN/exevalator/workflows/Standard%20Build%2FTest%20CI/badge.svg?branch=develop) on JDK 17
+&nbsp;&nbsp;&nbsp;&nbsp;![](https://github.com/RINEARN/exevalator/workflows/Old-Env%20Build%2FTest%20CI/badge.svg?branch=develop) on JDK 8
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;( 緑: OK / 赤: NG )
 
 
 <a id="how-to-use"></a>
