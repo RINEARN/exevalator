@@ -99,12 +99,16 @@ public class Exevalator {
 					continue;
 				}
 				Operator operator = null;
-				if (lastToken.type == Token.Type.NUMBER_LITERAL
+				if (lastToken == null
+						|| lastToken.type == Token.Type.OPERATOR
+						|| lastToken.word.equals("(")) {
+					operator = StaticSettings.searchOperator(Operator.Type.UNARY, token.word);
+				} else if (lastToken.type == Token.Type.NUMBER_LITERAL
 						|| lastToken.type == Token.Type.IDENTIFIER
 						|| lastToken.word.equals(")")) {
 					operator = StaticSettings.searchOperator(Operator.Type.BINARY, token.word);
 				} else {
-					operator = StaticSettings.searchOperator(Operator.Type.UNARY, token.word);
+					throw new ExevalatorException("Unexpected operator syntax: " + token.word);
 				}
 				tokens[itoken] = new Token(token.type, token.word, operator);
 				lastToken = token;
