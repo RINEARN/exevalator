@@ -19,7 +19,7 @@ import java.util.HashSet;
 /**
  * Interpreter Engine of Exevalator.
  */
-public class Exevalator {
+public final class Exevalator {
 
 	/**
 	 * Evaluates (computes) the value of an expression.
@@ -54,7 +54,7 @@ public class Exevalator {
 	/**
 	 * The class performing functions of a lexical analyzer.
 	 */
-	private static class LexicalAnalyzer {
+	private static final class LexicalAnalyzer {
 
 		/**
 		 * Splits (tokenizes) the expression into tokens, and analyze them.
@@ -121,7 +121,7 @@ public class Exevalator {
 	/**
 	 * The class performing functions of a parser.
 	 */
-	private static class Parser {
+	private static final class Parser {
 
 		/**
 		 * Parses tokens and construct Abstract Syntax Tree (AST).
@@ -298,18 +298,18 @@ public class Exevalator {
 	/**
 	 * The class storing information of an operator.
 	 */
-	private static class Operator {
+	private static final class Operator {
 
 		/**
 		 * The enum representing types of operators.
 		 */
-		private static enum Type {
+		public static enum Type {
 
 			/** Represents unary operator, for example: - of -1.23 */
 			UNARY,
 
 			/** Represents binary operator, for example: + of 1+2 */
-			BINARY,
+			BINARY
 		}
 
 		/** The symbol of this operator (for example: '+'). */
@@ -347,12 +347,12 @@ public class Exevalator {
 	/**
 	 * The class storing information of an token.
 	 */
-	private static class Token {
+	private static final class Token {
 
 		/**
 		 * The enum representing types of tokens.
 		 */
-		private static enum Type {
+		public static enum Type {
 
 			/** Represents number literal tokens, for example: 1.23 */
 			NUMBER_LITERAL,
@@ -422,7 +422,7 @@ public class Exevalator {
 	/**
 	 * The class storing information of an node of an AST.
 	 */
-	private static class AstNode {
+	private static final class AstNode {
 
 		/** The token corresponding with this AST node. */
 		public final Token token;
@@ -504,7 +504,7 @@ public class Exevalator {
 	 * The class providing various types of evaluator units
 	 * which evaluate values of operators, literals, etc.
 	 */
-	private static class Evaluator {
+	private static final class Evaluator {
 
 		/**
 		 * The super class of evaluator units.
@@ -711,35 +711,35 @@ public class Exevalator {
 	/**
 	 * The class defining static setting values.
 	 */
-	private static class StaticSettings {
+	private static final class StaticSettings {
 
 		/** The indent used in text representations of ASTs. */
-		private static final String AST_INDENT = "  ";
+		public static final String AST_INDENT = "  ";
 
 		/** The regular expression of number literals. */
-		private static final String NUMBER_LITERAL_REGEX =
+		public static final String NUMBER_LITERAL_REGEX =
 			"^" +                       // Begin
 			"([0-9]+\\.?[0-9]+)" +      // Significand part
 			"((e|E)(\\+|-)?[0-9]+)?" +  // Exponent part
 			"$";                        // End
 
 		/** The instance of addition operator. */
-		private static final Operator ADDITION_OPERATOR = new Operator(Operator.Type.BINARY, "+", 300);
+		public static final Operator ADDITION_OPERATOR = new Operator(Operator.Type.BINARY, "+", 300);
 
 		/** The instance of subtraction operator. */
-		private static final Operator SUBTRACTION_OPERATOR = new Operator(Operator.Type.BINARY, "-", 300);
+		public static final Operator SUBTRACTION_OPERATOR = new Operator(Operator.Type.BINARY, "-", 300);
 
 		/** The instance of multiplication operator. */
-		private static final Operator MULTIPLICATION_OPERATOR = new Operator(Operator.Type.BINARY, "*", 200);
+		public static final Operator MULTIPLICATION_OPERATOR = new Operator(Operator.Type.BINARY, "*", 200);
 
 		/** The instance of division operator. */
-		private static final Operator DIVISION_OPERATOR = new Operator(Operator.Type.BINARY, "/", 200);
+		public static final Operator DIVISION_OPERATOR = new Operator(Operator.Type.BINARY, "/", 200);
 
 		/** The instance of unary-minus operator. */
-		private static final Operator MINUS_OPERATOR = new Operator(Operator.Type.UNARY, "-", 100);
+		public static final Operator MINUS_OPERATOR = new Operator(Operator.Type.UNARY, "-", 100);
 
 		/** The list of available operators. */
-		private static final List<Operator> OPERATOR_LIST = List.of(
+		public static final List<Operator> OPERATOR_LIST = List.of(
 			ADDITION_OPERATOR,
 			SUBTRACTION_OPERATOR,
 			MULTIPLICATION_OPERATOR,
@@ -749,7 +749,7 @@ public class Exevalator {
 
 		/** The set of symbols of available operators. */
 		@SuppressWarnings("serial")
-		private static final Set<String> OPERATOR_SYMBOL_SET = new HashSet<String>() {{
+		public static final Set<String> OPERATOR_SYMBOL_SET = new HashSet<String>() {{
 			add("+");
 			add("-");
 			add("*");
@@ -763,7 +763,7 @@ public class Exevalator {
 		 * @param symbol The symbol of the operator to be searched
 		 * @return The Operator matching specified conditions
 		 */
-		private static final Operator searchOperator(Operator.Type type, String symbol) {
+		public static final Operator searchOperator(Operator.Type type, String symbol) {
 			for (Operator operator: OPERATOR_LIST) {
 				if (operator.type == type && operator.symbol.equals(symbol)) {
 					return operator;
@@ -778,7 +778,7 @@ public class Exevalator {
 	 * The Exception class thrown in/by this engine.
 	 */
 	@SuppressWarnings("serial")
-	public static class ExevalatorException extends RuntimeException {
+	public static final class ExevalatorException extends RuntimeException {
 
 		/**
 		 * Create an instance having the specified error message.
