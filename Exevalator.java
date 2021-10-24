@@ -14,6 +14,8 @@ import java.util.Deque;
 import java.util.ArrayDeque;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -68,7 +70,13 @@ public final class Exevalator {
 		 */
 		public Token[] analyze(String expression) {
 
-			// Split (tokenize) the expression into token words.
+			// Firstly, to simplify the tokenization,
+			// replace number literals in the expression to the escaped representation: "@NUMBER_LITERAL",
+			// because number literals may contains "+" or "-" in their exponent part.
+			List<String> numberLiteralList = new ArrayList<String>();
+			expression = this.escapeNumberLiterals(expression, numberLiteralList);
+
+			// Tokenize (split) the expression into token words.
 			expression = expression.replace("(", " ( ");
 			expression = expression.replace(")", " ) ");
 			for (Operator operator: StaticSettings.OPERATOR_LIST) {
@@ -78,8 +86,18 @@ public final class Exevalator {
 			String[] tokenWords = expression.trim().split("\\s+");
 			int tokenCount = tokenWords.length;
 
+			// Recover escaped number literals.
+			int numberLiteralIndex = 0;
+			for (int itoken=0; itoken<tokenCount; itoken++) {
+				if (tokenWords[itoken].equals(StaticSettings.ESCAPED_NUMBER_LITERAL)) {
+					tokenWords[itoken] = numberLiteralList.get(numberLiteralIndex);
+					numberLiteralIndex++;
+				}
+			}
+
 			// Create Token instances.
 			Token[] tokens = new Token[tokenCount];
+			String numberLiteralRegexForMatching = "^" + StaticSettings.NUMBER_LITERAL_REGEX + "$";
 			for (int itoken=0; itoken<tokenCount; itoken++) {
 				String word = tokenWords[itoken];
 
@@ -87,7 +105,7 @@ public final class Exevalator {
 					tokens[itoken] = new Token(Token.Type.PARENTHESIS, word);
 				} else if (StaticSettings.OPERATOR_SYMBOL_SET.contains(word)) {
 					tokens[itoken] = new Token(Token.Type.OPERATOR, word);
-				} else if (word.matches(StaticSettings.NUMBER_LITERAL_REGEX)) {
+				} else if (word.matches(numberLiteralRegexForMatching)) {
 					tokens[itoken] = new Token(Token.Type.NUMBER_LITERAL, word);
 				} else {
 					tokens[itoken] = new Token(Token.Type.IDENTIFIER, word);
@@ -118,6 +136,33 @@ public final class Exevalator {
 				lastToken = token;
 			}
 			return tokens;
+		}
+
+		/**
+		 * Replaces number literals in the expression to the escaped representation: "@NUMBER_LITERAL@".
+		 *
+		 * @param expression The expression of which number literals are not escaped yet
+		 * @param literalStoreList The list to which number literals will be added
+		 * @return The expression in which number literals are escaped.
+		 */
+		private String escapeNumberLiterals(String expression, List<String> literalStoreList) {
+			Pattern numberLiteralPattern = Pattern.compile(StaticSettings.NUMBER_LITERAL_REGEX);
+			Matcher numberLiteralMatcher = numberLiteralPattern.matcher(expression);
+
+			// Search the next number literal, and loops while any literals undetected yet exist.
+			while(numberLiteralMatcher.find()) {
+
+				// Extract a number literal detected by the above searching.
+				String matchedLiteral = numberLiteralMatcher.group();
+
+				// Add the extracted literal to the List specified to the argument.
+				literalStoreList.add(matchedLiteral);
+			}
+
+			// Replace all number literals in the expression to the escaped representation.
+			numberLiteralMatcher.reset();
+			String replacedExpression = numberLiteralMatcher.replaceAll(StaticSettings.ESCAPED_NUMBER_LITERAL);
+			return replacedExpression;
 		}
 	}
 
@@ -765,10 +810,11 @@ public final class Exevalator {
 
 		/** The regular expression of number literals. */
 		public static final String NUMBER_LITERAL_REGEX =
-			"^" +                       // Begin
 			"([0-9]+(\\.[0-9]+)?)" +    // Significand part
-			"((e|E)(\\+|-)?[0-9]+)?" +  // Exponent part
-			"$";                        // End
+			"((e|E)(\\+|-)?[0-9]+)?";   // Exponent part
+
+		/** The escaped representation of number literals in expressions */
+		public static final String ESCAPED_NUMBER_LITERAL = "@NUMBER_LITERAL@";
 
 		/** The instance of addition operator. */
 		public static final Operator ADDITION_OPERATOR = new Operator(Operator.Type.BINARY, "+", 300);

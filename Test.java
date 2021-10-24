@@ -18,6 +18,7 @@ public class Test {
 		test.testOperationsOfOperators();
 		test.testPrecedencesOfOperators();
 		test.testParentheses();
+		test.testComplicatedCases();
 
 		System.out.println("All tests have completed successfully.");
 	}
@@ -45,6 +46,42 @@ public class Test {
 			"Test of a Simple Number Literal 3",
 			exevalator.eval("1.2"),
 			1.2
+		);
+
+		check(
+			"Test of a Number Literal with a Exponent Part 1",
+			exevalator.eval("1.2E3"),
+			1.2E3
+		);
+
+		check(
+			"Test of a Number Literal with a Exponent Part 2",
+			exevalator.eval("1.2E+3"),
+			1.2E3
+		);
+
+		check(
+			"Test of a Number Literal with a Exponent Part 3",
+			exevalator.eval("1.2E-3"),
+			1.2E-3
+		);
+
+		check(
+			"Test of a Number Literal with a Exponent Part 4",
+			exevalator.eval("123.4567E12"),
+			123.4567E12
+		);
+
+		check(
+			"Test of a Number Literal with a Exponent Part 5",
+			exevalator.eval("123.4567E+12"),
+			123.4567E+12
+		);
+
+		check(
+			"Test of a Number Literal with a Exponent Part 6",
+			exevalator.eval("123.4567E-12"),
+			123.4567E-12
 		);
 	}
 
@@ -261,6 +298,20 @@ public class Test {
 			"Test of Parentheses 10",
 			exevalator.eval("(-(1.2 + 3.4 - 5.6) * ((7.8 + 9.0) / 10.1) / 11.2 + 12.3 * ((13.4 + -(15.6 - 17.8)) * 18.9)) + 19.0 * 20.1"),
 			(-(1.2 + 3.4 - 5.6) * ((7.8 + 9.0) / 10.1) / 11.2 + 12.3 * ((13.4 + -(15.6 - 17.8)) * 18.9)) + 19.0 * 20.1
+		);
+	}
+
+
+	/**
+	 * Tests of complicated cases.
+	 */
+	private void testComplicatedCases() {
+		Exevalator exevalator = new Exevalator();
+
+		check(
+			"Test of Complicated Case 1: The Expression Containing Many Parentheses and Many Literals having Exponent Parts",
+			exevalator.eval("(-(1.2E1 + 3.4E-2 - 5.6E2) * ((7.8E0 + 9.0) / 10.1E-3) / 11.2 + 12.3E-1 * ((13.4 + -(15.6E-12 - 17.8E-10)) * 18.9E-5)) + 19.0E-2 * 20.1E0"),
+			(-(1.2E1 + 3.4E-2 - 5.6E2) * ((7.8E0 + 9.0) / 10.1E-3) / 11.2 + 12.3E-1 * ((13.4 + -(15.6E-12 - 17.8E-10)) * 18.9E-5)) + 19.0E-2 * 20.1E0
 		);
 	}
 
