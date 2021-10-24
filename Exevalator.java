@@ -971,6 +971,35 @@ public final class Exevalator {
 
 
 	/**
+	 * The super class of functions available on this interpreter.
+	 */
+	public abstract class AbstractFunction {
+
+		/**
+		 * Gets the name of this function.
+		 *
+		 * @return The name of this function.
+		 */
+		public abstract String getFunctionName();
+
+		/**
+		 * Gets names of parameters.
+		 *
+		 * @return Names of parameters.
+		 */
+		public abstract String[] getParameterNames();
+
+		/**
+		 * Invokes this function.
+		 *
+		 * @param arguments The arguments to be passed to this function.
+		 * @return The returned value of this function.
+		 */
+		public abstract double invoke(double[] arguments);
+	}
+
+
+	/**
 	 * The class defining static setting values.
 	 */
 	private static final class StaticSettings {
