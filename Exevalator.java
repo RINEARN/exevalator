@@ -495,7 +495,7 @@ public final class Exevalator {
 			// Working stack to form multiple AstNode instances into a tree-shape.
 			Deque<AstNode> stack = new ArrayDeque<AstNode>();
 
-			// Temporarys node used in the above working stack, for isolating ASTs of partial expressions.
+			// Temporary nodes used in the above working stack, for isolating ASTs of partial expressions.
 			AstNode parenthesisStackLid = new AstNode(new Token(Token.Type.STACK_LID, "(PARENTHESIS_STACK_LID)"));
 			AstNode separatorStackLid = new AstNode(new Token(Token.Type.STACK_LID, "(SEPARATOR_STACK_LID)"));
 			AstNode callBeginStackLid = new AstNode(new Token(Token.Type.STACK_LID, "(CALL_BEGIN_STACK_LID)"));
