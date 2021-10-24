@@ -101,11 +101,8 @@ public final class Exevalator {
 			expression = this.escapeNumberLiterals(expression, numberLiteralList);
 
 			// Tokenize (split) the expression into token words.
-			expression = expression.replace("(", " ( ");
-			expression = expression.replace(")", " ) ");
-			for (Operator operator: StaticSettings.OPERATOR_LIST) {
-				String symbol = operator.symbol;
-				expression = expression.replace(symbol, " " + symbol + " ");
+			for (String splitter: StaticSettings.TOKEN_SPLITTER_SYMBOL_LIST) {
+				expression = expression.replace(splitter, " " + splitter + " ");
 			}
 			String[] tokenWords = expression.trim().split("\\s+");
 			int tokenCount = tokenWords.length;
@@ -168,7 +165,7 @@ public final class Exevalator {
 				} else if (word.matches(numberLiteralRegexForMatching)) {
 					tokens[itoken] = new Token(Token.Type.NUMBER_LITERAL, word);
 				} else if (word.equals(",")) {
-					tokens[itoken] = new Token(Token.Type.SEPARATOR, word);
+					tokens[itoken] = new Token(Token.Type.EXPRESSION_SEPARATOR, word);
 
 				// Cases of variable identifier of function identifier.
 				} else {
@@ -437,8 +434,10 @@ public final class Exevalator {
 			// Working stack to form multiple AstNode instances into a tree-shape.
 			Deque<AstNode> stack = new ArrayDeque<AstNode>();
 
-			// Temporary node used in the above working stack, for isolating ASTs of partial expressions.
+			// Temporarys node used in the above working stack, for isolating ASTs of partial expressions.
 			AstNode parenthesisStackLid = new AstNode(new Token(Token.Type.STACK_LID, "(PARENTHESIS_STACK_LID)"));
+			AstNode separatorStackLid = new AstNode(new Token(Token.Type.STACK_LID, "(SEPARATOR_STACK_LID)"));
+			AstNode callBeginStackLid = new AstNode(new Token(Token.Type.STACK_LID, "(CALL_BEGIN_STACK_LID)"));
 
 			// The array storing next operator's precedence for each token.
 			// At [i], it is stored that the precedence of the first operator of which token-index is greater than i.
@@ -450,8 +449,10 @@ public final class Exevalator {
 				Token token = tokens[itoken];
 				AstNode operatorNode = null;
 
-				// Case of operands: "1.23", "x", etc.
-				if (token.type == Token.Type.NUMBER_LITERAL || token.type == Token.Type.VARIABLE_IDENTIFIER) {
+				// Case of literals and identifiers: "1.23", "x", "f", etc.
+				if (token.type == Token.Type.NUMBER_LITERAL
+						|| token.type == Token.Type.VARIABLE_IDENTIFIER
+						|| token.type == Token.Type.FUNCTION_IDENTIFIER) {
 					stack.push(new AstNode(token));
 					itoken++;
 					continue;
@@ -462,9 +463,15 @@ public final class Exevalator {
 						stack.push(parenthesisStackLid);
 						itoken++;
 						continue;
-					} else {
+					} else { // Case of ")"
 						operatorNode = this.popPartialExprNodes(stack, parenthesisStackLid)[0];
 					}
+
+				// Case of separator: ","
+				} else if (token.type == Token.Type.EXPRESSION_SEPARATOR) {
+					stack.push(separatorStackLid);
+					itoken++;
+					continue;
 
 				// Case of operators: "+", "-", etc.
 				} else if (token.type == Token.Type.OPERATOR) {
@@ -488,6 +495,22 @@ public final class Exevalator {
 							operatorNode.childNodeList.add(new AstNode(tokens[itoken + 1]));
 							itoken++;
 						} // else: Right-operand will be connected later. See the bottom of this loop.
+
+					// Case of function-call operators.
+					} else if (token.operator.type == Operator.Type.CALL) {
+						if (token.word.equals("(")) {
+							operatorNode.childNodeList.add(stack.pop()); // Add function-identifier node at the top of the stack.
+							stack.push(operatorNode);
+							stack.push(callBeginStackLid); // The marker to correct partial expressions of args from the stack.
+							itoken++;
+							continue;
+						} else { // Case of ")"
+							AstNode[] argNodes = this.popPartialExprNodes(stack, callBeginStackLid);
+							operatorNode = stack.pop();
+							for (AstNode argNode: argNodes) {
+								operatorNode.childNodeList.add(argNode);
+							}
+						}
 					}
 				}
 
@@ -661,7 +684,7 @@ public final class Exevalator {
 			OPERATOR,
 
 			/** Represents separator tokens of partial expressions: , */
-			SEPARATOR,
+			EXPRESSION_SEPARATOR,
 
 			/** Represents parenthesis, for example: ( and ) of (1*(2+3)) */
 			PARENTHESIS,
@@ -1258,6 +1281,18 @@ public final class Exevalator {
 			add("(");
 			add(")");
 		}};
+
+		/** The list of symbols to split an expression into tokens. */
+		public static final List<String> TOKEN_SPLITTER_SYMBOL_LIST = new ArrayList<String>();
+		static {
+			TOKEN_SPLITTER_SYMBOL_LIST.add("+");
+			TOKEN_SPLITTER_SYMBOL_LIST.add("-");
+			TOKEN_SPLITTER_SYMBOL_LIST.add("*");
+			TOKEN_SPLITTER_SYMBOL_LIST.add("/");
+			TOKEN_SPLITTER_SYMBOL_LIST.add("(");
+			TOKEN_SPLITTER_SYMBOL_LIST.add(")");
+			TOKEN_SPLITTER_SYMBOL_LIST.add(",");
+		};
 
 		/**
 		 * Search an available Operator having specified information.
