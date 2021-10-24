@@ -943,6 +943,34 @@ public final class Exevalator {
 
 
 	/**
+	 * The super class of variables available on this interpreter.
+	 */
+	public abstract class AbstractVariable {
+
+		/**
+		 * Gets the name of this variable.
+		 *
+		 * @return The name of this variable.
+		 */
+		public abstract String getVariableName();
+
+		/**
+		 * Sets the value of this variable.
+		 *
+		 * @param value The value to be set to this variable
+		 */
+		public abstract void setVariableValue(double value);
+
+		/**
+		 *  Gets the value of this variable.
+		 *
+		 * @return The value of this variable.
+		 */
+		public abstract double getVariableValue();
+	}
+
+
+	/**
 	 * The class defining static setting values.
 	 */
 	private static final class StaticSettings {
