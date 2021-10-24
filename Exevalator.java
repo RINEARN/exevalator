@@ -81,12 +81,45 @@ public final class Exevalator {
 	}
 
 	/**
+	 * Disconnects the variable having the specified name.
+	 *
+	 * @param variableName The name of the variable to be disconnected.
+	 */
+	public synchronized void disconnectVariable(String variableName) {
+		this.interconnect.disconnectVariable(variableName);
+	}
+
+	/**
+	 * Disconnects all variables..
+	 */
+	public synchronized void disconnectAllVariables() {
+		this.interconnect.disconnectAllVariables();
+	}
+
+	/**
 	 * Connects the new function to share it between components of this interpreter.
 	 *
 	 * @param variable The function to be connected.
 	 */
 	public synchronized void connectFunction(AbstractFunction function) {
 		this.interconnect.connectFunction(function);
+	}
+
+	/**
+	 * Disconnects the function having the specified information.
+	 *
+	 * @param functionName The name of the function to be disconnected.
+	 * @param parameterCount The number of parameters of the function to be disconnected.
+	 */
+	public synchronized void disconnectFunction(String functionName, int parameterCount) {
+		this.interconnect.disconnectFunction(functionName, parameterCount);
+	}
+
+	/**
+	 * Disconnects all functions.
+	 */
+	public synchronized void disconnectAllFunctions() {
+		this.interconnect.disconnectAllFunctions();
 	}
 
 
@@ -1299,6 +1332,22 @@ public final class Exevalator {
 		}
 
 		/**
+		 * Disconnects the variable having the specified name.
+		 *
+		 * @param variableName The name of the variable to be disconnected.
+		 */
+		public synchronized void disconnectVariable(String variableName) {
+			this.variableTable.remove(variableName);
+		}
+
+		/**
+		 * Disconnects all variables..
+		 */
+		public synchronized void disconnectAllVariables() {
+			this.variableTable.clear();
+		}
+
+		/**
 		 * Connects the new function to share it between components of this interpreter.
 		 *
 		 * @param variable The function to be connected.
@@ -1331,6 +1380,24 @@ public final class Exevalator {
 		public synchronized boolean isFunctionConnected(String functionName, int parameterCount) {
 			String key = functionName + "$" + parameterCount; // See the comment in "connectFunction" method.
 			return this.functionTable.containsKey(key);
+		}
+
+		/**
+		 * Disconnects the function having the specified information.
+		 *
+		 * @param functionName The name of the function to be disconnected.
+		 * @param parameterCount The number of parameters of the function to be disconnected.
+		 */
+		public synchronized void disconnectFunction(String functionName, int parameterCount) {
+			String key = functionName + "$" + parameterCount; // See the comment in "connectFunction" method.
+			this.functionTable.remove(key);
+		}
+
+		/**
+		 * Disconnects all functions.
+		 */
+		public synchronized void disconnectAllFunctions() {
+			this.functionTable.clear();
 		}
 	}
 
