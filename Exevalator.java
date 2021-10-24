@@ -75,9 +75,24 @@ public final class Exevalator {
 		 */
 		public Token[] analyze(String expression) {
 
-			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			// !!!  REFACTORING REQUIRED  !!!
-			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			// Split the expression into token words.
+			String[] tokenWords = this.splitExpressionIntoTokenWords(expression);
+
+			// Create Token instances.
+			Token[] tokens = this.createTokensFromTokenWords(tokenWords);
+
+			// Analyze detailed information for operator tokens.
+			tokens = this.analyzeInformationOfOperands(tokens);
+			return tokens;
+		}
+
+		/**
+		 * Splits the inputted expression into token words.
+		 *
+		 * @param expression The inputted expression
+		 * @return Splitted token words
+		 */
+		private String[] splitExpressionIntoTokenWords(String expression) {
 
 			// Firstly, to simplify the tokenization,
 			// replace number literals in the expression to the escaped representation: "@NUMBER_LITERAL",
@@ -103,6 +118,17 @@ public final class Exevalator {
 					numberLiteralIndex++;
 				}
 			}
+			return tokenWords;
+		}
+
+		/**
+		 * Creates Token-type instances from token words (String).
+		 *
+		 * @param tokenWords Token words (String) to be converted to Token instances
+		 * @return Created Token instances
+		 */
+		private Token[] createTokensFromTokenWords(String[] tokenWords) {
+			int tokenCount = tokenWords.length;
 
 			// Stores the parenthesis-depth, which will increase at "(" and decrease at ")".
 			int parenthesisDepth = 0;
@@ -111,7 +137,6 @@ public final class Exevalator {
 			// for detecting the end of the function operator.
 			Set<Integer> callParenthesisDepths = new HashSet<Integer>();
 
-			// Create Token instances.
 			Token[] tokens = new Token[tokenCount];
 			String numberLiteralRegexForMatching = "^" + StaticSettings.NUMBER_LITERAL_REGEX + "$";
 			for (int itoken=0; itoken<tokenCount; itoken++) {
@@ -154,12 +179,25 @@ public final class Exevalator {
 					}
 				}
 			}
+			return tokens;
+		}
+
+		/**
+		 * Analyzes information of OPERAND-type tokens in specified tokens.
+		 *
+		 * @param tokens Tokens to be analyzed.
+		 * @return Tokens to which information of operands are added.
+		 */
+		private Token[] analyzeInformationOfOperands(Token[] tokens) {
+			int tokenCount = tokens.length;
+			Token[] resultTokens = new Token[tokenCount];
 
 			// Analyze detailed information for operator tokens.
 			Token lastToken = null;
 			for (int itoken=0; itoken<tokenCount; itoken++) {
 				Token token = tokens[itoken];
 				if (token.type != Token.Type.OPERATOR) {
+					resultTokens[itoken] = token;
 					lastToken = token;
 					continue;
 				}
@@ -184,10 +222,10 @@ public final class Exevalator {
 				} else {
 					throw new ExevalatorException("Unexpected operator syntax: " + token.word);
 				}
-				tokens[itoken] = new Token(token.type, token.word, operator);
-				lastToken = tokens[itoken];
+				resultTokens[itoken] = new Token(token.type, token.word, operator);
+				lastToken = resultTokens[itoken];
 			}
-			return tokens;
+			return resultTokens;
 		}
 
 		/**
