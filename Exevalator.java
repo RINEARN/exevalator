@@ -15,6 +15,7 @@ import java.util.ArrayDeque;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.EnumSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -996,6 +997,91 @@ public final class Exevalator {
 		 * @return The returned value of this function.
 		 */
 		public abstract double invoke(double[] arguments);
+	}
+
+
+	/**
+	 * The class to provide objects shared among multiple components of this interpreter.
+	 */
+	public static class Interconnect {
+
+		/** The table mapping from names of variables to instances of variables. */
+		private volatile ConcurrentHashMap<String, AbstractVariable> variableTable;
+
+		/** The table mapping from names of functions to instances of functions. */
+		private volatile ConcurrentHashMap<String, AbstractFunction> functionTable;
+
+		/**
+		 * Creates an Interconnect instance to which nothing is connected.
+		 */
+		public Interconnect() {
+			this.variableTable = new ConcurrentHashMap<String, AbstractVariable>();
+			this.functionTable = new ConcurrentHashMap<String, AbstractFunction>();
+		}
+
+		/**
+		 * Connects the new variable to share it between components of this interpreter..
+		 *
+		 * @param variable The variable to be connected.
+		 */
+		public synchronized void connectVariable(AbstractVariable variable) {
+			this.variableTable.put(variable.getVariableName(), variable);
+		}
+
+		/**
+		 * Returns the variable having the specified name, if it is connected.
+		 *
+		 * @param variableName The name of the variable to be gotten.
+		 * @return The variable having the specified name.
+		 */
+		public synchronized AbstractVariable getVariable(String variableName) {
+			return this.variableTable.get(variableName);
+		}
+
+		/**
+		 * Checks whether the variable having the specified name is connected or not.
+		 *
+		 * @param variableName The name of the variable to be checked.
+		 * @return True if the variable having the specified name is connected.
+		 */
+		public synchronized boolean isVariableConnected(String variableName) {
+			return this.variableTable.containsKey(variableName);
+		}
+
+		/**
+		 * Connects the new function to share it between components of this interpreter.
+		 *
+		 * @param variable The function to be connected.
+		 */
+		public synchronized void connectFunction(AbstractFunction function) {
+			// Append the number of parameters to the tail of the function name, to support function-overloading.
+			String key = function.getFunctionName() + "$" + function.getParameterNames().length;
+			this.functionTable.put(key, function);
+		}
+
+		/**
+		 * Returns the function having the specified information, if it is connected.
+		 *
+		 * @param functionName The name of the function to be gotten.
+		 * @param parameterCount The number of parameters of the function to be gotten.
+		 * @return The function having the specified information.
+		 */
+		public synchronized AbstractFunction getFunction(String functionName, int parameterCount) {
+			String key = functionName + "$" + parameterCount; // See the comment in "connectFunction" method.
+			return this.functionTable.get(key);
+		}
+
+		/**
+		 * Checks whether the function having the specified information is connected or not.
+		 *
+		 * @param functionName The name of the function to be checked.
+		 * @param parameterCount The number of parameters of the function to be checked.
+		 * @return True if the function having the specified information is connected.
+		 */
+		public synchronized boolean isFunctionConnected(String functionName, int parameterCount) {
+			String key = functionName + "$" + parameterCount; // See the comment in "connectFunction" method.
+			return this.functionTable.containsKey(key);
+		}
 	}
 
 
