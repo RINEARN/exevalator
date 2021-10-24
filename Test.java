@@ -20,6 +20,7 @@ public class Test {
 		test.testParentheses();
 		test.testComplicatedCases();
 		test.testSyntaxChecksOfCorresponencesOfParentheses();
+		test.testSyntaxChecksOfLocationsOfOperatorsAndLeafs();
 
 		System.out.println("All tests have completed successfully.");
 	}
@@ -323,15 +324,11 @@ public class Test {
 	private void testSyntaxChecksOfCorresponencesOfParentheses() {
 		Exevalator exevalator = new Exevalator();
 
-		try {
-			check(
-				"Test of Detection of Mismatching of Open/Closed Parentheses 1",
-				exevalator.eval("(1 + 2)"),
-				(1 + 2)
-			);
-		} catch (Exevalator.ExevalatorException ee) {
-			throw new Exevalator.ExevalatorException("Unexpected exception has been thrown");
-		}
+		check(
+			"Test of Detection of Mismatching of Open/Closed Parentheses 1",
+			exevalator.eval("(1 + 2)"),
+			(1 + 2)
+		);
 
 		try {
 			check(
@@ -357,15 +354,11 @@ public class Test {
 			System.out.println("Test of Detection of Mismatching of Open/Closed Parentheses 3: OK.");
 		}
 
-		try {
-			check(
-				"Test of Detection of Mismatching of Open/Closed Parentheses 4",
-				exevalator.eval("(1 + 2) + (3 + 4)"),
-				(1 + 2) + (3 + 4)
-			);
-		} catch (Exevalator.ExevalatorException ee) {
-			throw new Exevalator.ExevalatorException("Unexpected exception has been thrown");
-		}
+		check(
+			"Test of Detection of Mismatching of Open/Closed Parentheses 4",
+			exevalator.eval("(1 + 2) + (3 + 4)"),
+			(1 + 2) + (3 + 4)
+		);
 
 		try {
 			check(
@@ -379,15 +372,11 @@ public class Test {
 			System.out.println("Test of Detection of Mismatching of Open/Closed Parentheses 5: OK.");
 		}
 
-		try {
-			check(
-				"Test of Detection of Mismatching of Open/Closed Parentheses 6",
-				exevalator.eval("1 + ((2 + (3 + 4) + 5) + 6)"),
-				1 + ((2 + (3 + 4) + 5) + 6)
-			);
-		} catch (Exevalator.ExevalatorException ee) {
-			throw new Exevalator.ExevalatorException("Unexpected exception has been thrown");
-		}
+		check(
+			"Test of Detection of Mismatching of Open/Closed Parentheses 6",
+			exevalator.eval("1 + ((2 + (3 + 4) + 5) + 6)"),
+			1 + ((2 + (3 + 4) + 5) + 6)
+		);
 
 		try {
 			check(
@@ -448,6 +437,111 @@ public class Test {
 			// Expected to thrown
 			System.out.println("Test of Detection of Empty Parentheses 3: OK.");
 		}
+	}
+
+
+	/**
+	 * Tests syntax checks by the interpreter for locations of operators and leaf elements (literals and identifiers).
+	 */
+	private void testSyntaxChecksOfLocationsOfOperatorsAndLeafs() {
+		Exevalator exevalator = new Exevalator();
+
+		check(
+			"Test of Detection of Left Operand of Unary-Prefix Operator 1",
+			exevalator.eval("1 + -123"),
+			1 + -123
+		);
+
+		try {
+			check(
+				"Test of Detection of Left Operand of Unary-Prefix Operator 2",
+				exevalator.eval("1 + -"),
+				1 + -123
+			);
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (Exevalator.ExevalatorException ee) {
+			// Expected to thrown
+			System.out.println("Test of Detection of Left Operand of Unary-Prefix Operator 2: OK.");
+		}
+
+		try {
+			check(
+				"Test of Detection of Left Operand of Unary-Prefix Operator 3",
+				exevalator.eval("(1 + -)"),
+				1 + -123
+			);
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (Exevalator.ExevalatorException ee) {
+			// Expected to thrown
+			System.out.println("Test of Detection of Left Operand of Unary-Prefix Operator 3: OK.");
+		}
+
+		check(
+			"Test of Detection of Left Operand of Binary Operator 1",
+			exevalator.eval("123 + 456"),
+			123 + 456
+		);
+
+		try {
+			check(
+				"Test of Detection of Left Operand of Binary Operator 2",
+				exevalator.eval("123 *"),
+				123 * 456
+			);
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (Exevalator.ExevalatorException ee) {
+			// Expected to thrown
+			System.out.println("Test of Detection of Left Operand of Binary Operator 2: OK.");
+		}
+
+		try {
+			check(
+				"Test of Detection of Left Operand of Binary Operator 3",
+				exevalator.eval("* 456"),
+				123 * 456
+			);
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (Exevalator.ExevalatorException ee) {
+			// Expected to thrown
+			System.out.println("Test of Detection of Left Operand of Binary Operator 3: OK.");
+		}
+
+		try {
+			check(
+				"Test of Detection of Left Operand of Binary Operator 4",
+				exevalator.eval("123 + ( * 456)"),
+				123 * 456
+			);
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (Exevalator.ExevalatorException ee) {
+			// Expected to thrown
+			System.out.println("Test of Detection of Left Operand of Binary Operator 4: OK.");
+		}
+
+		try {
+			check(
+				"Test of Detection of Left Operand of Binary Operator 5",
+				exevalator.eval("(123 *) + 456"),
+				123 * 456
+			);
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (Exevalator.ExevalatorException ee) {
+			// Expected to thrown
+			System.out.println("Test of Detection of Left Operand of Binary Operator 5: OK.");
+		}
+
+		try {
+			check(
+				"Test of Detection of Lacking Operator",
+				exevalator.eval("123 456"),
+				123 * 456
+			);
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (Exevalator.ExevalatorException ee) {
+			// Expected to thrown
+			System.out.println("Test of Detection of Lacking Operator: OK.");
+		}
+
 	}
 
 

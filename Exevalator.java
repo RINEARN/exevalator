@@ -14,6 +14,7 @@ import java.util.Deque;
 import java.util.ArrayDeque;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -124,7 +125,7 @@ public final class Exevalator {
 				if (lastToken == null
 						|| lastToken.type == Token.Type.OPERATOR
 						|| lastToken.word.equals("(")) {
-					operator = StaticSettings.searchOperator(Operator.Type.UNARY, token.word);
+					operator = StaticSettings.searchOperator(Operator.Type.UNARY_PREFIX, token.word);
 				} else if (lastToken.type == Token.Type.NUMBER_LITERAL
 						|| lastToken.type == Token.Type.IDENTIFIER
 						|| lastToken.word.equals(")")) {
@@ -137,7 +138,9 @@ public final class Exevalator {
 			}
 
 			// Check syntactic correctness of the expression
-			this.check(tokens);
+			this.checkParenthesisOpeningClosings(tokens);
+			this.checkEmptyParentheses(tokens);
+			this.checkLocationsOfOperatorsAndLeafs(tokens);
 			return tokens;
 		}
 
@@ -166,16 +169,6 @@ public final class Exevalator {
 			numberLiteralMatcher.reset();
 			String replacedExpression = numberLiteralMatcher.replaceAll(StaticSettings.ESCAPED_NUMBER_LITERAL);
 			return replacedExpression;
-		}
-
-		/**
-		 * Checks syntactic correctness of the inputted expression.
-		 * An ExevalatorException will be thrown when any errors detected.
-		 * If no error detected, nothing will occur.
-		 */
-		private void check(Token[] tokens) {
-			this.checkParenthesisOpeningClosings(tokens);
-			this.checkEmptyParentheses(tokens);
 		}
 
 		/**
@@ -241,7 +234,77 @@ public final class Exevalator {
 				}
 			}
 		}
+
+		/**
+		 * Checks correctness of locations of operators and leaf elements (literals and identifiers).
+		 *
+		 * @param tokens Tokens of the inputted expression.
+		 */
+		private void checkLocationsOfOperatorsAndLeafs(Token[] tokens) {
+			int tokenCount = tokens.length;
+			Set<Token.Type> leafTypeSet = EnumSet.noneOf(Token.Type.class);
+			leafTypeSet.add(Token.Type.NUMBER_LITERAL);
+			leafTypeSet.add(Token.Type.IDENTIFIER);
+
+			// Reads and check tokens from left to right.
+			for (int tokenIndex=0; tokenIndex<tokenCount; tokenIndex++) {
+				Token token = tokens[tokenIndex];
+
+				boolean nextIsLeaf = tokenIndex!=tokenCount-1 && leafTypeSet.contains(tokens[tokenIndex+1].type);
+				boolean prevIsLeaf = tokenIndex!=0 && leafTypeSet.contains(tokens[tokenIndex-1].type);
+				boolean nextIsOpenParenthesis = tokenIndex < tokenCount-1 && tokens[tokenIndex+1].word.equals("(");
+				boolean prevIsCloseParenthesis = tokenIndex != 0 && tokens[tokenIndex-1].word.equals(")");
+				boolean nextIsPrefixOperator = tokenIndex < tokenCount-1
+						&& tokens[tokenIndex+1].type == Token.Type.OPERATOR
+						&& tokens[tokenIndex+1].operator.type == Operator.Type.UNARY_PREFIX;
+				boolean nextIsFunctionCallBegin = nextIsOpenParenthesis
+						&& tokens[tokenIndex+1].type == Token.Type.OPERATOR
+						&& tokens[tokenIndex+1].operator.type == Operator.Type.CALL;
+
+				// Case of operators
+				if (token.type == Token.Type.OPERATOR) {
+
+					// Cases of unary-prefix operators
+					if (token.operator.type == Operator.Type.UNARY_PREFIX) {
+
+						// Only leafs, open parentheses, and unary-prefix operators can be operands.
+						if ( !(  nextIsLeaf || nextIsOpenParenthesis || nextIsPrefixOperator  ) ) {
+							throw new ExevalatorException("An operand is required at the right of: \"" + token.word + "\"");
+						}
+					} // Cases of unary-prefix operators
+
+					// Cases of binary operators or a separator of partial expressions
+					if (token.operator.type == Operator.Type.BINARY || token.word.equals(",")) {
+
+						// Only leaf elements, open parenthesis, and unary-prefix operator can be a right-operand.
+						if( !(  nextIsLeaf || nextIsOpenParenthesis || nextIsPrefixOperator ) ) {
+							throw new ExevalatorException("An operand is required at the right of: \"" + token.word + "\"");
+						}
+						// Only leaf elements and closed parenthesis can be a right-operand.
+						if( !(  prevIsLeaf || prevIsCloseParenthesis  ) ) {
+							throw new ExevalatorException("An operand is required at the left of: \"" + token.word + "\"");
+						}
+					} // Cases of binary operators or a separator of partial expressions
+
+				} // Case of operators
+
+				// Case of leaf elements
+				if (leafTypeSet.contains(token.type)) {
+
+					// An other leaf element or an open parenthesis can not be at the right of an leaf element.
+					if (!nextIsFunctionCallBegin && (nextIsOpenParenthesis || nextIsLeaf)) {
+						throw new ExevalatorException("An operator is required at the right of: \"" + token.word + "\"");
+					}
+
+					// An other leaf element or a closed parenthesis can not be at the left of an leaf element.
+					if (prevIsCloseParenthesis || prevIsLeaf) {
+						throw new ExevalatorException("An operator is required at the left of: \"" + token.word + "\"");
+					}
+				} // Case of leaf elements
+			} // Loops for each token
+		} // End of this method
 	}
+
 
 	/**
 	 * The class performing functions of a parser.
@@ -301,7 +364,7 @@ public final class Exevalator {
 
 					// Case of unary-prefix operators:
 					// * Connect the node of right-token as an operand, if necessary (depending the next operator's precedence).
-					if (token.operator.type == Operator.Type.UNARY) {
+					if (token.operator.type == Operator.Type.UNARY_PREFIX) {
 						if (this.shouldAddRightOperand(token.operator.precedence, nextOpPrecedence)) {
 							operatorNode.childNodeList.add(new AstNode(tokens[itoken + 1]));
 							itoken++;
@@ -431,10 +494,13 @@ public final class Exevalator {
 		public static enum Type {
 
 			/** Represents unary operator, for example: - of -1.23 */
-			UNARY,
+			UNARY_PREFIX,
 
 			/** Represents binary operator, for example: + of 1+2 */
-			BINARY
+			BINARY,
+
+			/** Represents function-call operator */
+			CALL
 		}
 
 		/** The symbol of this operator (for example: '+'). */
@@ -905,7 +971,7 @@ public final class Exevalator {
 		public static final Operator DIVISION_OPERATOR = new Operator(Operator.Type.BINARY, "/", 200);
 
 		/** The instance of unary-minus operator. */
-		public static final Operator MINUS_OPERATOR = new Operator(Operator.Type.UNARY, "-", 100);
+		public static final Operator MINUS_OPERATOR = new Operator(Operator.Type.UNARY_PREFIX, "-", 100);
 
 		/** The list of available operators. */
 		public static final List<Operator> OPERATOR_LIST = new ArrayList<Operator>();
