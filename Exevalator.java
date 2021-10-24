@@ -72,6 +72,10 @@ public final class Exevalator {
 		 */
 		public Token[] analyze(String expression) {
 
+			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			// !!!  REFACTORING REQUIRED  !!!
+			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 			// Firstly, to simplify the tokenization,
 			// replace number literals in the expression to the escaped representation: "@NUMBER_LITERAL",
 			// because number literals may contains "+" or "-" in their exponent part.
@@ -97,20 +101,48 @@ public final class Exevalator {
 				}
 			}
 
+			// Stores the parenthesis-depth, which will increase at "(" and decrease at ")".
+			int parenthesisDepth = 0;
+
+			// Stores the parenthesis-depth when a function call operator begins,
+			// for detecting the end of the function operator.
+			Set<Integer> callParenthesisDepths = new HashSet<Integer>();
+
 			// Create Token instances.
 			Token[] tokens = new Token[tokenCount];
 			String numberLiteralRegexForMatching = "^" + StaticSettings.NUMBER_LITERAL_REGEX + "$";
 			for (int itoken=0; itoken<tokenCount; itoken++) {
 				String word = tokenWords[itoken];
 
-				if (word.equals("(") || word.equals(")")) {
-					tokens[itoken] = new Token(Token.Type.PARENTHESIS, word);
+				// Cases of open parentheses, or beginning of function calls.
+				if (word.equals("(")) {
+					parenthesisDepth++;
+					if (1 <= itoken && tokens[itoken - 1].type == Token.Type.FUNCTION_IDENTIFIER) {
+						callParenthesisDepths.add(parenthesisDepth);
+						tokens[itoken] = new Token(Token.Type.OPERATOR, word);
+					} else {
+						tokens[itoken] = new Token(Token.Type.PARENTHESIS, word);
+					}
+
+				// Cases of closes parentheses, or end of function calls.
+				} else if (word.equals(")")) {
+					if (callParenthesisDepths.contains(parenthesisDepth)) {
+						callParenthesisDepths.remove(parenthesisDepth);
+						tokens[itoken] = new Token(Token.Type.OPERATOR, word);
+					} else {
+						tokens[itoken] = new Token(Token.Type.PARENTHESIS, word);
+					}
+					parenthesisDepth--;
+
+				// Cases of operator, literals, and separator.
 				} else if (StaticSettings.OPERATOR_SYMBOL_SET.contains(word)) {
 					tokens[itoken] = new Token(Token.Type.OPERATOR, word);
 				} else if (word.matches(numberLiteralRegexForMatching)) {
 					tokens[itoken] = new Token(Token.Type.NUMBER_LITERAL, word);
+				} else if (word.equals(",")) {
+					tokens[itoken] = new Token(Token.Type.SEPARATOR, word);
 
-				// Cases of variable identifier of function identifier
+				// Cases of variable identifier of function identifier.
 				} else {
 					if (itoken < tokenCount - 1 && tokenWords[itoken + 1].equals("(")) {
 						tokens[itoken] = new Token(Token.Type.FUNCTION_IDENTIFIER, word);
@@ -129,22 +161,31 @@ public final class Exevalator {
 					continue;
 				}
 				Operator operator = null;
-				if (lastToken == null
-						|| lastToken.type == Token.Type.OPERATOR
-						|| lastToken.word.equals("(")) {
+
+				// Cases of function call operators.
+				if (token.word.equals("(") || token.word.equals(")") ) {
+					operator = StaticSettings.searchOperator(Operator.Type.CALL, token.word);
+
+				// Cases of unary-prefix operators.
+				} else if (lastToken == null
+						|| lastToken.word.equals("(")
+						|| (lastToken.type == Token.Type.OPERATOR && lastToken.operator.type != Operator.Type.CALL) ) {
 					operator = StaticSettings.searchOperator(Operator.Type.UNARY_PREFIX, token.word);
-				} else if (lastToken.type == Token.Type.NUMBER_LITERAL
-						|| lastToken.type == Token.Type.VARIABLE_IDENTIFIER
-						|| lastToken.word.equals(")")) {
+
+				// Cases of binary operators.
+				} else if (lastToken.word.equals(")")
+						|| lastToken.type == Token.Type.NUMBER_LITERAL
+						|| lastToken.type == Token.Type.VARIABLE_IDENTIFIER) {
 					operator = StaticSettings.searchOperator(Operator.Type.BINARY, token.word);
+
 				} else {
 					throw new ExevalatorException("Unexpected operator syntax: " + token.word);
 				}
 				tokens[itoken] = new Token(token.type, token.word, operator);
-				lastToken = token;
+				lastToken = tokens[itoken];
 			}
 
-			// Check syntactic correctness of the expression
+			// Check syntactic correctness of the expression.
 			this.checkParenthesisOpeningClosings(tokens);
 			this.checkEmptyParentheses(tokens);
 			this.checkLocationsOfOperatorsAndLeafs(tokens);
@@ -232,7 +273,7 @@ public final class Exevalator {
 					} else if (token.word.equals(")")) {
 						if (contentCounter == 0) {
 							throw new ExevalatorException(
-								"The content parentheses \"()\" should not be empty (excepting function calls)."
+								"The content parentheses \"()\" should not be empty (excluding function calls)."
 							);
 						}
 					}
@@ -257,6 +298,7 @@ public final class Exevalator {
 			for (int tokenIndex=0; tokenIndex<tokenCount; tokenIndex++) {
 				Token token = tokens[tokenIndex];
 
+				// Prepare information of next/previous token.
 				boolean nextIsLeaf = tokenIndex!=tokenCount-1 && leafTypeSet.contains(tokens[tokenIndex+1].type);
 				boolean prevIsLeaf = tokenIndex!=0 && leafTypeSet.contains(tokens[tokenIndex-1].type);
 				boolean nextIsOpenParenthesis = tokenIndex < tokenCount-1 && tokens[tokenIndex+1].word.equals("(");
@@ -267,6 +309,8 @@ public final class Exevalator {
 				boolean nextIsFunctionCallBegin = nextIsOpenParenthesis
 						&& tokens[tokenIndex+1].type == Token.Type.OPERATOR
 						&& tokens[tokenIndex+1].operator.type == Operator.Type.CALL;
+				boolean nextIsFunctionIdentifier = tokenIndex < tokenCount-1
+						&& tokens[tokenIndex+1].type == Token.Type.FUNCTION_IDENTIFIER;
 
 				// Case of operators
 				if (token.type == Token.Type.OPERATOR) {
@@ -284,7 +328,7 @@ public final class Exevalator {
 					if (token.operator.type == Operator.Type.BINARY || token.word.equals(",")) {
 
 						// Only leaf elements, open parenthesis, and unary-prefix operator can be a right-operand.
-						if( !(  nextIsLeaf || nextIsOpenParenthesis || nextIsPrefixOperator ) ) {
+						if( !(  nextIsLeaf || nextIsOpenParenthesis || nextIsPrefixOperator || nextIsFunctionIdentifier ) ) {
 							throw new ExevalatorException("An operand is required at the right of: \"" + token.word + "\"");
 						}
 						// Only leaf elements and closed parenthesis can be a right-operand.
@@ -557,6 +601,9 @@ public final class Exevalator {
 
 			/** Represents operator tokens, for example: + */
 			OPERATOR,
+
+			/** Represents separator tokens of partial expressions: , */
+			SEPARATOR,
 
 			/** Represents parenthesis, for example: ( and ) of (1*(2+3)) */
 			PARENTHESIS,
@@ -1111,19 +1158,25 @@ public final class Exevalator {
 		public static final String ESCAPED_NUMBER_LITERAL = "@NUMBER_LITERAL@";
 
 		/** The instance of addition operator. */
-		public static final Operator ADDITION_OPERATOR = new Operator(Operator.Type.BINARY, "+", 300);
+		public static final Operator ADDITION_OPERATOR = new Operator(Operator.Type.BINARY, "+", 400);
 
 		/** The instance of subtraction operator. */
-		public static final Operator SUBTRACTION_OPERATOR = new Operator(Operator.Type.BINARY, "-", 300);
+		public static final Operator SUBTRACTION_OPERATOR = new Operator(Operator.Type.BINARY, "-", 400);
 
 		/** The instance of multiplication operator. */
-		public static final Operator MULTIPLICATION_OPERATOR = new Operator(Operator.Type.BINARY, "*", 200);
+		public static final Operator MULTIPLICATION_OPERATOR = new Operator(Operator.Type.BINARY, "*", 300);
 
 		/** The instance of division operator. */
-		public static final Operator DIVISION_OPERATOR = new Operator(Operator.Type.BINARY, "/", 200);
+		public static final Operator DIVISION_OPERATOR = new Operator(Operator.Type.BINARY, "/", 300);
 
 		/** The instance of unary-minus operator. */
-		public static final Operator MINUS_OPERATOR = new Operator(Operator.Type.UNARY_PREFIX, "-", 100);
+		public static final Operator MINUS_OPERATOR = new Operator(Operator.Type.UNARY_PREFIX, "-", 200);
+
+		/** The instance of the beginning of call operator. */
+		public static final Operator CALL_BEGIN_OPERATOR = new Operator(Operator.Type.CALL, "(", 100);
+
+		/** The instance of the end of call operator. */
+		public static final Operator CALL_END_OPERATOR = new Operator(Operator.Type.CALL, ")", Integer.MAX_VALUE); // least prior
 
 		/** The list of available operators. */
 		public static final List<Operator> OPERATOR_LIST = new ArrayList<Operator>();
@@ -1133,6 +1186,8 @@ public final class Exevalator {
 			OPERATOR_LIST.add(MULTIPLICATION_OPERATOR);
 			OPERATOR_LIST.add(DIVISION_OPERATOR);
 			OPERATOR_LIST.add(MINUS_OPERATOR);
+			OPERATOR_LIST.add(CALL_BEGIN_OPERATOR);
+			OPERATOR_LIST.add(CALL_END_OPERATOR);
 		}
 
 		/** The set of symbols of available operators. */
@@ -1142,6 +1197,8 @@ public final class Exevalator {
 			add("-");
 			add("*");
 			add("/");
+			add("(");
+			add(")");
 		}};
 
 		/**
