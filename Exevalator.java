@@ -25,6 +25,16 @@ import java.util.regex.Pattern;
  */
 public final class Exevalator {
 
+	/** The interconnect providing objects shared among multiple components of this interpreter. */
+	private volatile Interconnect interconnect;
+
+	/**
+	 * Creates a new interpreter of the Exevalator.
+	 */
+	public Exevalator() {
+		this.interconnect = new Interconnect();
+	}
+
 	/**
 	 * Evaluates (computes) the value of an expression.
 	 *
@@ -43,7 +53,7 @@ public final class Exevalator {
 		AstNode ast = new Parser().parse(tokens);
 
 		// Evaluate (compute) the value of the root node of the AST.
-		ast.initializeEvaluatorUnit();
+		ast.initializeEvaluatorUnit(this.interconnect);
 		double evaluatedValue = ast.evaluate();
 
 		/*
@@ -59,6 +69,15 @@ public final class Exevalator {
 		*/
 
 		return evaluatedValue;
+	}
+
+	/**
+	 * Connects the new variable to share it between components of this interpreter.
+	 *
+	 * @param variable The variable to be connected.
+	 */
+	public synchronized void connectVariable(AbstractVariable variable) {
+		this.interconnect.connectVariable(variable);
 	}
 
 
@@ -774,20 +793,24 @@ public final class Exevalator {
 
 		/**
 		 * Initializes the evaluator unit for evaluating the value of this AST node.
+		 *
+		 * @param interconnect The interconnect providing references to variables and functions.
 		 */
-		public void initializeEvaluatorUnit() {
+		public void initializeEvaluatorUnit(Interconnect interconnect) {
 
 			// Initialize evaluation units of child nodes, and store then into an array.
 			int childCount = this.childNodeList.size();
 			Evaluator.EvaluatorUnit childNodeUnits[] = new Evaluator.EvaluatorUnit[childCount];
 			for (int ichild=0; ichild<childCount; ichild++) {
-				this.childNodeList.get(ichild).initializeEvaluatorUnit();
+				this.childNodeList.get(ichild).initializeEvaluatorUnit(interconnect);
 				childNodeUnits[ichild] = this.childNodeList.get(ichild).evaluatorUnit;
 			}
 
 			// Initialize evaluation units of this node.
 			if (this.token.type == Token.Type.NUMBER_LITERAL) {
 				this.evaluatorUnit = new Evaluator.NumberLiteralEvaluatorUnit(this.token.word);
+			} else if (this.token.type == Token.Type.VARIABLE_IDENTIFIER) {
+				this.evaluatorUnit = new Evaluator.VariableValueEvaluatorUnit(this.token.word, interconnect);
 			} else if (this.token.type == Token.Type.OPERATOR) {
 				if (this.token.operator == StaticSettings.MINUS_OPERATOR) {
 					this.evaluatorUnit = new Evaluator.MinusEvaluatorUnit(childNodeUnits[0]);
@@ -1077,6 +1100,38 @@ public final class Exevalator {
 				return this.value;
 			}
 		}
+
+		/**
+		 * The evaluator unit for evaluating the value of a variable.
+		 */
+		private static final class VariableValueEvaluatorUnit extends EvaluatorUnit {
+
+			/** The variable to be evaluated. */
+			private volatile AbstractVariable variable;
+
+			/**
+			 * Initializes the reference to the variable.
+			 *
+			 * @param variableName The name of the variable to be evaluated
+			 * @param interconnect The interconnect providing the reference to the variable
+			 */
+			public VariableValueEvaluatorUnit(String variableName, Interconnect interconnect) {
+				if (!interconnect.isVariableConnected(variableName)) {
+					throw new ExevalatorException("No variable found: " + variableName);
+				}
+				this.variable = interconnect.getVariable(variableName);
+			}
+
+			/**
+			 * Returns the value of the variable.
+			 *
+			 * @return The value of the variable.
+			 */
+			@Override
+			public double evaluate() {
+				return this.variable.getVariableValue();
+			}
+		}
 	}
 
 
@@ -1157,7 +1212,7 @@ public final class Exevalator {
 		}
 
 		/**
-		 * Connects the new variable to share it between components of this interpreter..
+		 * Connects the new variable to share it between components of this interpreter.
 		 *
 		 * @param variable The variable to be connected.
 		 */
