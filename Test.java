@@ -19,6 +19,7 @@ public class Test {
 		test.testPrecedencesOfOperators();
 		test.testParentheses();
 		test.testComplicatedCases();
+		test.testSyntaxChecksOfCorresponencesOfParentheses();
 
 		System.out.println("All tests have completed successfully.");
 	}
@@ -313,6 +314,140 @@ public class Test {
 			exevalator.eval("(-(1.2E1 + 3.4E-2 - 5.6E2) * ((7.8E0 + 9.0) / 10.1E-3) / 11.2 + 12.3E-1 * ((13.4 + -(15.6E-12 - 17.8E-10)) * 18.9E-5)) + 19.0E-2 * 20.1E0"),
 			(-(1.2E1 + 3.4E-2 - 5.6E2) * ((7.8E0 + 9.0) / 10.1E-3) / 11.2 + 12.3E-1 * ((13.4 + -(15.6E-12 - 17.8E-10)) * 18.9E-5)) + 19.0E-2 * 20.1E0
 		);
+	}
+
+
+	/**
+	 * Tests syntax checks by the interpreter for expressions.
+	 */
+	private void testSyntaxChecksOfCorresponencesOfParentheses() {
+		Exevalator exevalator = new Exevalator();
+
+		try {
+			check(
+				"Test of Detection of Mismatching of Open/Closed Parentheses 1",
+				exevalator.eval("(1 + 2)"),
+				(1 + 2)
+			);
+		} catch (Exevalator.ExevalatorException ee) {
+			throw new Exevalator.ExevalatorException("Unexpected exception has been thrown");
+		}
+
+		try {
+			check(
+				"Test of Detection of Mismatching of Open/Closed Parentheses 2",
+				exevalator.eval("((1 + 2)"),
+				(1 + 2)
+			);
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (Exevalator.ExevalatorException ee) {
+			// Expected to thrown
+			System.out.println("Test of Detection of Mismatching of Open/Closed Parentheses 2: OK.");
+		}
+
+		try {
+			check(
+				"Test of Detection of Mismatching of Open/Closed Parentheses 3",
+				exevalator.eval("(1 + 2))"),
+				(1 + 2)
+			);
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (Exevalator.ExevalatorException ee) {
+			// Expected to thrown
+			System.out.println("Test of Detection of Mismatching of Open/Closed Parentheses 3: OK.");
+		}
+
+		try {
+			check(
+				"Test of Detection of Mismatching of Open/Closed Parentheses 4",
+				exevalator.eval("(1 + 2) + (3 + 4)"),
+				(1 + 2) + (3 + 4)
+			);
+		} catch (Exevalator.ExevalatorException ee) {
+			throw new Exevalator.ExevalatorException("Unexpected exception has been thrown");
+		}
+
+		try {
+			check(
+				"Test of Detection of Mismatching of Open/Closed Parentheses 5",
+				exevalator.eval("1 + 2) + (3 + 4"),
+				(1 + 2) + (3 + 4)
+			);
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (Exevalator.ExevalatorException ee) {
+			// Expected to thrown
+			System.out.println("Test of Detection of Mismatching of Open/Closed Parentheses 5: OK.");
+		}
+
+		try {
+			check(
+				"Test of Detection of Mismatching of Open/Closed Parentheses 6",
+				exevalator.eval("1 + ((2 + (3 + 4) + 5) + 6)"),
+				1 + ((2 + (3 + 4) + 5) + 6)
+			);
+		} catch (Exevalator.ExevalatorException ee) {
+			throw new Exevalator.ExevalatorException("Unexpected exception has been thrown");
+		}
+
+		try {
+			check(
+				"Test of Detection of Mismatching of Open/Closed Parentheses 7",
+				exevalator.eval("1 + ((2 + (3 + 4) + 5) + 6"),
+				1 + ((2 + (3 + 4) + 5) + 6)
+			);
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (Exevalator.ExevalatorException ee) {
+			// Expected to thrown
+			System.out.println("Test of Detection of Mismatching of Open/Closed Parentheses 7: OK.");
+		}
+
+		try {
+			check(
+				"Test of Detection of Mismatching of Open/Closed Parentheses 8",
+				exevalator.eval("1 + (2 + (3 + 4) + 5) + 6)"),
+				1 + ((2 + (3 + 4) + 5) + 6)
+			);
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (Exevalator.ExevalatorException ee) {
+			// Expected to thrown
+			System.out.println("Test of Detection of Mismatching of Open/Closed Parentheses 8: OK.");
+		}
+
+		try {
+			check(
+				"Test of Detection of Empty Parentheses 1",
+				exevalator.eval("()"),
+				Double.NaN
+			);
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (Exevalator.ExevalatorException ee) {
+			// Expected to thrown
+			System.out.println("Test of Detection of Empty Parentheses 1: OK.");
+		}
+
+		try {
+			check(
+				"Test of Detection of Empty Parentheses 2",
+				exevalator.eval("1 + ()"),
+				Double.NaN
+			);
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (Exevalator.ExevalatorException ee) {
+			// Expected to thrown
+			System.out.println("Test of Detection of Empty Parentheses 2: OK.");
+		}
+
+		try {
+			check(
+				"Test of Detection of Empty Parentheses 3",
+				exevalator.eval("() + 1"),
+				Double.NaN
+			);
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (Exevalator.ExevalatorException ee) {
+			// Expected to thrown
+			System.out.println("Test of Detection of Empty Parentheses 3: OK.");
+		}
 	}
 
 

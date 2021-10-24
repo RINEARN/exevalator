@@ -135,6 +135,9 @@ public final class Exevalator {
 				tokens[itoken] = new Token(token.type, token.word, operator);
 				lastToken = token;
 			}
+
+			// Check syntactic correctness of the expression
+			this.check(tokens);
 			return tokens;
 		}
 
@@ -164,8 +167,81 @@ public final class Exevalator {
 			String replacedExpression = numberLiteralMatcher.replaceAll(StaticSettings.ESCAPED_NUMBER_LITERAL);
 			return replacedExpression;
 		}
-	}
 
+		/**
+		 * Checks syntactic correctness of the inputted expression.
+		 * An ExevalatorException will be thrown when any errors detected.
+		 * If no error detected, nothing will occur.
+		 */
+		private void check(Token[] tokens) {
+			this.checkParenthesisOpeningClosings(tokens);
+			this.checkEmptyParentheses(tokens);
+		}
+
+		/**
+		 * Checks the number and correspondence of open "(" / closed ")" parentheses.
+		 * An ExevalatorException will be thrown when any errors detected.
+		 * If no error detected, nothing will occur.
+		 *
+		 * @param tokens Tokens of the inputted expression.
+		 */
+		private void checkParenthesisOpeningClosings(Token[] tokens) {
+			int tokenCount = tokens.length;
+			int hierarchy = 0; // Increases at "(" and decreases at ")".
+
+			for (int tokenIndex=0; tokenIndex<tokenCount; tokenIndex++) {
+				Token token = tokens[tokenIndex];
+				if (token.word.equals("(")) {
+					hierarchy++;
+				} else if (token.word.equals(")")) {
+					hierarchy--;
+				}
+
+				// If the value of hierarchy is negative, the open parenthesis is deficient.
+				if (hierarchy < 0) {
+					throw new ExevalatorException(
+						"The number of open parenthesis \"(\" is deficient."
+					);
+				}
+			}
+
+			// If the value of hierarchy is not zero at the end of the expression,
+			// the closed parentheses ")" is deficient.
+			if (hierarchy > 0) {
+				throw new ExevalatorException(
+					"The number of closed parenthesis \")\" is deficient."
+				);
+			}
+		}
+
+		/**
+		 * Checks that empty parentheses "()" are not contained in the expression.
+		 * An ExevalatorException will be thrown when any errors detected.
+		 * If no error detected, nothing will occur.
+		 *
+		 * @param tokens Tokens of the inputted expression.
+		 */
+		private void checkEmptyParentheses(Token[] tokens) {
+			int tokenCount = tokens.length;
+			int contentCounter = 0;
+			for (int tokenIndex=0; tokenIndex<tokenCount; tokenIndex++) {
+				Token token = tokens[tokenIndex];
+				if (token.type == Token.Type.PARENTHESIS) { // Excepting CALL operators
+					if (token.word.equals("(")) {
+						contentCounter = 0;
+					} else if (token.word.equals(")")) {
+						if (contentCounter == 0) {
+							throw new ExevalatorException(
+								"The content parentheses \"()\" should not be empty (excepting function calls)."
+							);
+						}
+					}
+				} else {
+					contentCounter++;
+				}
+			}
+		}
+	}
 
 	/**
 	 * The class performing functions of a parser.
