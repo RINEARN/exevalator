@@ -80,6 +80,15 @@ public final class Exevalator {
 		this.interconnect.connectVariable(variable);
 	}
 
+	/**
+	 * Connects the new function to share it between components of this interpreter.
+	 *
+	 * @param variable The function to be connected.
+	 */
+	public synchronized void connectFunction(AbstractFunction function) {
+		this.interconnect.connectFunction(function);
+	}
+
 
 	/**
 	 * The class performing functions of a lexical analyzer.
@@ -822,6 +831,9 @@ public final class Exevalator {
 					this.evaluatorUnit = new Evaluator.MultiplicationEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
 				} else if (this.token.operator == StaticSettings.DIVISION_OPERATOR) {
 					this.evaluatorUnit = new Evaluator.DivisionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+				} else if (this.token.operator == StaticSettings.CALL_BEGIN_OPERATOR) {
+					String identifier = this.childNodeList.get(0).token.word;
+					this.evaluatorUnit = new Evaluator.FunctionCallEvaluatorUnit(identifier, interconnect, childNodeUnits);
 				}
 			}
 		}
@@ -1130,6 +1142,52 @@ public final class Exevalator {
 			@Override
 			public double evaluate() {
 				return this.variable.getVariableValue();
+			}
+		}
+
+		/**
+		 * The evaluator unit for evaluating a function-call operator.
+		 *
+		 */
+		private static final class FunctionCallEvaluatorUnit extends EvaluatorUnit {
+
+			/** The variable to be called. */
+			private volatile AbstractFunction function;
+
+			/** Evaluator units for evaluating values of arguments. */
+			private volatile EvaluatorUnit[] argumentEvalUnits;
+
+			/** An array storing evaluated values of arguments. */
+			private volatile double[] argumentArrayBuffer;
+
+			/** The number of arguments. */
+			private volatile int argumentCount;
+
+			public FunctionCallEvaluatorUnit(
+					String functionName, Interconnect interconnect, EvaluatorUnit[] argumentEvalUnits) {
+
+				this.argumentCount = argumentEvalUnits.length - 1; // The first element is identifier, so -1.
+				if (!interconnect.isFunctionConnected(functionName, this.argumentCount)) {
+					throw new ExevalatorException(
+						"No function found: " + functionName + "(" + this.argumentCount + "-arguments"
+					);
+				}
+				this.function = interconnect.getFunction(functionName, this.argumentCount);
+				this.argumentEvalUnits = argumentEvalUnits;
+				this.argumentArrayBuffer = new double[this.argumentCount];
+			}
+
+			/**
+			 * Calls the function and returns the returned value of the function.
+			 *
+			 * @return The returned value of the function
+			 */
+			@Override
+			public double evaluate() {
+				for (int iarg=0; iarg<this.argumentCount; iarg++) {
+					this.argumentArrayBuffer[iarg] = this.argumentEvalUnits[iarg + 1].evaluate();
+				}
+				return this.function.invoke(this.argumentArrayBuffer);
 			}
 		}
 	}
