@@ -945,7 +945,7 @@ public final class Exevalator {
 	/**
 	 * The super class of variables available on this interpreter.
 	 */
-	public abstract class AbstractVariable {
+	public static abstract class AbstractVariable {
 
 		/**
 		 * Gets the name of this variable.
@@ -973,7 +973,7 @@ public final class Exevalator {
 	/**
 	 * The super class of functions available on this interpreter.
 	 */
-	public abstract class AbstractFunction {
+	public static abstract class AbstractFunction {
 
 		/**
 		 * Gets the name of this function.
