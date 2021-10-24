@@ -109,8 +109,14 @@ public final class Exevalator {
 					tokens[itoken] = new Token(Token.Type.OPERATOR, word);
 				} else if (word.matches(numberLiteralRegexForMatching)) {
 					tokens[itoken] = new Token(Token.Type.NUMBER_LITERAL, word);
+
+				// Cases of variable identifier of function identifier
 				} else {
-					tokens[itoken] = new Token(Token.Type.IDENTIFIER, word);
+					if (itoken < tokenCount - 1 && tokenWords[itoken + 1].equals("(")) {
+						tokens[itoken] = new Token(Token.Type.FUNCTION_IDENTIFIER, word);
+					} else {
+						tokens[itoken] = new Token(Token.Type.VARIABLE_IDENTIFIER, word);
+					}
 				}
 			}
 
@@ -128,7 +134,7 @@ public final class Exevalator {
 						|| lastToken.word.equals("(")) {
 					operator = StaticSettings.searchOperator(Operator.Type.UNARY_PREFIX, token.word);
 				} else if (lastToken.type == Token.Type.NUMBER_LITERAL
-						|| lastToken.type == Token.Type.IDENTIFIER
+						|| lastToken.type == Token.Type.VARIABLE_IDENTIFIER
 						|| lastToken.word.equals(")")) {
 					operator = StaticSettings.searchOperator(Operator.Type.BINARY, token.word);
 				} else {
@@ -245,7 +251,7 @@ public final class Exevalator {
 			int tokenCount = tokens.length;
 			Set<Token.Type> leafTypeSet = EnumSet.noneOf(Token.Type.class);
 			leafTypeSet.add(Token.Type.NUMBER_LITERAL);
-			leafTypeSet.add(Token.Type.IDENTIFIER);
+			leafTypeSet.add(Token.Type.VARIABLE_IDENTIFIER);
 
 			// Reads and check tokens from left to right.
 			for (int tokenIndex=0; tokenIndex<tokenCount; tokenIndex++) {
@@ -343,7 +349,7 @@ public final class Exevalator {
 				AstNode operatorNode = null;
 
 				// Case of operands: "1.23", "x", etc.
-				if (token.type == Token.Type.NUMBER_LITERAL || token.type == Token.Type.IDENTIFIER) {
+				if (token.type == Token.Type.NUMBER_LITERAL || token.type == Token.Type.VARIABLE_IDENTIFIER) {
 					stack.push(new AstNode(token));
 					itoken++;
 					continue;
@@ -555,8 +561,11 @@ public final class Exevalator {
 			/** Represents parenthesis, for example: ( and ) of (1*(2+3)) */
 			PARENTHESIS,
 
-			/** Represents identifier tokens, for example: x */
-			IDENTIFIER,
+			/** Represents variable-identifier tokens, for example: x */
+			VARIABLE_IDENTIFIER,
+
+			/** Represents function-identifier tokens, for example: f */
+			FUNCTION_IDENTIFIER,
 
 			/** Represents temporary token for isolating partial expressions in the stack, in parser */
 			STACK_LID
