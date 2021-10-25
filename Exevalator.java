@@ -18,6 +18,9 @@ import java.util.EnumSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 
 /**
@@ -72,12 +75,31 @@ public final class Exevalator {
 	}
 
 	/**
-	 * Connects the new variable to share it between components of this interpreter.
+	 * Connects the variable for accessing to it in the expression.
 	 *
 	 * @param variable The variable to be connected.
 	 */
 	public synchronized void connectVariable(AbstractVariable variable) {
 		this.interconnect.connectVariable(variable);
+	}
+
+	/**
+	 * Connects the static field for accessing to it in the expression as a variable.
+	 *
+	 * @param field The static field to be connected as a variable.
+	 */
+	public synchronized void connectFieldAsVariable(Field field) {
+		this.interconnect.connectVariable(new FieldToVariableAdapter(field, null));
+	}
+
+	/**
+	 * Connects the non-static field for accessing to it in the expression as a variable.
+	 *
+	 * @param field The non-static field to be connected as a variable.
+	 * @param objectInstance The instance of the object to which the field belongs.
+	 */
+	public synchronized void connectFieldAsVariable(Field field, Object objectInstance) {
+		this.interconnect.connectVariable(new FieldToVariableAdapter(field, objectInstance));
 	}
 
 	/**
@@ -90,19 +112,38 @@ public final class Exevalator {
 	}
 
 	/**
-	 * Disconnects all variables..
+	 * Disconnects all variables.
 	 */
 	public synchronized void disconnectAllVariables() {
 		this.interconnect.disconnectAllVariables();
 	}
 
 	/**
-	 * Connects the new function to share it between components of this interpreter.
+	 * Connects the function for calling it in the expression.
 	 *
-	 * @param variable The function to be connected.
+	 * @param function The function to be connected.
 	 */
 	public synchronized void connectFunction(AbstractFunction function) {
 		this.interconnect.connectFunction(function);
+	}
+
+	/**
+	 * Connects the static method for calling it in the expression as a function.
+	 *
+	 * @param method The method to be connected as a function.
+	 */
+	public synchronized void connectMethodAsFunction(Method method) {
+		this.interconnect.connectFunction(new MethodToFunctionAdapter(method, null));
+	}
+
+	/**
+	 * Connects the non-static method for calling it in the expression as a function.
+	 *
+	 * @param method The method to be connected as a function.
+	 * @param objectInstance The instance of the object to which the method belongs.
+	 */
+	public synchronized void connectMethodAsFunction(Method method, Object objectInstance) {
+		this.interconnect.connectFunction(new MethodToFunctionAdapter(method, objectInstance));
 	}
 
 	/**
@@ -1284,6 +1325,112 @@ public final class Exevalator {
 
 
 	/**
+	 * The class for connecting a Field to this interpreter as a variable.
+	 */
+	private static final class FieldToVariableAdapter extends AbstractVariable {
+
+		/** The field to be connected as a variable. */
+		private volatile Field field;
+
+		/** The instance of the object to which the field belongs. */
+		private Object objectInstance;
+
+		/**
+		 * Creates the adapter to connect the specified field as a variable.
+		 *
+		 * @param field The field to be connected as a variable
+		 * @param objectInstance The instance of the object to which the field belongs.
+		 */
+		public FieldToVariableAdapter (Field field, Object objectInstance) {
+			this.field = field;
+			this.objectInstance = objectInstance;
+			if (this.field.getType() != double.class && this.field.getType() != Double.class) {
+				throw new ExevalatorException("Incorrect data type of the variable: " + this.field.getName());
+			}
+		}
+
+		@Override
+		public String getVariableName() {
+			return this.field.getName();
+		}
+
+		@Override
+		public void setVariableValue(double value) {
+			try {
+				this.field.set(this.objectInstance, value);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				throw new ExevalatorException("Can not set a value to the variable: " + this.field.getName(), e);
+			}
+		}
+
+		@Override
+		public double getVariableValue() {
+			try {
+				return (double)this.field.get(this.objectInstance);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				throw new ExevalatorException("Can not get a value of the variable: " + this.field.getName(), e);
+			}
+		}
+	}
+
+
+	/**
+	 * The class for connecting a Method to this interpreter as a function.
+	 */
+	private static final class MethodToFunctionAdapter extends AbstractFunction {
+
+		/** The method to be connected as a function. */
+		private volatile Method method;
+
+		/** The instance of the object to which the method belongs. */
+		private Object objectInstance;
+
+		/**
+		 * Creates the adapter to connect the specified method as a function.
+		 *
+		 * @param method The method to be connected as a function
+		 * @param objectInstance The instance of the object to which the method belongs.
+		 */
+		public MethodToFunctionAdapter(Method method, Object objectInstance) {
+			this.method = method;
+			this.objectInstance = objectInstance;
+		}
+
+		@Override
+		public String getFunctionName() {
+			return this.method.getName();
+		}
+
+		@Override
+		public String[] getParameterNames() {
+			int parameterCount = this.method.getParameterCount();
+			String[] parameterNames = new String[parameterCount];
+			for (int iparam=0; iparam<parameterCount; iparam++) {
+				parameterNames[iparam] = "arg" + iparam;
+			}
+			return parameterNames;
+		}
+
+		@Override
+		public double invoke(double[] arguments) {
+			int argCount = arguments.length;
+			Object[] argObjects = new Object[argCount];
+			for (int iarg=0; iarg<argCount; iarg++) {
+				argObjects[iarg] = arguments[iarg];
+			}
+
+			double returnedValue = Double.NaN;
+			try {
+				returnedValue = (double)this.method.invoke(this.objectInstance, argObjects);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				throw new ExevalatorException("Can not invoke the function: " + this.method.getName(), e);
+			}
+			return returnedValue;
+		}
+	}
+
+
+	/**
 	 * The class to provide objects shared among multiple components of this interpreter.
 	 */
 	public static class Interconnect {
@@ -1505,6 +1652,16 @@ public final class Exevalator {
 		 */
 		public ExevalatorException(String errorMessage) {
 			super(errorMessage);
+		}
+
+		/**
+		 * Create an instance having the specified error message and the cause exception.
+		 *
+		 * @param errorMessage The error message explaining the cause of this exception
+		 * @param causeException The cause exception of this exception
+		 */
+		public ExevalatorException(String errorMessage, Exception causeException) {
+			super(errorMessage, causeException);
 		}
 	}
 }
