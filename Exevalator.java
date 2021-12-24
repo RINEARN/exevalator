@@ -271,37 +271,37 @@ final class LexicalAnalyzer {
 			// Cases of open parentheses, or beginning of function calls.
 			if (word.equals("(")) {
 				parenthesisDepth++;
-				if (1 <= itoken && tokens[itoken - 1].type == Token.Type.FUNCTION_IDENTIFIER) {
+				if (1 <= itoken && tokens[itoken - 1].type == TokenType.FUNCTION_IDENTIFIER) {
 					callParenthesisDepths.add(parenthesisDepth);
-					tokens[itoken] = new Token(Token.Type.OPERATOR, word);
+					tokens[itoken] = new Token(TokenType.OPERATOR, word);
 				} else {
-					tokens[itoken] = new Token(Token.Type.PARENTHESIS, word);
+					tokens[itoken] = new Token(TokenType.PARENTHESIS, word);
 				}
 
 			// Cases of closes parentheses, or end of function calls.
 			} else if (word.equals(")")) {
 				if (callParenthesisDepths.contains(parenthesisDepth)) {
 					callParenthesisDepths.remove(parenthesisDepth);
-					tokens[itoken] = new Token(Token.Type.OPERATOR, word);
+					tokens[itoken] = new Token(TokenType.OPERATOR, word);
 				} else {
-					tokens[itoken] = new Token(Token.Type.PARENTHESIS, word);
+					tokens[itoken] = new Token(TokenType.PARENTHESIS, word);
 				}
 				parenthesisDepth--;
 
 			// Cases of operator, literals, and separator.
 			} else if (StaticSettings.OPERATOR_SYMBOL_SET.contains(word)) {
-				tokens[itoken] = new Token(Token.Type.OPERATOR, word);
+				tokens[itoken] = new Token(TokenType.OPERATOR, word);
 			} else if (word.matches(numberLiteralRegexForMatching)) {
-				tokens[itoken] = new Token(Token.Type.NUMBER_LITERAL, word);
+				tokens[itoken] = new Token(TokenType.NUMBER_LITERAL, word);
 			} else if (word.equals(",")) {
-				tokens[itoken] = new Token(Token.Type.EXPRESSION_SEPARATOR, word);
+				tokens[itoken] = new Token(TokenType.EXPRESSION_SEPARATOR, word);
 
 			// Cases of variable identifier of function identifier.
 			} else {
 				if (itoken < tokenCount - 1 && tokenWords[itoken + 1].equals("(")) {
-					tokens[itoken] = new Token(Token.Type.FUNCTION_IDENTIFIER, word);
+					tokens[itoken] = new Token(TokenType.FUNCTION_IDENTIFIER, word);
 				} else {
-					tokens[itoken] = new Token(Token.Type.VARIABLE_IDENTIFIER, word);
+					tokens[itoken] = new Token(TokenType.VARIABLE_IDENTIFIER, word);
 				}
 			}
 		}
@@ -322,7 +322,7 @@ final class LexicalAnalyzer {
 		Token lastToken = null;
 		for (int itoken=0; itoken<tokenCount; itoken++) {
 			Token token = tokens[itoken];
-			if (token.type != Token.Type.OPERATOR) {
+			if (token.type != TokenType.OPERATOR) {
 				resultTokens[itoken] = token;
 				lastToken = token;
 				continue;
@@ -331,19 +331,19 @@ final class LexicalAnalyzer {
 
 			// Cases of function call operators.
 			if (token.word.equals("(") || token.word.equals(")") ) {
-				operator = StaticSettings.searchOperator(Operator.Type.CALL, token.word);
+				operator = StaticSettings.searchOperator(OperatorType.CALL, token.word);
 
 			// Cases of unary-prefix operators.
 			} else if (lastToken == null
 					|| lastToken.word.equals("(")
-					|| (lastToken.type == Token.Type.OPERATOR && lastToken.operator.type != Operator.Type.CALL) ) {
-				operator = StaticSettings.searchOperator(Operator.Type.UNARY_PREFIX, token.word);
+					|| (lastToken.type == TokenType.OPERATOR && lastToken.operator.type != OperatorType.CALL) ) {
+				operator = StaticSettings.searchOperator(OperatorType.UNARY_PREFIX, token.word);
 
 			// Cases of binary operators.
 			} else if (lastToken.word.equals(")")
-					|| lastToken.type == Token.Type.NUMBER_LITERAL
-					|| lastToken.type == Token.Type.VARIABLE_IDENTIFIER) {
-				operator = StaticSettings.searchOperator(Operator.Type.BINARY, token.word);
+					|| lastToken.type == TokenType.NUMBER_LITERAL
+					|| lastToken.type == TokenType.VARIABLE_IDENTIFIER) {
+				operator = StaticSettings.searchOperator(OperatorType.BINARY, token.word);
 
 			} else {
 				throw new Exevalator.ExevalatorException("Unexpected operator syntax: " + token.word);
@@ -449,7 +449,7 @@ final class LexicalChecker {
 		int contentCounter = 0;
 		for (int tokenIndex=0; tokenIndex<tokenCount; tokenIndex++) {
 			Token token = tokens[tokenIndex];
-			if (token.type == Token.Type.PARENTHESIS) { // Excepting CALL operators
+			if (token.type == TokenType.PARENTHESIS) { // Excepting CALL operators
 				if (token.word.equals("(")) {
 					contentCounter = 0;
 				} else if (token.word.equals(")")) {
@@ -474,9 +474,9 @@ final class LexicalChecker {
 	 */
 	private void checkLocationsOfOperatorsAndLeafs(Token[] tokens) {
 		int tokenCount = tokens.length;
-		Set<Token.Type> leafTypeSet = EnumSet.noneOf(Token.Type.class);
-		leafTypeSet.add(Token.Type.NUMBER_LITERAL);
-		leafTypeSet.add(Token.Type.VARIABLE_IDENTIFIER);
+		Set<TokenType> leafTypeSet = EnumSet.noneOf(TokenType.class);
+		leafTypeSet.add(TokenType.NUMBER_LITERAL);
+		leafTypeSet.add(TokenType.VARIABLE_IDENTIFIER);
 
 		// Reads and check tokens from left to right.
 		for (int tokenIndex=0; tokenIndex<tokenCount; tokenIndex++) {
@@ -488,19 +488,19 @@ final class LexicalChecker {
 			boolean nextIsOpenParenthesis = tokenIndex < tokenCount-1 && tokens[tokenIndex+1].word.equals("(");
 			boolean prevIsCloseParenthesis = tokenIndex != 0 && tokens[tokenIndex-1].word.equals(")");
 			boolean nextIsPrefixOperator = tokenIndex < tokenCount-1
-					&& tokens[tokenIndex+1].type == Token.Type.OPERATOR
-					&& tokens[tokenIndex+1].operator.type == Operator.Type.UNARY_PREFIX;
+					&& tokens[tokenIndex+1].type == TokenType.OPERATOR
+					&& tokens[tokenIndex+1].operator.type == OperatorType.UNARY_PREFIX;
 			boolean nextIsFunctionCallBegin = nextIsOpenParenthesis
-					&& tokens[tokenIndex+1].type == Token.Type.OPERATOR
-					&& tokens[tokenIndex+1].operator.type == Operator.Type.CALL;
+					&& tokens[tokenIndex+1].type == TokenType.OPERATOR
+					&& tokens[tokenIndex+1].operator.type == OperatorType.CALL;
 			boolean nextIsFunctionIdentifier = tokenIndex < tokenCount-1
-					&& tokens[tokenIndex+1].type == Token.Type.FUNCTION_IDENTIFIER;
+					&& tokens[tokenIndex+1].type == TokenType.FUNCTION_IDENTIFIER;
 
 			// Case of operators
-			if (token.type == Token.Type.OPERATOR) {
+			if (token.type == TokenType.OPERATOR) {
 
 				// Cases of unary-prefix operators
-				if (token.operator.type == Operator.Type.UNARY_PREFIX) {
+				if (token.operator.type == OperatorType.UNARY_PREFIX) {
 
 					// Only leafs, open parentheses, and unary-prefix operators can be operands.
 					if ( !(  nextIsLeaf || nextIsOpenParenthesis || nextIsPrefixOperator  ) ) {
@@ -509,7 +509,7 @@ final class LexicalChecker {
 				} // Cases of unary-prefix operators
 
 				// Cases of binary operators or a separator of partial expressions
-				if (token.operator.type == Operator.Type.BINARY || token.word.equals(",")) {
+				if (token.operator.type == OperatorType.BINARY || token.word.equals(",")) {
 
 					// Only leaf elements, open parenthesis, and unary-prefix operator can be a right-operand.
 					if( !(  nextIsLeaf || nextIsOpenParenthesis || nextIsPrefixOperator || nextIsFunctionIdentifier ) ) {
@@ -564,9 +564,9 @@ final class Parser {
 		Deque<AstNode> stack = new ArrayDeque<AstNode>();
 
 		// Temporary nodes used in the above working stack, for isolating ASTs of partial expressions.
-		AstNode parenthesisStackLid = new AstNode(new Token(Token.Type.STACK_LID, "(PARENTHESIS_STACK_LID)"));
-		AstNode separatorStackLid = new AstNode(new Token(Token.Type.STACK_LID, "(SEPARATOR_STACK_LID)"));
-		AstNode callBeginStackLid = new AstNode(new Token(Token.Type.STACK_LID, "(CALL_BEGIN_STACK_LID)"));
+		AstNode parenthesisStackLid = new AstNode(new Token(TokenType.STACK_LID, "(PARENTHESIS_STACK_LID)"));
+		AstNode separatorStackLid = new AstNode(new Token(TokenType.STACK_LID, "(SEPARATOR_STACK_LID)"));
+		AstNode callBeginStackLid = new AstNode(new Token(TokenType.STACK_LID, "(CALL_BEGIN_STACK_LID)"));
 
 		// The array storing next operator's precedence for each token.
 		// At [i], it is stored that the precedence of the first operator of which token-index is greater than i.
@@ -579,15 +579,15 @@ final class Parser {
 			AstNode operatorNode = null;
 
 			// Case of literals and identifiers: "1.23", "x", "f", etc.
-			if (token.type == Token.Type.NUMBER_LITERAL
-					|| token.type == Token.Type.VARIABLE_IDENTIFIER
-					|| token.type == Token.Type.FUNCTION_IDENTIFIER) {
+			if (token.type == TokenType.NUMBER_LITERAL
+					|| token.type == TokenType.VARIABLE_IDENTIFIER
+					|| token.type == TokenType.FUNCTION_IDENTIFIER) {
 				stack.push(new AstNode(token));
 				itoken++;
 				continue;
 
 			// Case of parenthesis: "(" or ")"
-			} else if (token.type == Token.Type.PARENTHESIS) {
+			} else if (token.type == TokenType.PARENTHESIS) {
 				if (token.word.equals("(")) {
 					stack.push(parenthesisStackLid);
 					itoken++;
@@ -597,19 +597,19 @@ final class Parser {
 				}
 
 			// Case of separator: ","
-			} else if (token.type == Token.Type.EXPRESSION_SEPARATOR) {
+			} else if (token.type == TokenType.EXPRESSION_SEPARATOR) {
 				stack.push(separatorStackLid);
 				itoken++;
 				continue;
 
 			// Case of operators: "+", "-", etc.
-			} else if (token.type == Token.Type.OPERATOR) {
+			} else if (token.type == TokenType.OPERATOR) {
 				operatorNode = new AstNode(token);
 				int nextOpPrecedence = nextOperatorPrecedences[itoken];
 
 				// Case of unary-prefix operators:
 				// * Connect the node of right-token as an operand, if necessary (depending the next operator's precedence).
-				if (token.operator.type == Operator.Type.UNARY_PREFIX) {
+				if (token.operator.type == OperatorType.UNARY_PREFIX) {
 					if (this.shouldAddRightOperand(token.operator.precedence, nextOpPrecedence)) {
 						operatorNode.childNodeList.add(new AstNode(tokens[itoken + 1]));
 						itoken++;
@@ -618,7 +618,7 @@ final class Parser {
 				// Case of binary operators:
 				// * Always connect the node of left-token as an operand.
 				// * Connect the node of right-token as an operand, if necessary (depending the next operator's precedence).
-				} else if (token.operator.type == Operator.Type.BINARY) {
+				} else if (token.operator.type == OperatorType.BINARY) {
 					operatorNode.childNodeList.add(stack.pop());
 					if (this.shouldAddRightOperand(token.operator.precedence, nextOpPrecedence)) {
 						operatorNode.childNodeList.add(new AstNode(tokens[itoken + 1]));
@@ -626,7 +626,7 @@ final class Parser {
 					} // else: Right-operand will be connected later. See the bottom of this loop.
 
 				// Case of function-call operators.
-				} else if (token.operator.type == Operator.Type.CALL) {
+				} else if (token.operator.type == OperatorType.CALL) {
 					if (token.word.equals("(")) {
 						operatorNode.childNodeList.add(stack.pop()); // Add function-identifier node at the top of the stack.
 						stack.push(operatorNode);
@@ -679,7 +679,7 @@ final class Parser {
 	 * @return Returns true if the right-side token (operand) should be connected to the operator at the top of the stack
 	 */
 	private boolean shouldAddRightOperandToStackedOperator(Deque<AstNode> stack, int nextOperatorPrecedence) {
-		if (stack.size() == 0 || stack.peek().token.type != Token.Type.OPERATOR) {
+		if (stack.size() == 0 || stack.peek().token.type != TokenType.OPERATOR) {
 			return false;
 		}
 		return this.shouldAddRightOperand(stack.peek().token.operator.precedence, nextOperatorPrecedence);
@@ -698,7 +698,7 @@ final class Parser {
 		}
 		List<AstNode> partialExprNodeList = new ArrayList<AstNode>();
 		while(stack.size() != 0) {
-			if (stack.peek().token.type == Token.Type.STACK_LID) {
+			if (stack.peek().token.type == TokenType.STACK_LID) {
 				AstNode stackLidNode = stack.pop();
 				if (stackLidNode == endStackLidNode) {
 					break;
@@ -727,11 +727,11 @@ final class Parser {
 			Token token = tokens[itoken];
 			nextOperatorPrecedences[itoken] = lastOperatorPrecedence;
 
-			if (token.type == Token.Type.OPERATOR) {
+			if (token.type == TokenType.OPERATOR) {
 				lastOperatorPrecedence = token.operator.precedence;
 			}
 
-			if (token.type == Token.Type.PARENTHESIS) {
+			if (token.type == TokenType.PARENTHESIS) {
 				if (token.word.equals("(")) {
 					lastOperatorPrecedence = 0; // most prior
 				} else { // case of ")"
@@ -745,24 +745,25 @@ final class Parser {
 
 
 /**
+ * The enum representing types of operators.
+ */
+enum OperatorType {
+
+	/** Represents unary operator, for example: - of -1.23 */
+	UNARY_PREFIX,
+
+	/** Represents binary operator, for example: + of 1+2 */
+	BINARY,
+
+	/** Represents function-call operator */
+	CALL
+}
+
+
+/**
  * The class storing information of an operator.
  */
 final class Operator {
-
-	/**
-	 * The enum representing types of operators.
-	 */
-	public static enum Type {
-
-		/** Represents unary operator, for example: - of -1.23 */
-		UNARY_PREFIX,
-
-		/** Represents binary operator, for example: + of 1+2 */
-		BINARY,
-
-		/** Represents function-call operator */
-		CALL
-	}
 
 	/** The symbol of this operator (for example: '+'). */
 	public final String symbol;
@@ -771,7 +772,7 @@ final class Operator {
 	public final int precedence;
 
 	/** The type of operator tokens. */
-	public final Type type;
+	public final OperatorType type;
 
 	/**
 	 * Create an Operator instance storing specified information.
@@ -780,7 +781,7 @@ final class Operator {
 	 * @param symbol The symbol of this operator
 	 * @param precedence The precedence of this operator
 	 */
-	public Operator(Type type, String symbol, int precedence) {
+	public Operator(OperatorType type, String symbol, int precedence) {
 		this.type = type;
 		this.symbol = symbol;
 		this.precedence = precedence;
@@ -797,39 +798,40 @@ final class Operator {
 
 
 /**
+ * The enum representing types of tokens.
+ */
+enum TokenType {
+
+	/** Represents number literal tokens, for example: 1.23 */
+	NUMBER_LITERAL,
+
+	/** Represents operator tokens, for example: + */
+	OPERATOR,
+
+	/** Represents separator tokens of partial expressions: , */
+	EXPRESSION_SEPARATOR,
+
+	/** Represents parenthesis, for example: ( and ) of (1*(2+3)) */
+	PARENTHESIS,
+
+	/** Represents variable-identifier tokens, for example: x */
+	VARIABLE_IDENTIFIER,
+
+	/** Represents function-identifier tokens, for example: f */
+	FUNCTION_IDENTIFIER,
+
+	/** Represents temporary token for isolating partial expressions in the stack, in parser */
+	STACK_LID
+}
+
+
+/**
  * The class storing information of an token.
  */
 final class Token {
 
-	/**
-	 * The enum representing types of tokens.
-	 */
-	public static enum Type {
-
-		/** Represents number literal tokens, for example: 1.23 */
-		NUMBER_LITERAL,
-
-		/** Represents operator tokens, for example: + */
-		OPERATOR,
-
-		/** Represents separator tokens of partial expressions: , */
-		EXPRESSION_SEPARATOR,
-
-		/** Represents parenthesis, for example: ( and ) of (1*(2+3)) */
-		PARENTHESIS,
-
-		/** Represents variable-identifier tokens, for example: x */
-		VARIABLE_IDENTIFIER,
-
-		/** Represents function-identifier tokens, for example: f */
-		FUNCTION_IDENTIFIER,
-
-		/** Represents temporary token for isolating partial expressions in the stack, in parser */
-		STACK_LID
-	}
-
 	/** The type of this token. */
-	public final Type type;
+	public final TokenType type;
 
 	/** The text representation of this token. */
 	public final String word;
@@ -843,7 +845,7 @@ final class Token {
 	 * @param type The type of this token
 	 * @param word The text representation of this token
 	 */
-	public Token(Type type, String word) {
+	public Token(TokenType type, String word) {
 		this.type = type;
 		this.word = word;
 		this.operator = null;
@@ -856,7 +858,7 @@ final class Token {
 	 * @param word The text representation of this token
 	 * @param operator The detailed information of the operator, for OPERATOR type tokens
 	 */
-	public Token(Type type, String word, Operator operator) {
+	public Token(TokenType type, String word, Operator operator) {
 		this.type = type;
 		this.word = word;
 		this.operator = operator;
@@ -917,11 +919,11 @@ final class AstNode {
 		}
 
 		// Initialize evaluation units of this node.
-		if (this.token.type == Token.Type.NUMBER_LITERAL) {
+		if (this.token.type == TokenType.NUMBER_LITERAL) {
 			this.evaluatorUnit = new Evaluator.NumberLiteralEvaluatorUnit(this.token.word);
-		} else if (this.token.type == Token.Type.VARIABLE_IDENTIFIER) {
+		} else if (this.token.type == TokenType.VARIABLE_IDENTIFIER) {
 			this.evaluatorUnit = new Evaluator.VariableValueEvaluatorUnit(this.token.word, interconnect);
-		} else if (this.token.type == Token.Type.OPERATOR) {
+		} else if (this.token.type == TokenType.OPERATOR) {
 			if (this.token.operator == StaticSettings.MINUS_OPERATOR) {
 				this.evaluatorUnit = new Evaluator.MinusEvaluatorUnit(childNodeUnits[0]);
 			} else if (this.token.operator == StaticSettings.ADDITION_OPERATOR) {
@@ -979,7 +981,7 @@ final class AstNode {
 		resultBuilder.append(" word=\"");
 		resultBuilder.append(this.token.word);
 		resultBuilder.append("\"");
-		if (this.token.type == Token.Type.OPERATOR) {
+		if (this.token.type == TokenType.OPERATOR) {
 			resultBuilder.append(" optype=\"");
 			resultBuilder.append(this.token.operator.type);
 			resultBuilder.append("\" precedence=\"");
@@ -1593,25 +1595,25 @@ final class StaticSettings {
 	public static final String ESCAPED_NUMBER_LITERAL = "@NUMBER_LITERAL@";
 
 	/** The instance of addition operator. */
-	public static final Operator ADDITION_OPERATOR = new Operator(Operator.Type.BINARY, "+", 400);
+	public static final Operator ADDITION_OPERATOR = new Operator(OperatorType.BINARY, "+", 400);
 
 	/** The instance of subtraction operator. */
-	public static final Operator SUBTRACTION_OPERATOR = new Operator(Operator.Type.BINARY, "-", 400);
+	public static final Operator SUBTRACTION_OPERATOR = new Operator(OperatorType.BINARY, "-", 400);
 
 	/** The instance of multiplication operator. */
-	public static final Operator MULTIPLICATION_OPERATOR = new Operator(Operator.Type.BINARY, "*", 300);
+	public static final Operator MULTIPLICATION_OPERATOR = new Operator(OperatorType.BINARY, "*", 300);
 
 	/** The instance of division operator. */
-	public static final Operator DIVISION_OPERATOR = new Operator(Operator.Type.BINARY, "/", 300);
+	public static final Operator DIVISION_OPERATOR = new Operator(OperatorType.BINARY, "/", 300);
 
 	/** The instance of unary-minus operator. */
-	public static final Operator MINUS_OPERATOR = new Operator(Operator.Type.UNARY_PREFIX, "-", 200);
+	public static final Operator MINUS_OPERATOR = new Operator(OperatorType.UNARY_PREFIX, "-", 200);
 
 	/** The instance of the beginning of call operator. */
-	public static final Operator CALL_BEGIN_OPERATOR = new Operator(Operator.Type.CALL, "(", 100);
+	public static final Operator CALL_BEGIN_OPERATOR = new Operator(OperatorType.CALL, "(", 100);
 
 	/** The instance of the end of call operator. */
-	public static final Operator CALL_END_OPERATOR = new Operator(Operator.Type.CALL, ")", Integer.MAX_VALUE); // least prior
+	public static final Operator CALL_END_OPERATOR = new Operator(OperatorType.CALL, ")", Integer.MAX_VALUE); // least prior
 
 	/** The list of available operators. */
 	public static final List<Operator> OPERATOR_LIST = new ArrayList<Operator>();
@@ -1655,7 +1657,7 @@ final class StaticSettings {
 	 * @param symbol The symbol of the operator to be searched
 	 * @return The Operator matching specified conditions
 	 */
-	public static final Operator searchOperator(Operator.Type type, String symbol) {
+	public static final Operator searchOperator(OperatorType type, String symbol) {
 		for (Operator operator: OPERATOR_LIST) {
 			if (operator.type == type && operator.symbol.equals(symbol)) {
 				return operator;
