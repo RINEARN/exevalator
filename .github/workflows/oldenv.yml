@@ -12,9 +12,13 @@ jobs:
         java-version: 8
     - name: Compile Exevalator
       run: javac Exevalator.java
+      working-directory: ./java
     - name: Compile Example Code 1
       run: javac Example1.java
+      working-directory: ./java
     - name: Compile Test Code
       run: javac Test.java
+      working-directory: ./java
     - name: Run Test Code
       run: java Test
+      working-directory: ./java
