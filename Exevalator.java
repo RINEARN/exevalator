@@ -31,10 +31,10 @@ import java.lang.reflect.Method;
 public final class Exevalator {
 
     /** The array used as as a virtual memory storing values of variables. */
-    double[] memory;
+    private volatile double[] memory;
 
 	/** The current usage (max used index + 1) of the memory. */
-	int memoryUsage;
+	private volatile int memoryUsage;
 
     /** The Map mapping each variable name to an address of the variable. */
     private volatile Map<String, Integer> variableTable;
@@ -137,7 +137,7 @@ public final class Exevalator {
 	 */
 	public synchronized void writeVariable(String name, double value) {
 		if (!this.variableTable.containsKey(name)) {
-			throw new ExevalatorException("Variable not found: " + name);
+			throw new Exevalator.Exception("Variable not found: " + name);
 		}
 		int address = this.variableTable.get(name);
 		this.writeVariableAt(address, value);
@@ -152,7 +152,7 @@ public final class Exevalator {
 	 */
 	public synchronized void writeVariableAt(int address, double value) {
 		if (address < 0 || this.memoryUsage <= address) {
-			throw new ExevalatorException("Invalid variable address: " + address);
+			throw new Exevalator.Exception("Invalid variable address: " + address);
 		}
 		this.memory[address] = value;
 	}
@@ -165,7 +165,7 @@ public final class Exevalator {
 	 */
 	public synchronized double readVariable(String name) {
 		if (!this.variableTable.containsKey(name)) {
-			throw new ExevalatorException("Variable not found: " + name);
+			throw new Exevalator.Exception("Variable not found: " + name);
 		}
 		int address = this.variableTable.get(name);
 		return this.readVariableAt(address);
@@ -180,7 +180,7 @@ public final class Exevalator {
 	 */
 	public synchronized double readVariableAt(int address) {
 		if (address < 0 || this.memoryUsage <= address) {
-			throw new ExevalatorException("Invalid variable address: " + address);
+			throw new Exevalator.Exception("Invalid variable address: " + address);
 		}
 		return this.memory[address];
 	}
@@ -206,14 +206,14 @@ public final class Exevalator {
 	 * The Exception class thrown in/by this engine.
 	 */
 	@SuppressWarnings("serial")
-	public static final class ExevalatorException extends RuntimeException {
+	public static final class Exception extends RuntimeException {
 
 		/**
 		 * Create an instance having the specified error message.
 		 *
 		 * @param errorMessage The error message explaining the cause of this exception
 		 */
-		public ExevalatorException(String errorMessage) {
+		public Exception(String errorMessage) {
 			super(errorMessage);
 		}
 
@@ -223,7 +223,7 @@ public final class Exevalator {
 		 * @param errorMessage The error message explaining the cause of this exception
 		 * @param causeException The cause exception of this exception
 		 */
-		public ExevalatorException(String errorMessage, Exception causeException) {
+		public Exception(String errorMessage, java.lang.Exception causeException) {
 			super(errorMessage, causeException);
 		}
 	}
@@ -322,7 +322,7 @@ final class LexicalAnalyzer {
 						|| (lastToken.type == TokenType.OPERATOR && lastToken.operator.type != OperatorType.CALL) ) {
 
 					if (!StaticSettings.UNARY_PREFIX_OPERATOR_SYMBOL_MAP.containsKey(word.charAt(0))) {
-						throw new Exevalator.ExevalatorException("Unknown unary-prefix operator: " + word);
+						throw new Exevalator.Exception("Unknown unary-prefix operator: " + word);
 					}
 					op = StaticSettings.UNARY_PREFIX_OPERATOR_SYMBOL_MAP.get(word.charAt(0));
 
@@ -332,12 +332,12 @@ final class LexicalAnalyzer {
 						|| lastToken.type == TokenType.VARIABLE_IDENTIFIER) {
 
 					if (!StaticSettings.BINARY_OPERATOR_SYMBOL_MAP.containsKey(word.charAt(0))) {
-						throw new Exevalator.ExevalatorException("Unknown binary operator: " + word);
+						throw new Exevalator.Exception("Unknown binary operator: " + word);
 					}
 					op = StaticSettings.BINARY_OPERATOR_SYMBOL_MAP.get(word.charAt(0));
 
 				} else {
-					throw new Exevalator.ExevalatorException("Unexpected operator syntax: " + word);
+					throw new Exevalator.Exception("Unexpected operator syntax: " + word);
 				}
 				tokens[itoken] = new Token(TokenType.OPERATOR, word, op);
 
@@ -409,7 +409,7 @@ final class LexicalAnalyzer {
 
 			// If the value of hierarchy is negative, the open parenthesis is deficient.
 			if (hierarchy < 0) {
-				throw new Exevalator.ExevalatorException(
+				throw new Exevalator.Exception(
 					"The number of open parenthesis \"(\" is deficient."
 				);
 			}
@@ -418,7 +418,7 @@ final class LexicalAnalyzer {
 		// If the value of hierarchy is not zero at the end of the expression,
 		// the closed parentheses ")" is deficient.
 		if (hierarchy > 0) {
-			throw new Exevalator.ExevalatorException(
+			throw new Exevalator.Exception(
 				"The number of closed parenthesis \")\" is deficient."
 			);
 		}
@@ -441,7 +441,7 @@ final class LexicalAnalyzer {
 					contentCounter = 0;
 				} else if (token.word.equals(")")) {
 					if (contentCounter == 0) {
-						throw new Exevalator.ExevalatorException(
+						throw new Exevalator.Exception(
 							"The content parentheses \"()\" should not be empty (excluding function calls)."
 						);
 					}
@@ -491,7 +491,7 @@ final class LexicalAnalyzer {
 
 					// Only leafs, open parentheses, and unary-prefix operators can be operands.
 					if ( !(  nextIsLeaf || nextIsOpenParenthesis || nextIsPrefixOperator  ) ) {
-						throw new Exevalator.ExevalatorException("An operand is required at the right of: \"" + token.word + "\"");
+						throw new Exevalator.Exception("An operand is required at the right of: \"" + token.word + "\"");
 					}
 				} // Cases of unary-prefix operators
 
@@ -500,11 +500,11 @@ final class LexicalAnalyzer {
 
 					// Only leaf elements, open parenthesis, and unary-prefix operator can be a right-operand.
 					if( !(  nextIsLeaf || nextIsOpenParenthesis || nextIsPrefixOperator || nextIsFunctionIdentifier ) ) {
-						throw new Exevalator.ExevalatorException("An operand is required at the right of: \"" + token.word + "\"");
+						throw new Exevalator.Exception("An operand is required at the right of: \"" + token.word + "\"");
 					}
 					// Only leaf elements and closed parenthesis can be a right-operand.
 					if( !(  prevIsLeaf || prevIsCloseParenthesis  ) ) {
-						throw new Exevalator.ExevalatorException("An operand is required at the left of: \"" + token.word + "\"");
+						throw new Exevalator.Exception("An operand is required at the left of: \"" + token.word + "\"");
 					}
 				} // Cases of binary operators or a separator of partial expressions
 
@@ -515,12 +515,12 @@ final class LexicalAnalyzer {
 
 				// An other leaf element or an open parenthesis can not be at the right of an leaf element.
 				if (!nextIsFunctionCallBegin && (nextIsOpenParenthesis || nextIsLeaf)) {
-					throw new Exevalator.ExevalatorException("An operator is required at the right of: \"" + token.word + "\"");
+					throw new Exevalator.Exception("An operator is required at the right of: \"" + token.word + "\"");
 				}
 
 				// An other leaf element or a closed parenthesis can not be at the left of an leaf element.
 				if (prevIsCloseParenthesis || prevIsLeaf) {
-					throw new Exevalator.ExevalatorException("An operator is required at the left of: \"" + token.word + "\"");
+					throw new Exevalator.Exception("An operator is required at the left of: \"" + token.word + "\"");
 				}
 			} // Case of leaf elements
 		} // Loops for each token
@@ -681,7 +681,7 @@ final class Parser {
 	 */
 	private static AstNode[] popPartialExprNodes(Deque<AstNode> stack, AstNode endStackLidNode) {
 		if (stack.size() == 0) {
-			throw new Exevalator.ExevalatorException("Unexpected end of a partial expression");
+			throw new Exevalator.Exception("Unexpected end of a partial expression");
 		}
 		List<AstNode> partialExprNodeList = new ArrayList<AstNode>();
 		while(stack.size() != 0) {
@@ -912,7 +912,7 @@ final class AstNode {
 			return new Evaluator.NumberLiteralEvaluatorUnit(this.token.word);
 		} else if (this.token.type == TokenType.VARIABLE_IDENTIFIER) {
 			if (!variableTable.containsKey(this.token.word)) {
-				throw new Exevalator.ExevalatorException("Variable not found: " + this.token.word);
+				throw new Exevalator.Exception("Variable not found: " + this.token.word);
 			}
 			int address = variableTable.get(this.token.word);
 			return new Evaluator.VariableEvaluatorUnit(address);
@@ -934,7 +934,7 @@ final class AstNode {
 			} else if (op.type == OperatorType.CALL && op.symbol == '(') {
 				String identifier = this.childNodeList.get(0).token.word;
 				if (!functionTable.containsKey(identifier)) {
-					throw new Exevalator.ExevalatorException("Function not found: " + identifier);
+					throw new Exevalator.Exception("Function not found: " + identifier);
 				}
 				Exevalator.FunctionInterface function = functionTable.get(identifier);
 				int argCount = this.childNodeList.size() - 1;
@@ -944,10 +944,10 @@ final class AstNode {
 				}
 				return new Evaluator.FunctionEvaluatorUnit(function, identifier, argUnits);
 			} else {
-				throw new Exevalator.ExevalatorException("Unexpected operator: " + op);
+				throw new Exevalator.Exception("Unexpected operator: " + op);
 			}
 		} else {
-			throw new Exevalator.ExevalatorException("Unexpected token type: " + this.token.type);
+			throw new Exevalator.Exception("Unexpected token type: " + this.token.type);
 		}
 	}
 
@@ -1207,7 +1207,7 @@ final class Evaluator {
 			try {
 				this.value = Double.parseDouble(literal);
 			} catch (NumberFormatException nfe) {
-				throw new Exevalator.ExevalatorException("Invalid number literal: " + literal);
+				throw new Exevalator.Exception("Invalid number literal: " + literal);
 			}
 		}
 
@@ -1249,7 +1249,7 @@ final class Evaluator {
 		@Override
 		public double evaluate(double[] memory) {
 			if (address < 0 || memory.length <= address) {
-				throw new Exevalator.ExevalatorException("Invalid memory address: " + address);
+				throw new Exevalator.Exception("Invalid memory address: " + address);
 			}
 			return memory[this.address];
 		}
@@ -1296,7 +1296,7 @@ final class Evaluator {
 			try {
 				return this.function.invoke(this.argumentArrayBuffer);
 			} catch (Exception e) {
-				throw new Exevalator.ExevalatorException("Function error (" + this.functionName + ")", e);
+				throw new Exevalator.Exception("Function error (" + this.functionName + ")", e);
 			}
 		}
 	}
