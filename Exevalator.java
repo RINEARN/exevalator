@@ -221,8 +221,6 @@ final class LexicalAnalyzer {
 		// Also, escaped number literals will be recovered.
 		Token[] tokens = this.createTokensFromTokenWords(tokenWords, numberLiteralList);
 
-		// Analyze detailed information for operator tokens.
-		tokens = this.analyzeInformationOfOperands(tokens);
 		return tokens;
 	}
 
@@ -244,6 +242,7 @@ final class LexicalAnalyzer {
 		Set<Integer> callParenthesisDepths = new HashSet<Integer>();
 
 		Token[] tokens = new Token[tokenCount];
+		Token lastToken = null;
 		int iliteral = 0;
 		for (int itoken=0; itoken<tokenCount; itoken++) {
 			String word = tokenWords[itoken];
@@ -253,7 +252,8 @@ final class LexicalAnalyzer {
 				parenthesisDepth++;
 				if (1 <= itoken && tokens[itoken - 1].type == TokenType.FUNCTION_IDENTIFIER) {
 					callParenthesisDepths.add(parenthesisDepth);
-					tokens[itoken] = new Token(TokenType.OPERATOR, word);
+					Operator op = StaticSettings.CALL_OPERATOR_SYMBOL_MAP.get(word.charAt(0));
+					tokens[itoken] = new Token(TokenType.OPERATOR, word, op);
 				} else {
 					tokens[itoken] = new Token(TokenType.PARENTHESIS, word);
 				}
@@ -262,15 +262,43 @@ final class LexicalAnalyzer {
 			} else if (word.equals(")")) {
 				if (callParenthesisDepths.contains(parenthesisDepth)) {
 					callParenthesisDepths.remove(parenthesisDepth);
-					tokens[itoken] = new Token(TokenType.OPERATOR, word);
+					Operator op = StaticSettings.CALL_OPERATOR_SYMBOL_MAP.get(word.charAt(0));
+					tokens[itoken] = new Token(TokenType.OPERATOR, word, op);
 				} else {
 					tokens[itoken] = new Token(TokenType.PARENTHESIS, word);
 				}
 				parenthesisDepth--;
 
-			// Cases of operator, literals, and separator.
+			// Cases of operators.
 			} else if (word.length() == 1 && StaticSettings.OPERATOR_SYMBOL_SET.contains(word.charAt(0))) {
-				tokens[itoken] = new Token(TokenType.OPERATOR, word);
+				Operator op = null;
+
+				// Cases of unary-prefix operators.
+				if (lastToken == null
+						|| lastToken.word.equals("(")
+						|| (lastToken.type == TokenType.OPERATOR && lastToken.operator.type != OperatorType.CALL) ) {
+
+					if (!StaticSettings.UNARY_PREFIX_OPERATOR_SYMBOL_MAP.containsKey(word.charAt(0))) {
+						throw new Exevalator.ExevalatorException("Unknown unary-prefix operator: " + word);
+					}
+					op = StaticSettings.UNARY_PREFIX_OPERATOR_SYMBOL_MAP.get(word.charAt(0));
+
+				// Cases of binary operators.
+				} else if (lastToken.word.equals(")")
+						|| lastToken.type == TokenType.NUMBER_LITERAL
+						|| lastToken.type == TokenType.VARIABLE_IDENTIFIER) {
+
+					if (!StaticSettings.BINARY_OPERATOR_SYMBOL_MAP.containsKey(word.charAt(0))) {
+						throw new Exevalator.ExevalatorException("Unknown binary operator: " + word);
+					}
+					op = StaticSettings.BINARY_OPERATOR_SYMBOL_MAP.get(word.charAt(0));
+
+				} else {
+					throw new Exevalator.ExevalatorException("Unexpected operator syntax: " + word);
+				}
+				tokens[itoken] = new Token(TokenType.OPERATOR, word, op);
+
+				// Cases of literals, and separator.
 			} else if (word.equals(StaticSettings.ESCAPED_NUMBER_LITERAL)) {
 				tokens[itoken] = new Token(TokenType.NUMBER_LITERAL, numberLiterals.get(iliteral));
 				iliteral++;
@@ -285,62 +313,9 @@ final class LexicalAnalyzer {
 					tokens[itoken] = new Token(TokenType.VARIABLE_IDENTIFIER, word);
 				}
 			}
+			lastToken = tokens[itoken];
 		}
 		return tokens;
-	}
-
-	/**
-	 * Analyzes information of OPERAND-type tokens in specified tokens.
-	 *
-	 * @param tokens Tokens to be analyzed.
-	 * @return Tokens to which information of operands are added.
-	 */
-	private Token[] analyzeInformationOfOperands(Token[] tokens) {
-		int tokenCount = tokens.length;
-		Token[] resultTokens = new Token[tokenCount];
-
-		// Analyze detailed information for operator tokens.
-		Token lastToken = null;
-		for (int itoken=0; itoken<tokenCount; itoken++) {
-			Token token = tokens[itoken];
-			if (token.type != TokenType.OPERATOR) {
-				resultTokens[itoken] = token;
-				lastToken = token;
-				continue;
-			}
-			Operator operator = null;
-
-			// Cases of function call operators.
-			if (token.word.equals("(") || token.word.equals(")") ) {
-				operator = StaticSettings.CALL_OPERATOR_SYMBOL_MAP.get(token.word.charAt(0));
-
-			// Cases of unary-prefix operators.
-			} else if (lastToken == null
-					|| lastToken.word.equals("(")
-					|| (lastToken.type == TokenType.OPERATOR && lastToken.operator.type != OperatorType.CALL) ) {
-
-				if (!StaticSettings.UNARY_PREFIX_OPERATOR_SYMBOL_MAP.containsKey(token.word.charAt(0))) {
-					throw new Exevalator.ExevalatorException("Unknown unary-prefix operator: " + token.word);
-				}
-				operator = StaticSettings.UNARY_PREFIX_OPERATOR_SYMBOL_MAP.get(token.word.charAt(0));
-
-			// Cases of binary operators.
-			} else if (lastToken.word.equals(")")
-					|| lastToken.type == TokenType.NUMBER_LITERAL
-					|| lastToken.type == TokenType.VARIABLE_IDENTIFIER) {
-
-				if (!StaticSettings.BINARY_OPERATOR_SYMBOL_MAP.containsKey(token.word.charAt(0))) {
-					throw new Exevalator.ExevalatorException("Unknown binary operator: " + token.word);
-				}
-				operator = StaticSettings.BINARY_OPERATOR_SYMBOL_MAP.get(token.word.charAt(0));
-
-			} else {
-				throw new Exevalator.ExevalatorException("Unexpected operator syntax: " + token.word);
-			}
-			resultTokens[itoken] = new Token(token.type, token.word, operator);
-			lastToken = resultTokens[itoken];
-		}
-		return resultTokens;
 	}
 
 	/**
