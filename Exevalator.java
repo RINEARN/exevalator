@@ -17,12 +17,8 @@ import java.util.HashSet;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 
 /**
@@ -83,7 +79,7 @@ public final class Exevalator {
 
         // If the expression changed from the last-evaluated expression, re-parsing is necessary.
         if (this.evaluatorUnit == null || expressionChanged) {
-            
+
             // Split the expression into tokens, and analyze them.
             Token[] tokens = LexicalAnalyzer.analyze(expression);
 
@@ -115,7 +111,7 @@ public final class Exevalator {
 
     /**
      * Declares a new variable, for using the value of it in expressions.
-     * 
+     *
      * @param name The name of the variable to be declared.
      * @returns The virtual address of the declared variable,
      *             which useful for accessing to the variable faster.
@@ -139,7 +135,7 @@ public final class Exevalator {
             this.memory = new double[ this.memory.length * 2 ];
             System.arraycopy(stock, 0, this.memory, 0, stock.length);
         }
-        
+
         // Assign an address to the new variable,
         // and register the address and the name to the variable table.
         int address = this.memoryUsage;
@@ -168,7 +164,7 @@ public final class Exevalator {
     /**
      * Writes the value to the variable at the specified virtual address.
      * This function works faster than "WriteVariable" function.
-     * 
+     *
      * @param address The virtual address of the variable to be written.
      * @param value The new value of the variable.
      */
@@ -181,7 +177,7 @@ public final class Exevalator {
 
     /**
      * Reads the value of the variable having the specified name.
-     * 
+     *
      * @param name The name of the variable to be read.
      * @return The current value of the variable.
      */
@@ -199,7 +195,7 @@ public final class Exevalator {
     /**
      * Reads the value of the variable at the specified virtual address.
      * This function works faster than "EeadVariable" function.
-     * 
+     *
      * @param address The virtual address of the variable to be read.
      * @return The current value of the variable.
      */
@@ -212,7 +208,7 @@ public final class Exevalator {
 
     /**
      * Connects a function, for using it in expressions.
-     * 
+     *
      * @param name The name of the function used in the expression.
      * @param function The function to be connected.
      */
