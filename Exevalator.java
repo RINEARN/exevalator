@@ -925,17 +925,19 @@ final class AstNode {
 		} else if (this.token.type == TokenType.VARIABLE_IDENTIFIER) {
 			this.evaluatorUnit = new Evaluator.VariableValueEvaluatorUnit(this.token.word, interconnect);
 		} else if (this.token.type == TokenType.OPERATOR) {
-			if (this.token.operator == StaticSettings.MINUS_OPERATOR) {
+			Operator op = this.token.operator;
+
+			if (op.type == OperatorType.UNARY_PREFIX && op.symbol == '-') {
 				this.evaluatorUnit = new Evaluator.MinusEvaluatorUnit(childNodeUnits[0]);
-			} else if (this.token.operator == StaticSettings.ADDITION_OPERATOR) {
+			} else if (op.type == OperatorType.BINARY && op.symbol == '+') {
 				this.evaluatorUnit = new Evaluator.AdditionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
-			} else if (this.token.operator == StaticSettings.SUBTRACTION_OPERATOR) {
+			} else if (op.type == OperatorType.BINARY && op.symbol == '-') {
 				this.evaluatorUnit = new Evaluator.SubtractionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
-			} else if (this.token.operator == StaticSettings.MULTIPLICATION_OPERATOR) {
+			} else if (op.type == OperatorType.BINARY && op.symbol == '*') {
 				this.evaluatorUnit = new Evaluator.MultiplicationEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
-			} else if (this.token.operator == StaticSettings.DIVISION_OPERATOR) {
+			} else if (op.type == OperatorType.BINARY && op.symbol == '/') {
 				this.evaluatorUnit = new Evaluator.DivisionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
-			} else if (this.token.operator == StaticSettings.CALL_BEGIN_OPERATOR) {
+			} else if (op.type == OperatorType.CALL && op.symbol == '(') {
 				String identifier = this.childNodeList.get(0).token.word;
 				this.evaluatorUnit = new Evaluator.FunctionCallEvaluatorUnit(identifier, interconnect, childNodeUnits);
 			}
@@ -1595,63 +1597,52 @@ final class StaticSettings {
 	/** The escaped representation of number literals in expressions */
 	public static final String ESCAPED_NUMBER_LITERAL = "@NUMBER_LITERAL@";
 
-	/** The instance of addition operator. */
-	public static final Operator ADDITION_OPERATOR = new Operator(OperatorType.BINARY, '+', 400);
-
-	/** The instance of subtraction operator. */
-	public static final Operator SUBTRACTION_OPERATOR = new Operator(OperatorType.BINARY, '-', 400);
-
-	/** The instance of multiplication operator. */
-	public static final Operator MULTIPLICATION_OPERATOR = new Operator(OperatorType.BINARY, '*', 300);
-
-	/** The instance of division operator. */
-	public static final Operator DIVISION_OPERATOR = new Operator(OperatorType.BINARY, '/', 300);
-
-	/** The instance of unary-minus operator. */
-	public static final Operator MINUS_OPERATOR = new Operator(OperatorType.UNARY_PREFIX, '-', 200);
-
-	/** The instance of the beginning of call operator. */
-	public static final Operator CALL_BEGIN_OPERATOR = new Operator(OperatorType.CALL, '(', 100);
-
-	/** The instance of the end of call operator. */
-	public static final Operator CALL_END_OPERATOR = new Operator(OperatorType.CALL, ')', Integer.MAX_VALUE); // least prior
-
 	/** The set of symbols of available operators. */
-	@SuppressWarnings("serial")
-	public static final Set<Character> OPERATOR_SYMBOL_SET = new HashSet<Character>() {{
-		add('+');
-		add('-');
-		add('*');
-		add('/');
-		add('(');
-		add(')');
-	}};
+	public static final Set<Character> OPERATOR_SYMBOL_SET;
 
 	/** The Map mapping each symbol of an unary-prefix operator to an instance of Operator class. */
-	public static final Map<Character, Operator> UNARY_PREFIX_OPERATOR_SYMBOL_MAP = 
-	new ConcurrentHashMap<Character, Operator>() {{
-		put('-', MINUS_OPERATOR);
-	}};
+	public static final Map<Character, Operator> UNARY_PREFIX_OPERATOR_SYMBOL_MAP;
 
 	/** The Map mapping each symbol of an binary operator to an instance of Operator class. */
-	public static final Map<Character, Operator> BINARY_OPERATOR_SYMBOL_MAP = 
-	new ConcurrentHashMap<Character, Operator>() {{
-		put('+', ADDITION_OPERATOR);
-		put('-', SUBTRACTION_OPERATOR);
-		put('*', MULTIPLICATION_OPERATOR);
-		put('/', DIVISION_OPERATOR);
-	}};
+	public static final Map<Character, Operator> BINARY_OPERATOR_SYMBOL_MAP;
 
 	/** The Map mapping each symbol of an call operator to an instance of Operator class. */
-	public static final Map<Character, Operator> CALL_OPERATOR_SYMBOL_MAP = 
-	new ConcurrentHashMap<Character, Operator>() {{
-		put('(', CALL_BEGIN_OPERATOR);
-		put(')', CALL_END_OPERATOR);
-	}};
+	public static final Map<Character, Operator> CALL_OPERATOR_SYMBOL_MAP;
 
 	/** The list of symbols to split an expression into tokens. */
-	public static final List<Character> TOKEN_SPLITTER_SYMBOL_LIST = new ArrayList<Character>();
+	public static final List<Character> TOKEN_SPLITTER_SYMBOL_LIST;
+
 	static {
+		Operator additionOperator       = new Operator(OperatorType.BINARY, '+', 400);
+		Operator subtractionOperator    = new Operator(OperatorType.BINARY, '-', 400);
+		Operator multiplicationOperator = new Operator(OperatorType.BINARY, '*', 300);
+		Operator divisionOperator       = new Operator(OperatorType.BINARY, '/', 300);
+		Operator minusOperator          = new Operator(OperatorType.UNARY_PREFIX, '-', 200);
+		Operator callBeginOperator      = new Operator(OperatorType.CALL, '(', 100);
+		Operator callEndOperator        = new Operator(OperatorType.CALL, ')', Integer.MAX_VALUE); // least prior
+
+		OPERATOR_SYMBOL_SET = new HashSet<Character>();
+		OPERATOR_SYMBOL_SET.add('+');
+		OPERATOR_SYMBOL_SET.add('-');
+		OPERATOR_SYMBOL_SET.add('*');
+		OPERATOR_SYMBOL_SET.add('/');
+		OPERATOR_SYMBOL_SET.add('(');
+		OPERATOR_SYMBOL_SET.add(')');
+
+		UNARY_PREFIX_OPERATOR_SYMBOL_MAP = new ConcurrentHashMap<Character, Operator>();
+		UNARY_PREFIX_OPERATOR_SYMBOL_MAP.put('-', minusOperator);
+
+		BINARY_OPERATOR_SYMBOL_MAP = new ConcurrentHashMap<Character, Operator>();
+		BINARY_OPERATOR_SYMBOL_MAP.put('+', additionOperator);
+		BINARY_OPERATOR_SYMBOL_MAP.put('-', subtractionOperator);
+		BINARY_OPERATOR_SYMBOL_MAP.put('*', multiplicationOperator);
+		BINARY_OPERATOR_SYMBOL_MAP.put('/', divisionOperator);
+
+		CALL_OPERATOR_SYMBOL_MAP = new ConcurrentHashMap<Character, Operator>();
+		CALL_OPERATOR_SYMBOL_MAP.put('(', callBeginOperator);
+		CALL_OPERATOR_SYMBOL_MAP.put(')', callEndOperator);
+
+		TOKEN_SPLITTER_SYMBOL_LIST = new ArrayList<Character>();
 		TOKEN_SPLITTER_SYMBOL_LIST.add('+');
 		TOKEN_SPLITTER_SYMBOL_LIST.add('-');
 		TOKEN_SPLITTER_SYMBOL_LIST.add('*');
