@@ -293,6 +293,14 @@ final class LexicalAnalyzer {
 		// Also, escaped number literals will be recovered.
 		Token[] tokens = createTokensFromTokenWords(tokenWords, numberLiteralList);
 
+		// Checks the total number of tokens.
+		if (StaticSettings.MAX_TOKEN_COUNT < tokens.length) {
+			throw new Exevalator.Exception(
+				"The number of tokens exceeds the limit (StaticSettings.MAX_TOKEN_COUNT: "
+				+ StaticSettings.MAX_TOKEN_COUNT + ")"
+			);
+		}
+
 		// Checks syntactic correctness of tokens of inputted expressions.
 		checkParenthesisOpeningClosings(tokens);
 		checkEmptyParentheses(tokens);
@@ -1347,6 +1355,9 @@ final class StaticSettings {
 
 	/** The maximum number of characters of variable/function names. */
 	public static final int MAX_NAME_CHAR_COUNT = 64;
+
+	/** The maximum number of tokens in an expression. */
+	public static final int MAX_TOKEN_COUNT = 64;
 
 	/** The indent used in text representations of ASTs. */
 	public static final String AST_INDENT = "  ";
