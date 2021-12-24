@@ -29,6 +29,15 @@ import java.lang.reflect.Method;
  */
 public final class Exevalator {
 
+    /** The array used as as a virtual memory storing values of variables. */
+    double[] memory;
+
+	/** The current usage (max used index + 1) of the memory. */
+	int memoryUsage;
+
+    /** The Map mapping each variable name to an address of the variable. */
+    private volatile Map<String, Integer> variableTable;
+
 	/** The interconnect providing objects shared among multiple components of this interpreter. */
 	private volatile Interconnect interconnect;
 
@@ -42,6 +51,9 @@ public final class Exevalator {
 	 * Creates a new interpreter of the Exevalator.
 	 */
 	public Exevalator() {
+		this.memory = new double[64];
+		this.memoryUsage = 0;
+		this.variableTable = new ConcurrentHashMap<String, Integer>();
 		this.interconnect = new Interconnect();
 		this.lastEvaluatedExpression = null;
 		this.evaluatorUnit = null;
@@ -76,62 +88,100 @@ public final class Exevalator {
 
 			/*
 			// Temporary, for debugging AST
-			System.out.println(ast.toString());
+			System.out.println(ast.toMarkuppedText());
 			*/
 
 			// Evaluate (compute) the value of the root node of the AST.
-			this.evaluatorUnit = ast.createEvaluatorUnit(this.interconnect);
+			this.evaluatorUnit = ast.createEvaluatorUnit(this.interconnect, this.variableTable);
 
 			this.lastEvaluatedExpression = expression;
 		}
 
         // Evaluate the value of the expression, and return it.
-		double evaluatedValue = this.evaluatorUnit.evaluate();
+		double evaluatedValue = this.evaluatorUnit.evaluate(this.memory);
 		return evaluatedValue;
 	}
 
 	/**
-	 * Connects the variable for accessing to it in the expression.
-	 *
-	 * @param variable The variable to be connected.
+	 * Declares a new variable, for using the value of it in the expression.
+	 * 
+	 * @param name The name of the variable to be declared
+	 * @returns The virtual address of the declared variable,
+	 * 	        which useful for accessing to the variable faster.
+	 * 	        See "writeVariableAt" and "readVariableAt" method.
 	 */
-	public synchronized void connectVariable(AbstractVariable variable) {
-		this.interconnect.connectVariable(variable);
+	public synchronized int declareVariable(String name) {
+
+		// If the memory is full, expand the memory size.
+		if (this.memory.length == this.memoryUsage) {
+			double[] stock = new double[this.memory.length];
+			System.arraycopy(this.memory, 0, stock, 0, this.memory.length);
+			this.memory = new double[ this.memory.length * 2 ];
+			System.arraycopy(stock, 0, this.memory, 0, stock.length);
+		}
+		
+		// Assign an address to the new variable,
+		// and register the address and the name to the variable table.
+		int address = this.memoryUsage;
+		this.variableTable.put(name, address);
+		this.memoryUsage++;
+		return address;
 	}
 
 	/**
-	 * Connects the static field for accessing to it in the expression as a variable.
+	 * Writes the value to the variable having the specified name.
 	 *
-	 * @param field The static field to be connected as a variable.
+	 * @param name The name of the variable to be written
+     * @param value The new value of the variable
 	 */
-	public synchronized void connectFieldAsVariable(Field field) {
-		this.interconnect.connectVariable(new FieldToVariableAdapter(field, null));
+	public synchronized void writeVariable(String name, double value) {
+		if (!this.variableTable.containsKey(name)) {
+			throw new ExevalatorException("Variable not found: " + name);
+		}
+		int address = this.variableTable.get(name);
+		this.writeVariableAt(address, value);
 	}
 
 	/**
-	 * Connects the non-static field for accessing to it in the expression as a variable.
-	 *
-	 * @param field The non-static field to be connected as a variable.
-	 * @param objectInstance The instance of the object to which the field belongs.
+	 * Writes the value to the variable at the specified virtual address.
+	 * This function works faster than "WriteVariable" function.
+	 * 
+	 * @param address The virtual address of the variable to be written
+	 * @param value The new value of the variable
 	 */
-	public synchronized void connectFieldAsVariable(Field field, Object objectInstance) {
-		this.interconnect.connectVariable(new FieldToVariableAdapter(field, objectInstance));
+	public synchronized void writeVariableAt(int address, double value) {
+		if (address < 0 || this.memoryUsage <= address) {
+			throw new ExevalatorException("Invalid variable address: " + address);
+		}
+		this.memory[address] = value;
 	}
 
 	/**
-	 * Disconnects the variable having the specified name.
-	 *
-	 * @param variableName The name of the variable to be disconnected.
+	 * Reads the value of the variable having the specified name.
+	 * 
+	 * @param name The name of the variable to be read
+	 * @return The current value of the variable
 	 */
-	public synchronized void disconnectVariable(String variableName) {
-		this.interconnect.disconnectVariable(variableName);
+	public synchronized double readVariable(String name) {
+		if (!this.variableTable.containsKey(name)) {
+			throw new ExevalatorException("Variable not found: " + name);
+		}
+		int address = this.variableTable.get(name);
+		return this.readVariableAt(address);
 	}
 
 	/**
-	 * Disconnects all variables.
+	 * Reads the value of the variable at the specified virtual address.
+	 * This function works faster than "EeadVariable" function.
+	 * 
+	 * @param address The virtual address of the variable to be read
+	 * @return The current value of the variable
 	 */
-	public synchronized void disconnectAllVariables() {
-		this.interconnect.disconnectAllVariables();
+	public synchronized double readVariableAt(int address) {
+		if (address < 0 || this.memoryUsage <= address) {
+			throw new ExevalatorException("Invalid variable address: " + address);
+		}
+		return this.memory[address];
 	}
 
 	/**
@@ -871,22 +921,28 @@ final class AstNode {
 	 * Creates the evaluator unit for evaluating the value of this AST node.
 	 *
 	 * @param interconnect The interconnect providing references to variables and functions.
+     * @param variableTable The Map mapping each variable name to an address of the variable.
 	 * @return The created evaluator unit.
 	 */
-	public Evaluator.EvaluatorUnit createEvaluatorUnit(Interconnect interconnect) {
+	public Evaluator.EvaluatorUnit createEvaluatorUnit(
+			Interconnect interconnect, Map<String, Integer> variableTable) {
 
 		// Initialize evaluation units of child nodes, and store then into an array.
 		int childCount = this.childNodeList.size();
 		Evaluator.EvaluatorUnit childNodeUnits[] = new Evaluator.EvaluatorUnit[childCount];
 		for (int ichild=0; ichild<childCount; ichild++) {
-			childNodeUnits[ichild] = this.childNodeList.get(ichild).createEvaluatorUnit(interconnect);
+			childNodeUnits[ichild] = this.childNodeList.get(ichild).createEvaluatorUnit(interconnect, variableTable);
 		}
 
 		// Initialize evaluation units of this node.
 		if (this.token.type == TokenType.NUMBER_LITERAL) {
 			return new Evaluator.NumberLiteralEvaluatorUnit(this.token.word);
 		} else if (this.token.type == TokenType.VARIABLE_IDENTIFIER) {
-			return new Evaluator.VariableValueEvaluatorUnit(this.token.word, interconnect);
+			if (!variableTable.containsKey(this.token.word)) {
+				throw new Exevalator.ExevalatorException("Variable not found: " + this.token.word);
+			}
+			int address = variableTable.get(this.token.word);
+			return new Evaluator.VariableEvaluatorUnit(address);
 		} else if (this.token.type == TokenType.FUNCTION_IDENTIFIER) {
 			return null;
 		} else if (this.token.type == TokenType.OPERATOR) {
@@ -914,22 +970,12 @@ final class AstNode {
 	}
 
 	/**
-	 * Evaluates the value of this AST node.
-	 *
-	 * @return The evaluated value of this AST node.
-	 */
-	public double evaluate() {
-		return this.evaluatorUnit.evaluate();
-	}
-
-	/**
 	 * Expresses the AST under this node in XML-like text format.
 	 *
 	 * @returns XML-like text representation of the AST under this node
 	 */
-	@Override
-	public String toString() {
-		return this.toMarkupText(0);
+	public String toMarkuppedText() {
+		return this.toMarkuppedText(0);
 	}
 
 	/**
@@ -938,7 +984,7 @@ final class AstNode {
 	 * @param indentStage The stage of indent of this node
 	 * @return XML-like text representation of the AST under this node
 	 */
-	private String toMarkupText(int indentStage) {
+	public String toMarkuppedText(int indentStage) {
 		StringBuilder indentBuilder = new StringBuilder();
 		for (int istage=0; istage<indentStage; istage++) {
 			indentBuilder.append(StaticSettings.AST_INDENT);
@@ -965,7 +1011,7 @@ final class AstNode {
 			resultBuilder.append(">");
 			for (AstNode childNode: this.childNodeList) {
 				resultBuilder.append(eol);
-				resultBuilder.append(childNode.toMarkupText(indentStage + 1));
+				resultBuilder.append(childNode.toMarkuppedText(indentStage + 1));
 			}
 			resultBuilder.append(eol);
 			resultBuilder.append(indent);
@@ -996,9 +1042,10 @@ final class Evaluator {
 		/**
 		 * Performs the evaluation.
 		 *
-		 * @return The evaluated value.
+		 * @param memory The array storing values of variables
+		 * @return The evaluated value
 		 */
-		public abstract double evaluate();
+		public abstract double evaluate(double[] memory);
 	}
 
 	/**
@@ -1042,11 +1089,12 @@ final class Evaluator {
 		/**
 		 * Performs the addition.
 		 *
+		 * @param memory The array storing values of variables
 		 * @return The result value of the addition
 		 */
 		@Override
-		public double evaluate() {
-			return this.leftOperandUnit.evaluate() + this.rightOperandUnit.evaluate();
+		public double evaluate(double[] memory) {
+			return this.leftOperandUnit.evaluate(memory) + this.rightOperandUnit.evaluate(memory);
 		}
 	}
 
@@ -1068,11 +1116,12 @@ final class Evaluator {
 		/**
 		 * Performs the subtraction.
 		 *
+		 * @param memory The array storing values of variables
 		 * @return The result value of the subtraction
 		 */
 		@Override
-		public double evaluate() {
-			return this.leftOperandUnit.evaluate() - this.rightOperandUnit.evaluate();
+		public double evaluate(double[] memory) {
+			return this.leftOperandUnit.evaluate(memory) - this.rightOperandUnit.evaluate(memory);
 		}
 	}
 
@@ -1094,11 +1143,12 @@ final class Evaluator {
 		/**
 		 * Performs the multiplication.
 		 *
+		 * @param memory The array storing values of variables
 		 * @return The result value of the multiplication
 		 */
 		@Override
-		public double evaluate() {
-			return this.leftOperandUnit.evaluate() * this.rightOperandUnit.evaluate();
+		public double evaluate(double[] memory) {
+			return this.leftOperandUnit.evaluate(memory) * this.rightOperandUnit.evaluate(memory);
 		}
 	}
 
@@ -1120,11 +1170,12 @@ final class Evaluator {
 		/**
 		 * Performs the division.
 		 *
+		 * @param memory The array storing values of variables
 		 * @return The result value of the division
 		 */
 		@Override
-		public double evaluate() {
-			return this.leftOperandUnit.evaluate() / this.rightOperandUnit.evaluate();
+		public double evaluate(double[] memory) {
+			return this.leftOperandUnit.evaluate(memory) / this.rightOperandUnit.evaluate(memory);
 		}
 	}
 
@@ -1148,11 +1199,12 @@ final class Evaluator {
 		/**
 		 * Performs the division.
 		 *
+		 * @param memory The array storing values of variables
 		 * @return The result value of the division.
 		 */
 		@Override
-		public double evaluate() {
-			return -this.operandUnit.evaluate();
+		public double evaluate(double[] memory) {
+			return -this.operandUnit.evaluate(memory);
 		}
 	}
 
@@ -1180,10 +1232,11 @@ final class Evaluator {
 		/**
 		 * Returns the value of the number literal.
 		 *
+		 * @param memory The array storing values of variables
 		 * @return The value of the number literal.
 		 */
 		@Override
-		public double evaluate() {
+		public double evaluate(double[] memory) {
 			return this.value;
 		}
 	}
@@ -1191,32 +1244,32 @@ final class Evaluator {
 	/**
 	 * The evaluator unit for evaluating the value of a variable.
 	 */
-	public static final class VariableValueEvaluatorUnit extends EvaluatorUnit {
+	public static final class VariableEvaluatorUnit extends EvaluatorUnit {
 
-		/** The variable to be evaluated. */
-		private volatile AbstractVariable variable;
+		/** The address of the variable. */
+		private volatile int address;
 
 		/**
-		 * Initializes the reference to the variable.
+		 * Initializes the address of the variable.
 		 *
-		 * @param variableName The name of the variable to be evaluated
-		 * @param interconnect The interconnect providing the reference to the variable
+		 * @param address The address of the variable
 		 */
-		public VariableValueEvaluatorUnit(String variableName, Interconnect interconnect) {
-			if (!interconnect.isVariableConnected(variableName)) {
-				throw new Exevalator.ExevalatorException("No variable found: " + variableName);
-			}
-			this.variable = interconnect.getVariable(variableName);
+		public VariableEvaluatorUnit(int address) {
+			this.address = address;
 		}
 
 		/**
 		 * Returns the value of the variable.
 		 *
-		 * @return The value of the variable.
+		 * @param memory The array storing values of variables
+		 * @return The value of the variable
 		 */
 		@Override
-		public double evaluate() {
-			return this.variable.getVariableValue();
+		public double evaluate(double[] memory) {
+			if (address < 0 || memory.length <= address) {
+				throw new Exevalator.ExevalatorException("Invalid memory address: " + address);
+			}
+			return memory[this.address];
 		}
 	}
 
@@ -1255,44 +1308,17 @@ final class Evaluator {
 		/**
 		 * Calls the function and returns the returned value of the function.
 		 *
+		 * @param memory The array storing values of variables
 		 * @return The returned value of the function
 		 */
 		@Override
-		public double evaluate() {
+		public double evaluate(double[] memory) {
 			for (int iarg=0; iarg<this.argumentCount; iarg++) {
-				this.argumentArrayBuffer[iarg] = this.argumentEvalUnits[iarg + 1].evaluate();
+				this.argumentArrayBuffer[iarg] = this.argumentEvalUnits[iarg + 1].evaluate(memory);
 			}
 			return this.function.invoke(this.argumentArrayBuffer);
 		}
 	}
-}
-
-
-/**
- * The super class of variables available on this interpreter.
- */
-abstract class AbstractVariable {
-
-	/**
-	 * Gets the name of this variable.
-	 *
-	 * @return The name of this variable.
-	 */
-	public abstract String getVariableName();
-
-	/**
-	 * Sets the value of this variable.
-	 *
-	 * @param value The value to be set to this variable
-	 */
-	public abstract void setVariableValue(double value);
-
-	/**
-	 *  Gets the value of this variable.
-	 *
-	 * @return The value of this variable.
-	 */
-	public abstract double getVariableValue();
 }
 
 
@@ -1322,56 +1348,6 @@ abstract class AbstractFunction {
 	 * @return The returned value of this function.
 	 */
 	public abstract double invoke(double[] arguments);
-}
-
-
-/**
- * The class for connecting a Field to this interpreter as a variable.
- */
-final class FieldToVariableAdapter extends AbstractVariable {
-
-	/** The field to be connected as a variable. */
-	private volatile Field field;
-
-	/** The instance of the object to which the field belongs. */
-	private Object objectInstance;
-
-	/**
-	 * Creates the adapter to connect the specified field as a variable.
-	 *
-	 * @param field The field to be connected as a variable
-	 * @param objectInstance The instance of the object to which the field belongs.
-	 */
-	public FieldToVariableAdapter (Field field, Object objectInstance) {
-		this.field = field;
-		this.objectInstance = objectInstance;
-		if (this.field.getType() != double.class && this.field.getType() != Double.class) {
-			throw new Exevalator.ExevalatorException("Incorrect data type of the variable: " + this.field.getName());
-		}
-	}
-
-	@Override
-	public String getVariableName() {
-		return this.field.getName();
-	}
-
-	@Override
-	public void setVariableValue(double value) {
-		try {
-			this.field.set(this.objectInstance, value);
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-			throw new Exevalator.ExevalatorException("Can not set a value to the variable: " + this.field.getName(), e);
-		}
-	}
-
-	@Override
-	public double getVariableValue() {
-		try {
-			return (double)this.field.get(this.objectInstance);
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-			throw new Exevalator.ExevalatorException("Can not get a value of the variable: " + this.field.getName(), e);
-		}
-	}
 }
 
 
@@ -1436,9 +1412,6 @@ final class MethodToFunctionAdapter extends AbstractFunction {
  */
 class Interconnect {
 
-	/** The table mapping from names of variables to instances of variables. */
-	private volatile ConcurrentHashMap<String, AbstractVariable> variableTable;
-
 	/** The table mapping from names of functions to instances of functions. */
 	private volatile ConcurrentHashMap<String, AbstractFunction> functionTable;
 
@@ -1446,53 +1419,7 @@ class Interconnect {
 	 * Creates an Interconnect instance to which nothing is connected.
 	 */
 	public Interconnect() {
-		this.variableTable = new ConcurrentHashMap<String, AbstractVariable>();
 		this.functionTable = new ConcurrentHashMap<String, AbstractFunction>();
-	}
-
-	/**
-	 * Connects the new variable to share it between components of this interpreter.
-	 *
-	 * @param variable The variable to be connected.
-	 */
-	public synchronized void connectVariable(AbstractVariable variable) {
-		this.variableTable.put(variable.getVariableName(), variable);
-	}
-
-	/**
-	 * Returns the variable having the specified name, if it is connected.
-	 *
-	 * @param variableName The name of the variable to be gotten.
-	 * @return The variable having the specified name.
-	 */
-	public synchronized AbstractVariable getVariable(String variableName) {
-		return this.variableTable.get(variableName);
-	}
-
-	/**
-	 * Checks whether the variable having the specified name is connected or not.
-	 *
-	 * @param variableName The name of the variable to be checked.
-	 * @return True if the variable having the specified name is connected.
-	 */
-	public synchronized boolean isVariableConnected(String variableName) {
-		return this.variableTable.containsKey(variableName);
-	}
-
-	/**
-	 * Disconnects the variable having the specified name.
-	 *
-	 * @param variableName The name of the variable to be disconnected.
-	 */
-	public synchronized void disconnectVariable(String variableName) {
-		this.variableTable.remove(variableName);
-	}
-
-	/**
-	 * Disconnects all variables..
-	 */
-	public synchronized void disconnectAllVariables() {
-		this.variableTable.clear();
 	}
 
 	/**
