@@ -337,7 +337,7 @@ public class Test {
 				(1 + 2)
 			);
 			throw new ExevalatorTestException("Expected exception has not been thrown");
-		} catch (Exevalator.ExevalatorException ee) {
+		} catch (Exevalator.Exception ee) {
 			// Expected to thrown
 			System.out.println("Test of Detection of Mismatching of Open/Closed Parentheses 2: OK.");
 		}
@@ -349,7 +349,7 @@ public class Test {
 				(1 + 2)
 			);
 			throw new ExevalatorTestException("Expected exception has not been thrown");
-		} catch (Exevalator.ExevalatorException ee) {
+		} catch (Exevalator.Exception ee) {
 			// Expected to thrown
 			System.out.println("Test of Detection of Mismatching of Open/Closed Parentheses 3: OK.");
 		}
@@ -367,7 +367,7 @@ public class Test {
 				(1 + 2) + (3 + 4)
 			);
 			throw new ExevalatorTestException("Expected exception has not been thrown");
-		} catch (Exevalator.ExevalatorException ee) {
+		} catch (Exevalator.Exception ee) {
 			// Expected to thrown
 			System.out.println("Test of Detection of Mismatching of Open/Closed Parentheses 5: OK.");
 		}
@@ -385,7 +385,7 @@ public class Test {
 				1 + ((2 + (3 + 4) + 5) + 6)
 			);
 			throw new ExevalatorTestException("Expected exception has not been thrown");
-		} catch (Exevalator.ExevalatorException ee) {
+		} catch (Exevalator.Exception ee) {
 			// Expected to thrown
 			System.out.println("Test of Detection of Mismatching of Open/Closed Parentheses 7: OK.");
 		}
@@ -397,7 +397,7 @@ public class Test {
 				1 + ((2 + (3 + 4) + 5) + 6)
 			);
 			throw new ExevalatorTestException("Expected exception has not been thrown");
-		} catch (Exevalator.ExevalatorException ee) {
+		} catch (Exevalator.Exception ee) {
 			// Expected to thrown
 			System.out.println("Test of Detection of Mismatching of Open/Closed Parentheses 8: OK.");
 		}
@@ -409,7 +409,7 @@ public class Test {
 				Double.NaN
 			);
 			throw new ExevalatorTestException("Expected exception has not been thrown");
-		} catch (Exevalator.ExevalatorException ee) {
+		} catch (Exevalator.Exception ee) {
 			// Expected to thrown
 			System.out.println("Test of Detection of Empty Parentheses 1: OK.");
 		}
@@ -421,7 +421,7 @@ public class Test {
 				Double.NaN
 			);
 			throw new ExevalatorTestException("Expected exception has not been thrown");
-		} catch (Exevalator.ExevalatorException ee) {
+		} catch (Exevalator.Exception ee) {
 			// Expected to thrown
 			System.out.println("Test of Detection of Empty Parentheses 2: OK.");
 		}
@@ -433,7 +433,7 @@ public class Test {
 				Double.NaN
 			);
 			throw new ExevalatorTestException("Expected exception has not been thrown");
-		} catch (Exevalator.ExevalatorException ee) {
+		} catch (Exevalator.Exception ee) {
 			// Expected to thrown
 			System.out.println("Test of Detection of Empty Parentheses 3: OK.");
 		}
@@ -459,7 +459,7 @@ public class Test {
 				1 + -123
 			);
 			throw new ExevalatorTestException("Expected exception has not been thrown");
-		} catch (Exevalator.ExevalatorException ee) {
+		} catch (Exevalator.Exception ee) {
 			// Expected to thrown
 			System.out.println("Test of Detection of Left Operand of Unary-Prefix Operator 2: OK.");
 		}
@@ -471,7 +471,7 @@ public class Test {
 				1 + -123
 			);
 			throw new ExevalatorTestException("Expected exception has not been thrown");
-		} catch (Exevalator.ExevalatorException ee) {
+		} catch (Exevalator.Exception ee) {
 			// Expected to thrown
 			System.out.println("Test of Detection of Left Operand of Unary-Prefix Operator 3: OK.");
 		}
@@ -489,7 +489,7 @@ public class Test {
 				123 * 456
 			);
 			throw new ExevalatorTestException("Expected exception has not been thrown");
-		} catch (Exevalator.ExevalatorException ee) {
+		} catch (Exevalator.Exception ee) {
 			// Expected to thrown
 			System.out.println("Test of Detection of Left Operand of Binary Operator 2: OK.");
 		}
@@ -501,7 +501,7 @@ public class Test {
 				123 * 456
 			);
 			throw new ExevalatorTestException("Expected exception has not been thrown");
-		} catch (Exevalator.ExevalatorException ee) {
+		} catch (Exevalator.Exception ee) {
 			// Expected to thrown
 			System.out.println("Test of Detection of Left Operand of Binary Operator 3: OK.");
 		}
@@ -513,7 +513,7 @@ public class Test {
 				123 * 456
 			);
 			throw new ExevalatorTestException("Expected exception has not been thrown");
-		} catch (Exevalator.ExevalatorException ee) {
+		} catch (Exevalator.Exception ee) {
 			// Expected to thrown
 			System.out.println("Test of Detection of Left Operand of Binary Operator 4: OK.");
 		}
@@ -525,7 +525,7 @@ public class Test {
 				123 * 456
 			);
 			throw new ExevalatorTestException("Expected exception has not been thrown");
-		} catch (Exevalator.ExevalatorException ee) {
+		} catch (Exevalator.Exception ee) {
 			// Expected to thrown
 			System.out.println("Test of Detection of Left Operand of Binary Operator 5: OK.");
 		}
@@ -537,7 +537,7 @@ public class Test {
 				123 * 456
 			);
 			throw new ExevalatorTestException("Expected exception has not been thrown");
-		} catch (Exevalator.ExevalatorException ee) {
+		} catch (Exevalator.Exception ee) {
 			// Expected to thrown
 			System.out.println("Test of Detection of Lacking Operator: OK.");
 		}
