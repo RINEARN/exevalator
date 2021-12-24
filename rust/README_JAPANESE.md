@@ -35,7 +35,6 @@ Exevalator のインタープリタは、単一のファイル「 rust/exevalato
 
 あとは、式の計算を行いたいコードのファイルから読み込んでして、以下のように使用できます：
 
-    ...
     mod exevalator;
     use exevalator::Exevalator;
     ...
@@ -150,7 +149,7 @@ Microsoft&reg; Windows&reg; を使用している場合は:
 
 ### 3. 関数の使用
 
-式の中で使用するための関数も作成できます。具体的には、以下のような形式に沿う関数を定義します：
+式の中で使用するための関数も作成できます。具体的には、シグネチャ **"fn function(arguments: Vec<f64>) -> Result<f64, ExevalatorError>"** を持つ関数が使用できます。具体例としては：
 
     /// 式内で使用可能な関数を定義
     fn my_function(arguments: Vec<f64>) -> Result<f64, ExevalatorError> {
