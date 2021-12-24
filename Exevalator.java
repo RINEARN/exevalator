@@ -113,7 +113,7 @@ public final class Exevalator {
      * Declares a new variable, for using the value of it in expressions.
      *
      * @param name The name of the variable to be declared.
-     * @returns The virtual address of the declared variable,
+     * @return The virtual address of the declared variable,
      *             which useful for accessing to the variable faster.
      *             See "writeVariableAt" and "readVariableAt" method.
      */
@@ -229,6 +229,13 @@ public final class Exevalator {
      * The interface to implement functions available in expressions.
      */
     public interface FunctionInterface {
+
+        /**
+         * Invokes the function.
+         * 
+         * @param arguments An array storing values of arguments.
+         * @return The return value of the function.
+         */
         public double invoke(double[] arguments);
     }
 
@@ -309,7 +316,7 @@ final class LexicalAnalyzer {
      * Creates Token-type instances from token words (String).
      *
      * @param tokenWords Token words (String) to be converted to Token instances.
-     * @param numberLiteralList The List storing number literals.
+     * @param numberLiterals The List storing number literals.
      * @return Created Token instances.
      */
     private static Token[] createTokensFromTokenWords(String[] tokenWords, List<String> numberLiterals) {
@@ -719,7 +726,7 @@ final class Parser {
      * Pops root nodes of ASTs of partial expressions constructed on the stack.
      *
      * @param stack The working stack used for the parsing.
-     * @param targetStackLidNode The temporary node pushed in the stack, at the end of partial expressions to be popped.
+     * @param endStackLidNode The temporary node pushed in the stack, at the end of partial expressions to be popped.
      * @return Root nodes of ASTs of partial expressions.
      */
     private static AstNode[] popPartialExprNodes(Deque<AstNode> stack, AstNode endStackLidNode) {
@@ -1015,7 +1022,7 @@ final class AstNode {
     /**
      * Expresses the AST under this node in XML-like text format.
      *
-     * @returns XML-like text representation of the AST under this node.
+     * @return XML-like text representation of the AST under this node.
      */
     public String toMarkuppedText() {
         return this.toMarkuppedText(0);
@@ -1334,6 +1341,13 @@ final class Evaluator {
         /** An array storing evaluated values of arguments. */
         private volatile double[] argumentArrayBuffer;
 
+        /**
+         * Initializes information of functions to be called.
+         *
+         * @param function The function to be called.
+         * @param functionName The name of the function.
+         * @param argumentEvalUnits Evaluator units for evaluating values of arguments.
+         */
         public FunctionEvaluatorUnit(
                 Exevalator.FunctionInterface function, String functionName, EvaluatorUnit[] argumentEvalUnits) {
             this.function = function;
