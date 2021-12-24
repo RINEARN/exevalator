@@ -50,9 +50,6 @@ public final class Exevalator {
 		// Split the expression into tokens, and analyze them.
 		Token[] tokens = new LexicalAnalyzer().analyze(expression);
 
-		// Check syntactic correctness of tokens.
-		new LexicalChecker().check(tokens);
-
 		// Construct AST (Abstract Syntax Tree) by parsing tokens.
 		AstNode ast = new Parser().parse(tokens);
 
@@ -221,6 +218,11 @@ final class LexicalAnalyzer {
 		// Also, escaped number literals will be recovered.
 		Token[] tokens = this.createTokensFromTokenWords(tokenWords, numberLiteralList);
 
+		// Checks syntactic correctness of tokens of inputted expressions.
+		this.checkParenthesisOpeningClosings(tokens);
+		this.checkEmptyParentheses(tokens);
+		this.checkLocationsOfOperatorsAndLeafs(tokens);
+
 		return tokens;
 	}
 
@@ -343,26 +345,6 @@ final class LexicalAnalyzer {
 		numberLiteralMatcher.reset();
 		String replacedExpression = numberLiteralMatcher.replaceAll(StaticSettings.ESCAPED_NUMBER_LITERAL);
 		return replacedExpression;
-	}
-}
-
-
-/**
- * The class for checking syntactic correctness of tokens of inputted expressions.
- */
-final class LexicalChecker {
-
-	/*
-	* Checks syntactic correctness of tokens of inputted expressions.
-	* An ExevalatorException will be thrown when any errors detected.
-	* If no error detected, nothing will occur.
-	*
-	* @param tokens Tokens of the inputted expression.
-	*/
-	public void check(Token[] tokens) {
-		this.checkParenthesisOpeningClosings(tokens);
-		this.checkEmptyParentheses(tokens);
-		this.checkLocationsOfOperatorsAndLeafs(tokens);
 	}
 
 	/**
