@@ -7,11 +7,8 @@ Exevalator (an abbreviation for **Ex**pression-**Eval**u**ator**) is a compact i
 
 ## English README Index
 - <a href="#license">License</a>
-- <a href="#requirements">Requirements</a>
-- <a href="#test">Build/Test Results of The Latest Version</a>
-- <a href="#how-to-use">How to Use</a>
-- <a href="#how-to-use-example-code">How to Use Example Code</a>
-- <a href="#related">Related Software</a>
+- <a href="#how-to-use">How to Use for Each Language</a>
+	- <a href="#how-to-use-java">How to Use in Java&reg;</a>
 - <a href="#about-us">About Us</a>
 
 
@@ -21,98 +18,33 @@ Exevalator (an abbreviation for **Ex**pression-**Eval**u**ator**) is a compact i
 This software is released under the MIT License.
 
 
-<a id="requirements"></a>
-## Requirements
-
-* Java&reg; Development Kit (JDK) 8 or later
-
-
-<a id="test"></a>
-## Build/Test Results of The Latest Version
-
-&nbsp;&nbsp;- main branch -
-<br />
-&nbsp;&nbsp;&nbsp;&nbsp;![](https://github.com/RINEARN/exevalator/workflows/Standard%20Build%2FTest%20CI/badge.svg?branch=main) on JDK 17
-&nbsp;&nbsp;&nbsp;&nbsp;![](https://github.com/RINEARN/exevalator/workflows/Old-Env%20Build%2FTest%20CI/badge.svg?branch=main) on JDK 8
-<br />
-&nbsp;&nbsp;- develop branch -
-<br />
-&nbsp;&nbsp;&nbsp;&nbsp;![](https://github.com/RINEARN/exevalator/workflows/Standard%20Build%2FTest%20CI/badge.svg?branch=develop) on JDK 17
-&nbsp;&nbsp;&nbsp;&nbsp;![](https://github.com/RINEARN/exevalator/workflows/Old-Env%20Build%2FTest%20CI/badge.svg?branch=develop) on JDK 8
-<br />
-&nbsp;&nbsp;&nbsp;&nbsp;( Green: OK / Red: NG )
-
 
 <a id="how-to-use"></a>
-## How to Use
+## How to Use for Each Language
 
-The interpreter of Exevalator is implemented in a single file "java/Exevalator.java", so you can import and use it in your project by very easy 3 steps!
+<a id="how-to-use-java"></a>
+### 1. How to Use in Java&reg;
 
-### 1. Put into your source code folder
+In "java" folder, the Java implementation version of Exevalator, various example code, and [README for using in Java](./java/README.md) are locating. Most simple example code is "Example1.java", which computes the value of a simple expression "1.2 + 3.4" as follows:
 
-Firstly, put "java/Exevalator.java" into anywere in your source code folder, e.g.:
+	(in java/Example1.java)
 
-	src/your/projects/package/anywhere/Exevalator.java
+	Exevalator exevalator = new Exevalator();
+	double result = exevalator.eval("1.2 + 3.4");
+	System.out.println("Result: " + result);
 
-### 2. Write the package statement
-
-Secondly, the package statement at the top of the content of "Exevalator.java" as the following example:
-
-	(in Exevalator.java)
-	package your.projects.package.anywhere;
-
-### 3. Import from your code and use
-
-Now you are ready to use Exevalator! You can import the Exevalator from any your source, code and compute expressions as follows:
-
-	...
-	import your.projects.package.anywhere.Exevalator;
-	...
-
-	public class YourClass {
-		...
-		public void yourMethod() {
-			
-			// Create an interpreter for evaluating expressions
-			Exevalator exevalator = new Exevalator();
-
-			// Evaluate (compute) the value of an expression
-			double result = exevalator.eval("1.2 + 3.4");
-			
-			// Display the result
-			System.out.println("Result: " + result);
-		}
-		...
-	}
-
-Note that, all numbers in expressions will be handled as double-type values on Exevalator.
-The result is also double-type.
-
-
-<a id="how-to-use-example-code"></a>
-## How to Use Example Code
-
-Simple example code "java/Example*.java" are bundled in this repository. You can compile and run them as follows:
+How to compile/run this code is:
 
 	cd java
 	javac Exevalator.java
 	javac Example1.java
-	java Example1
+	Example1
 
-"Example1.java" is an example for computing the value of "1.2 + 3.4" by using Exevalator. Its code is almost the same as "YourClass" in the previous section. The result is:
+The result is:
 
 	4.6
 
-As the above, the computed value of "1.2 + 3.4" will be displayed.
-
-
-<a id="related"></a>
-## Related Software
-
-Features of Exevalator is not so rich, because we prioritize to make the interpreter compact.
-
-If you want more features, try to use the [Vnano](https://github.com/RINEARN/vnano) which is an script engine for embedded use in applications, instead of Exevalator.
-Vnano can execute relatively complex expressions/scripts, containing conditional branches, loops, and so on.
+For more details, see [README for using in Java](./java/README.md).
 
 
 <a id="about-us"></a>

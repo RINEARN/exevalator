@@ -7,12 +7,10 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、アプリケーシ
 
 ## 日本語版 README 目次
 - <a href="#license">ライセンス</a>
-- <a href="#requirements">必要な環境</a>
-- <a href="#test">最新版のビルド/テスト検証結果</a>
-- <a href="#how-to-use">使用方法</a>
-- <a href="#how-to-use-example-code">サンプルコードの使用方法</a>
-- <a href="#related">関連ソフトウェア</a>
+- <a href="#how-to-use">各言語ごとの使用方法</a>
+	- <a href="#how-to-use-java">Java&reg;言語での使用方法</a>
 - <a href="#about-us">開発元について</a>
+
 
 
 <a id="license"></a>
@@ -21,98 +19,34 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、アプリケーシ
 このソフトウェアはMITライセンスで公開されています。
 
 
-<a id="requirements"></a>
-## 必要な環境
-
-* Java&reg; 開発環境 (JDK) 8 以降
-
-
-<a id="test"></a>
-## 最新版のビルド/テスト検証結果
-
-&nbsp;&nbsp;- main branch -
-<br />
-&nbsp;&nbsp;&nbsp;&nbsp;![](https://github.com/RINEARN/exevalator/workflows/Standard%20Build%2FTest%20CI/badge.svg?branch=main) on JDK 17
-&nbsp;&nbsp;&nbsp;&nbsp;![](https://github.com/RINEARN/exevalator/workflows/Old-Env%20Build%2FTest%20CI/badge.svg?branch=main) on JDK 8
-<br />
-&nbsp;&nbsp;- develop branch -
-<br />
-&nbsp;&nbsp;&nbsp;&nbsp;![](https://github.com/RINEARN/exevalator/workflows/Standard%20Build%2FTest%20CI/badge.svg?branch=develop) on JDK 17
-&nbsp;&nbsp;&nbsp;&nbsp;![](https://github.com/RINEARN/exevalator/workflows/Old-Env%20Build%2FTest%20CI/badge.svg?branch=develop) on JDK 8
-<br />
-&nbsp;&nbsp;&nbsp;&nbsp;( 緑: OK / 赤: NG )
-
-
 <a id="how-to-use"></a>
-## 使用方法
+## 各言語ごとの使用方法
 
-Exevalator のインタープリタは、単一のファイル「 java/Exevalator.java 」内に実装されています。そのため、以下のような 3 ステップで、簡単に import して使用できます。
+<a id="how-to-use-java"></a>
+### 1. Java&reg; 言語での使用方法
 
-### 1. 使用したいプロジェクトのソースコードフォルダ内に配置
+「 java 」フォルダ内に、Java言語実装版の Exevalator と用例サンプルコード類、および [Java言語用README](./java/README_JAPANESE.md) があります。
+最もシンプルな用例は「 Example1.java 」で、以下のように単純な式「 1.2 + 3.4 」を計算する内容になっています：
 
-まず「 java/Exevalator.java 」を、使用したいプロジェクトのソースコードフォルダ内の、好きな場所に配置します。ここでは例として、以下の場所に配置したとします：
+	(in java/Example1.java)
 
-	src/your/projects/package/anywhere/Exevalator.java
+	Exevalator exevalator = new Exevalator();
+	double result = exevalator.eval("1.2 + 3.4");
+	System.out.println("Result: " + result);
 
-### 2. パッケージ文を記述
-
-続いて、配置した「 Exevalator.java 」を開き、配置した場所に対応するように、先頭にパッケージ文を記述します。今の例の場合は：
-
-	(Exevalator.java 内)
-	package your.projects.package.anywhere;
-
-### 3. 使用したいクラスから import
-
-以上で準備は整いました！ あとは、式の計算を行いたいクラスから import して、以下のように使用できます：
-
-	...
-	import your.projects.package.anywhere.Exevalator;
-	...
-
-	public class YourClass {
-		...
-		public void yourMethod() {
-			
-			// Exevalator のインタープリタを生成
-			Exevalator exevalator = new Exevalator();
-
-			// 式の値を計算（評価）する
-			double result = exevalator.eval("1.2 + 3.4");
-			
-			// 結果を表示
-			System.out.println("Result: " + result);
-		}
-		...
-	}
-
-なお、Exevalator では、式の中のすべての数値は double 型で扱われます。従って、結果も常に double 型です。
-
-
-<a id="how-to-use-example-code"></a>
-## サンプルコードの使用方法
-
-このリポジトリ内には、実際に Exevalator を使用する簡単なサンプルコード類「 java/Example*.java 」も同梱されています。
-それらは、以下のようにコンパイル/実行できます:
+このコードをコンパイルして実行するには：
 
 	cd java
 	javac Exevalator.java
 	javac Example1.java
-	java Example1
+	Example1
 
-上記の「 Example1.java 」は、"1.2 + 3.4" の値を Exevalator で計算するサンプルコードです。内容は、すぐ前の節で掲載したサンプル「 YourClass 」とほぼ同一です。実行結果は：
+結果は以下の通りです：
 
 	4.6
 
-この通り、"1.2 + 3.4" の計算結果が表示されます。
+より詳しい解説や機能一覧については [Java言語用README](./java/README_JAPANESE.md) をご参照ください。
 
-
-<a id="related"></a>
-## 関連ソフトウェア
-
-Exevalator では、インタープリタの規模をコンパクトに抑える事を優先するため、サポートされる機能が絞られています。
-
-もし、Exevalator を使用してみて、もう少し機能や処理速度が欲しいと思った方は、代わりにアプリケーション内組み込み用のスクリプトエンジン「 [Vnano](https://github.com/RINEARN/vnano) 」をお試しください。
-Vnano では、条件分岐や繰り返しも含めた、それなりに複雑な処理を実行できます。
 
 
 <a id="about-us"></a>
