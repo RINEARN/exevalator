@@ -684,8 +684,13 @@ final class Parser {
 
 		} while (itoken < tokenCount);
 
-		// The AST has been constructed on the stack, and only its root node is stored in the stack, so return it.
-		return stack.pop();
+		// The AST has been constructed on the stack, and only its root node is stored in the stack.
+		AstNode rootNodeOfExpressionAst = stack.pop();
+
+		// Check that the depth of the constructed AST does not exceeds the limit.
+		rootNodeOfExpressionAst.checkDepth(1, StaticSettings.MAX_AST_DEPTH);
+
+		return rootNodeOfExpressionAst;
 	}
 
 	/**
@@ -919,9 +924,6 @@ final class AstNode {
 	/** The list of child nodes of this AST node. */
 	public final List<AstNode> childNodeList;
 
-	/** The evaluator unit for evaluating the value of this AST node. */
-	private Evaluator.EvaluatorUnit evaluatorUnit;
-
 	/**
 	 * Create an AST node instance storing specified information.
 	 *
@@ -990,6 +992,27 @@ final class AstNode {
 			}
 		} else {
 			throw new Exevalator.Exception("Unexpected token type: " + this.token.type);
+		}
+	}
+
+	/**
+	 * Checks that depths in the AST of all nodes under this node (child nodes, grandchild nodes, and so on)
+	 * does not exceeds the specified maximum value.
+	 * An ExevalatorException will be thrown when the depth exceeds the maximum value.
+	 * If the depth does not exceeds the maximum value, nothing will occur.
+	 *
+	 * @param depthOfThisNode The depth of this node in the AST.
+	 * @param maxAstDepth The maximum value of the depth of the AST.
+	 */
+	public void checkDepth(int depthOfThisNode, int maxAstDepth) {
+		if (maxAstDepth < depthOfThisNode) {
+			throw new Exevalator.Exception(
+				"The depth of the AST exceeds the limit (StaticSettings.MAX_AST_DEPTH: "
+				+ StaticSettings.MAX_AST_DEPTH + ")"
+			);
+		}
+		for (AstNode childNode: this.childNodeList) {
+			childNode.checkDepth(depthOfThisNode + 1, maxAstDepth);
 		}
 	}
 
@@ -1358,6 +1381,9 @@ final class StaticSettings {
 
 	/** The maximum number of tokens in an expression. */
 	public static final int MAX_TOKEN_COUNT = 64;
+
+	/** The maximum depth of an Abstract Syntax Tree (AST). */
+	public static final int MAX_AST_DEPTH = 32;
 
 	/** The indent used in text representations of ASTs. */
 	public static final String AST_INDENT = "  ";
