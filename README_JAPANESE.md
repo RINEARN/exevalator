@@ -46,11 +46,11 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、アプリケーシ
 <a id="how-to-use"></a>
 ## 使用方法
 
-Exevalator のインタープリタは、単一のファイル「 Exevalator.java 」内に実装されています。そのため、以下のような 3 ステップで、簡単に import して使用できます。
+Exevalator のインタープリタは、単一のファイル「 java/Exevalator.java 」内に実装されています。そのため、以下のような 3 ステップで、簡単に import して使用できます。
 
 ### 1. 使用したいプロジェクトのソースコードフォルダ内に配置
 
-まず「 Exevalator.java 」を、使用したいプロジェクトのソースコードフォルダ内の、好きな場所に配置します。ここでは例として、以下の場所に配置したとします：
+まず「 java/Exevalator.java 」を、使用したいプロジェクトのソースコードフォルダ内の、好きな場所に配置します。ここでは例として、以下の場所に配置したとします：
 
 	src/your/projects/package/anywhere/Exevalator.java
 
@@ -91,9 +91,10 @@ Exevalator のインタープリタは、単一のファイル「 Exevalator.jav
 <a id="how-to-use-example-code"></a>
 ## サンプルコードの使用方法
 
-このリポジトリ内には、実際に Exevalator を使用する簡単なサンプルコード類「 Example*.java 」も同梱されています。
+このリポジトリ内には、実際に Exevalator を使用する簡単なサンプルコード類「 java/Example*.java 」も同梱されています。
 それらは、以下のようにコンパイル/実行できます:
 
+	cd java
 	javac Exevalator.java
 	javac Example1.java
 	java Example1

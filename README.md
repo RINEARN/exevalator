@@ -46,11 +46,11 @@ This software is released under the MIT License.
 <a id="how-to-use"></a>
 ## How to Use
 
-The interpreter of Exevalator is implemented in a single file "Exevalator.java", so you can import and use it in your project by very easy 3 steps!
+The interpreter of Exevalator is implemented in a single file "java/Exevalator.java", so you can import and use it in your project by very easy 3 steps!
 
 ### 1. Put into your source code folder
 
-Firstly, put "Exevalator.java" into anywere in your source code folder, e.g.:
+Firstly, put "java/Exevalator.java" into anywere in your source code folder, e.g.:
 
 	src/your/projects/package/anywhere/Exevalator.java
 
@@ -92,8 +92,9 @@ The result is also double-type.
 <a id="how-to-use-example-code"></a>
 ## How to Use Example Code
 
-Simple example code "Example*.java" are bundled in this repository. You can compile and run them as follows:
+Simple example code "java/Example*.java" are bundled in this repository. You can compile and run them as follows:
 
+	cd java
 	javac Exevalator.java
 	javac Example1.java
 	java Example1
