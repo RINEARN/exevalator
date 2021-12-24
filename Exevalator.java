@@ -15,6 +15,7 @@ import java.util.ArrayDeque;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -331,19 +332,19 @@ final class LexicalAnalyzer {
 
 			// Cases of function call operators.
 			if (token.word.equals("(") || token.word.equals(")") ) {
-				operator = StaticSettings.searchOperator(OperatorType.CALL, token.word.charAt(0));
+				operator = StaticSettings.CALL_OPERATOR_SYMBOL_MAP.get(token.word.charAt(0));
 
 			// Cases of unary-prefix operators.
 			} else if (lastToken == null
 					|| lastToken.word.equals("(")
 					|| (lastToken.type == TokenType.OPERATOR && lastToken.operator.type != OperatorType.CALL) ) {
-				operator = StaticSettings.searchOperator(OperatorType.UNARY_PREFIX, token.word.charAt(0));
+				operator = StaticSettings.UNARY_PREFIX_OPERATOR_SYMBOL_MAP.get(token.word.charAt(0));
 
 			// Cases of binary operators.
 			} else if (lastToken.word.equals(")")
 					|| lastToken.type == TokenType.NUMBER_LITERAL
 					|| lastToken.type == TokenType.VARIABLE_IDENTIFIER) {
-				operator = StaticSettings.searchOperator(OperatorType.BINARY, token.word.charAt(0));
+				operator = StaticSettings.BINARY_OPERATOR_SYMBOL_MAP.get(token.word.charAt(0));
 
 			} else {
 				throw new Exevalator.ExevalatorException("Unexpected operator syntax: " + token.word);
@@ -1615,18 +1616,6 @@ final class StaticSettings {
 	/** The instance of the end of call operator. */
 	public static final Operator CALL_END_OPERATOR = new Operator(OperatorType.CALL, ')', Integer.MAX_VALUE); // least prior
 
-	/** The list of available operators. */
-	public static final List<Operator> OPERATOR_LIST = new ArrayList<Operator>();
-	static {
-		OPERATOR_LIST.add(ADDITION_OPERATOR);
-		OPERATOR_LIST.add(SUBTRACTION_OPERATOR);
-		OPERATOR_LIST.add(MULTIPLICATION_OPERATOR);
-		OPERATOR_LIST.add(DIVISION_OPERATOR);
-		OPERATOR_LIST.add(MINUS_OPERATOR);
-		OPERATOR_LIST.add(CALL_BEGIN_OPERATOR);
-		OPERATOR_LIST.add(CALL_END_OPERATOR);
-	}
-
 	/** The set of symbols of available operators. */
 	@SuppressWarnings("serial")
 	public static final Set<Character> OPERATOR_SYMBOL_SET = new HashSet<Character>() {{
@@ -1636,6 +1625,28 @@ final class StaticSettings {
 		add('/');
 		add('(');
 		add(')');
+	}};
+
+	/** The Map mapping each symbol of an unary-prefix operator to an instance of Operator class. */
+	public static final Map<Character, Operator> UNARY_PREFIX_OPERATOR_SYMBOL_MAP = 
+	new ConcurrentHashMap<Character, Operator>() {{
+		put('-', MINUS_OPERATOR);
+	}};
+
+	/** The Map mapping each symbol of an binary operator to an instance of Operator class. */
+	public static final Map<Character, Operator> BINARY_OPERATOR_SYMBOL_MAP = 
+	new ConcurrentHashMap<Character, Operator>() {{
+		put('+', ADDITION_OPERATOR);
+		put('-', SUBTRACTION_OPERATOR);
+		put('*', MULTIPLICATION_OPERATOR);
+		put('/', DIVISION_OPERATOR);
+	}};
+
+	/** The Map mapping each symbol of an call operator to an instance of Operator class. */
+	public static final Map<Character, Operator> CALL_OPERATOR_SYMBOL_MAP = 
+	new ConcurrentHashMap<Character, Operator>() {{
+		put('(', CALL_BEGIN_OPERATOR);
+		put(')', CALL_END_OPERATOR);
 	}};
 
 	/** The list of symbols to split an expression into tokens. */
@@ -1649,20 +1660,4 @@ final class StaticSettings {
 		TOKEN_SPLITTER_SYMBOL_LIST.add(')');
 		TOKEN_SPLITTER_SYMBOL_LIST.add(',');
 	};
-
-	/**
-	 * Search an available Operator having specified information.
-	 *
-	 * @param type The type of the operator to be searched
-	 * @param symbol The symbol of the operator to be searched
-	 * @return The Operator matching specified conditions
-	 */
-	public static final Operator searchOperator(OperatorType type, char symbol) {
-		for (Operator operator: OPERATOR_LIST) {
-			if (operator.type == type && operator.symbol == symbol) {
-				return operator;
-			}
-		}
-		throw new Exevalator.ExevalatorException("No operator found: (" + type + ", " + symbol + ")");
-	}
 }
