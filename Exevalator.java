@@ -32,11 +32,19 @@ public final class Exevalator {
 	/** The interconnect providing objects shared among multiple components of this interpreter. */
 	private volatile Interconnect interconnect;
 
+    /** Caches the content of the expression evaluated last time, to skip re-parsing. */
+	private volatile String lastEvaluatedExpression;
+
+    /** The unit for evaluating an expression. */
+	private volatile Evaluator.EvaluatorUnit evaluatorUnit;
+
 	/**
 	 * Creates a new interpreter of the Exevalator.
 	 */
 	public Exevalator() {
 		this.interconnect = new Interconnect();
+		this.lastEvaluatedExpression = null;
+		this.evaluatorUnit = null;
 	}
 
 	/**
@@ -47,28 +55,38 @@ public final class Exevalator {
 	 */
 	public double eval(String expression) {
 
-		// Split the expression into tokens, and analyze them.
-		Token[] tokens = LexicalAnalyzer.analyze(expression);
+		boolean expressionChanged = expression != this.lastEvaluatedExpression
+			&& !expression.equals(this.lastEvaluatedExpression);
 
-		// Construct AST (Abstract Syntax Tree) by parsing tokens.
-		AstNode ast = Parser.parse(tokens);
+        // If the expression changed from the last-evaluated expression, re-parsing is necessary.
+		if (this.evaluatorUnit == null || expressionChanged) {
 
-		// Evaluate (compute) the value of the root node of the AST.
-		ast.initializeEvaluatorUnit(this.interconnect);
-		double evaluatedValue = ast.evaluate();
+			// Split the expression into tokens, and analyze them.
+			Token[] tokens = LexicalAnalyzer.analyze(expression);
 
-		/*
-		// Temporary, for debugging tokens
-		for (Token token: tokens) {
-			System.out.println(token.toString());
+			/*
+			// Temporary, for debugging tokens
+			for (Token token: tokens) {
+				System.out.println(token.toString());
+			}
+			*/
+
+			// Construct AST (Abstract Syntax Tree) by parsing tokens.
+			AstNode ast = Parser.parse(tokens);
+
+			/*
+			// Temporary, for debugging AST
+			System.out.println(ast.toString());
+			*/
+
+			// Evaluate (compute) the value of the root node of the AST.
+			this.evaluatorUnit = ast.createEvaluatorUnit(this.interconnect);
+
+			this.lastEvaluatedExpression = expression;
 		}
-		*/
 
-		/*
-		// Temporary, for debugging AST
-		System.out.println(ast.toString());
-		*/
-
+        // Evaluate the value of the expression, and return it.
+		double evaluatedValue = this.evaluatorUnit.evaluate();
 		return evaluatedValue;
 	}
 
@@ -850,42 +868,48 @@ final class AstNode {
 	}
 
 	/**
-	 * Initializes the evaluator unit for evaluating the value of this AST node.
+	 * Creates the evaluator unit for evaluating the value of this AST node.
 	 *
 	 * @param interconnect The interconnect providing references to variables and functions.
+	 * @return The created evaluator unit.
 	 */
-	public void initializeEvaluatorUnit(Interconnect interconnect) {
+	public Evaluator.EvaluatorUnit createEvaluatorUnit(Interconnect interconnect) {
 
 		// Initialize evaluation units of child nodes, and store then into an array.
 		int childCount = this.childNodeList.size();
 		Evaluator.EvaluatorUnit childNodeUnits[] = new Evaluator.EvaluatorUnit[childCount];
 		for (int ichild=0; ichild<childCount; ichild++) {
-			this.childNodeList.get(ichild).initializeEvaluatorUnit(interconnect);
-			childNodeUnits[ichild] = this.childNodeList.get(ichild).evaluatorUnit;
+			childNodeUnits[ichild] = this.childNodeList.get(ichild).createEvaluatorUnit(interconnect);
 		}
 
 		// Initialize evaluation units of this node.
 		if (this.token.type == TokenType.NUMBER_LITERAL) {
-			this.evaluatorUnit = new Evaluator.NumberLiteralEvaluatorUnit(this.token.word);
+			return new Evaluator.NumberLiteralEvaluatorUnit(this.token.word);
 		} else if (this.token.type == TokenType.VARIABLE_IDENTIFIER) {
-			this.evaluatorUnit = new Evaluator.VariableValueEvaluatorUnit(this.token.word, interconnect);
+			return new Evaluator.VariableValueEvaluatorUnit(this.token.word, interconnect);
+		} else if (this.token.type == TokenType.FUNCTION_IDENTIFIER) {
+			return null;
 		} else if (this.token.type == TokenType.OPERATOR) {
 			Operator op = this.token.operator;
 
 			if (op.type == OperatorType.UNARY_PREFIX && op.symbol == '-') {
-				this.evaluatorUnit = new Evaluator.MinusEvaluatorUnit(childNodeUnits[0]);
+				return new Evaluator.MinusEvaluatorUnit(childNodeUnits[0]);
 			} else if (op.type == OperatorType.BINARY && op.symbol == '+') {
-				this.evaluatorUnit = new Evaluator.AdditionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+				return new Evaluator.AdditionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
 			} else if (op.type == OperatorType.BINARY && op.symbol == '-') {
-				this.evaluatorUnit = new Evaluator.SubtractionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+				return new Evaluator.SubtractionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
 			} else if (op.type == OperatorType.BINARY && op.symbol == '*') {
-				this.evaluatorUnit = new Evaluator.MultiplicationEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+				return new Evaluator.MultiplicationEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
 			} else if (op.type == OperatorType.BINARY && op.symbol == '/') {
-				this.evaluatorUnit = new Evaluator.DivisionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+				return new Evaluator.DivisionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
 			} else if (op.type == OperatorType.CALL && op.symbol == '(') {
 				String identifier = this.childNodeList.get(0).token.word;
-				this.evaluatorUnit = new Evaluator.FunctionCallEvaluatorUnit(identifier, interconnect, childNodeUnits);
+				return new Evaluator.FunctionCallEvaluatorUnit(identifier, interconnect, childNodeUnits);
+			} else {
+				throw new Exevalator.ExevalatorException("Unexpected operator: " + op);
 			}
+		} else {
+			throw new Exevalator.ExevalatorException("Unexpected token type: " + this.token.type);
 		}
 	}
 
