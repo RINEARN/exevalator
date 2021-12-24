@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.lang.reflect.Field;
@@ -38,8 +39,8 @@ public final class Exevalator {
     /** The Map mapping each variable name to an address of the variable. */
     private volatile Map<String, Integer> variableTable;
 
-	/** The interconnect providing objects shared among multiple components of this interpreter. */
-	private volatile Interconnect interconnect;
+	/** The Map mapping each function name to an IExevalatorFunction instance. */
+	private volatile Map<String, FunctionInterface> functionTable;
 
     /** Caches the content of the expression evaluated last time, to skip re-parsing. */
 	private volatile String lastEvaluatedExpression;
@@ -54,7 +55,7 @@ public final class Exevalator {
 		this.memory = new double[64];
 		this.memoryUsage = 0;
 		this.variableTable = new ConcurrentHashMap<String, Integer>();
-		this.interconnect = new Interconnect();
+		this.functionTable = new ConcurrentHashMap<String, FunctionInterface>();
 		this.lastEvaluatedExpression = null;
 		this.evaluatorUnit = null;
 	}
@@ -65,7 +66,7 @@ public final class Exevalator {
 	 * @param expression The expression to be evaluated
 	 * @return The evaluated value
 	 */
-	public double eval(String expression) {
+	public synchronized double eval(String expression) {
 
 		boolean expressionChanged = expression != this.lastEvaluatedExpression
 			&& !expression.equals(this.lastEvaluatedExpression);
@@ -92,7 +93,7 @@ public final class Exevalator {
 			*/
 
 			// Evaluate (compute) the value of the root node of the AST.
-			this.evaluatorUnit = ast.createEvaluatorUnit(this.interconnect, this.variableTable);
+			this.evaluatorUnit = ast.createEvaluatorUnit(this.variableTable, this.functionTable);
 
 			this.lastEvaluatedExpression = expression;
 		}
@@ -103,7 +104,7 @@ public final class Exevalator {
 	}
 
 	/**
-	 * Declares a new variable, for using the value of it in the expression.
+	 * Declares a new variable, for using the value of it in expressions.
 	 * 
 	 * @param name The name of the variable to be declared
 	 * @returns The virtual address of the declared variable,
@@ -185,48 +186,20 @@ public final class Exevalator {
 	}
 
 	/**
-	 * Connects the function for calling it in the expression.
-	 *
-	 * @param function The function to be connected.
+	 * Connects a function, for using it in expressions.
+	 * 
+	 * @param name The name of the function used in the expression
+	 * @param function The function to be connected
 	 */
-	public synchronized void connectFunction(AbstractFunction function) {
-		this.interconnect.connectFunction(function);
+	public synchronized void connectFunction(String name, FunctionInterface function) {
+		this.functionTable.put(name, function);
 	}
 
 	/**
-	 * Connects the static method for calling it in the expression as a function.
-	 *
-	 * @param method The method to be connected as a function.
+	 * The interface to implement functions available in expressions.
 	 */
-	public synchronized void connectMethodAsFunction(Method method) {
-		this.interconnect.connectFunction(new MethodToFunctionAdapter(method, null));
-	}
-
-	/**
-	 * Connects the non-static method for calling it in the expression as a function.
-	 *
-	 * @param method The method to be connected as a function.
-	 * @param objectInstance The instance of the object to which the method belongs.
-	 */
-	public synchronized void connectMethodAsFunction(Method method, Object objectInstance) {
-		this.interconnect.connectFunction(new MethodToFunctionAdapter(method, objectInstance));
-	}
-
-	/**
-	 * Disconnects the function having the specified information.
-	 *
-	 * @param functionName The name of the function to be disconnected.
-	 * @param parameterCount The number of parameters of the function to be disconnected.
-	 */
-	public synchronized void disconnectFunction(String functionName, int parameterCount) {
-		this.interconnect.disconnectFunction(functionName, parameterCount);
-	}
-
-	/**
-	 * Disconnects all functions.
-	 */
-	public synchronized void disconnectAllFunctions() {
-		this.interconnect.disconnectAllFunctions();
+	public interface FunctionInterface {
+		public double invoke(double[] arguments);
 	}
 
 	/**
@@ -920,18 +893,18 @@ final class AstNode {
 	/**
 	 * Creates the evaluator unit for evaluating the value of this AST node.
 	 *
-	 * @param interconnect The interconnect providing references to variables and functions.
-     * @param variableTable The Map mapping each variable name to an address of the variable.
+     * @param variableTable The Map mapping each variable name to an address of the variable
+     * @param functionTable The Map mapping each function name to an IExevalatorFunction instance
 	 * @return The created evaluator unit.
 	 */
 	public Evaluator.EvaluatorUnit createEvaluatorUnit(
-			Interconnect interconnect, Map<String, Integer> variableTable) {
+			Map<String, Integer> variableTable, Map<String, Exevalator.FunctionInterface> functionTable) {
 
 		// Initialize evaluation units of child nodes, and store then into an array.
 		int childCount = this.childNodeList.size();
 		Evaluator.EvaluatorUnit childNodeUnits[] = new Evaluator.EvaluatorUnit[childCount];
 		for (int ichild=0; ichild<childCount; ichild++) {
-			childNodeUnits[ichild] = this.childNodeList.get(ichild).createEvaluatorUnit(interconnect, variableTable);
+			childNodeUnits[ichild] = this.childNodeList.get(ichild).createEvaluatorUnit(variableTable, functionTable);
 		}
 
 		// Initialize evaluation units of this node.
@@ -960,7 +933,16 @@ final class AstNode {
 				return new Evaluator.DivisionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
 			} else if (op.type == OperatorType.CALL && op.symbol == '(') {
 				String identifier = this.childNodeList.get(0).token.word;
-				return new Evaluator.FunctionCallEvaluatorUnit(identifier, interconnect, childNodeUnits);
+				if (!functionTable.containsKey(identifier)) {
+					throw new Exevalator.ExevalatorException("Function not found: " + identifier);
+				}
+				Exevalator.FunctionInterface function = functionTable.get(identifier);
+				int argCount = this.childNodeList.size() - 1;
+				Evaluator.EvaluatorUnit[] argUnits = new Evaluator.EvaluatorUnit[argCount];
+				for (int iarg=0; iarg<argCount; iarg++) {
+					argUnits[iarg] = childNodeUnits[iarg + 1];
+				}
+				return new Evaluator.FunctionEvaluatorUnit(function, identifier, argUnits);
 			} else {
 				throw new Exevalator.ExevalatorException("Unexpected operator: " + op);
 			}
@@ -1277,10 +1259,13 @@ final class Evaluator {
 	 * The evaluator unit for evaluating a function-call operator.
 	 *
 	 */
-	public static final class FunctionCallEvaluatorUnit extends EvaluatorUnit {
+	public static final class FunctionEvaluatorUnit extends EvaluatorUnit {
 
-		/** The variable to be called. */
-		private volatile AbstractFunction function;
+		/** The function to be called. */
+		private volatile Exevalator.FunctionInterface function;
+
+		/** The name of the function. */
+		private volatile String functionName;
 
 		/** Evaluator units for evaluating values of arguments. */
 		private volatile EvaluatorUnit[] argumentEvalUnits;
@@ -1288,21 +1273,12 @@ final class Evaluator {
 		/** An array storing evaluated values of arguments. */
 		private volatile double[] argumentArrayBuffer;
 
-		/** The number of arguments. */
-		private volatile int argumentCount;
-
-		public FunctionCallEvaluatorUnit(
-				String functionName, Interconnect interconnect, EvaluatorUnit[] argumentEvalUnits) {
-
-			this.argumentCount = argumentEvalUnits.length - 1; // The first element is identifier, so -1.
-			if (!interconnect.isFunctionConnected(functionName, this.argumentCount)) {
-				throw new Exevalator.ExevalatorException(
-					"No function found: " + functionName + "(" + this.argumentCount + "-arguments"
-				);
-			}
-			this.function = interconnect.getFunction(functionName, this.argumentCount);
+		public FunctionEvaluatorUnit(
+				Exevalator.FunctionInterface function, String functionName, EvaluatorUnit[] argumentEvalUnits) {
+			this.function = function;
+			this.functionName = functionName;
 			this.argumentEvalUnits = argumentEvalUnits;
-			this.argumentArrayBuffer = new double[this.argumentCount];
+			this.argumentArrayBuffer = new double[this.argumentEvalUnits.length];
 		}
 
 		/**
@@ -1313,166 +1289,16 @@ final class Evaluator {
 		 */
 		@Override
 		public double evaluate(double[] memory) {
-			for (int iarg=0; iarg<this.argumentCount; iarg++) {
-				this.argumentArrayBuffer[iarg] = this.argumentEvalUnits[iarg + 1].evaluate(memory);
+			int argCount = this.argumentEvalUnits.length;
+			for (int iarg=0; iarg<argCount; iarg++) {
+				this.argumentArrayBuffer[iarg] = this.argumentEvalUnits[iarg].evaluate(memory);
 			}
-			return this.function.invoke(this.argumentArrayBuffer);
+			try {
+				return this.function.invoke(this.argumentArrayBuffer);
+			} catch (Exception e) {
+				throw new Exevalator.ExevalatorException("Function error (" + this.functionName + ")", e);
+			}
 		}
-	}
-}
-
-
-/**
- * The super class of functions available on this interpreter.
- */
-abstract class AbstractFunction {
-
-	/**
-	 * Gets the name of this function.
-	 *
-	 * @return The name of this function.
-	 */
-	public abstract String getFunctionName();
-
-	/**
-	 * Gets names of parameters.
-	 *
-	 * @return Names of parameters.
-	 */
-	public abstract String[] getParameterNames();
-
-	/**
-	 * Invokes this function.
-	 *
-	 * @param arguments The arguments to be passed to this function.
-	 * @return The returned value of this function.
-	 */
-	public abstract double invoke(double[] arguments);
-}
-
-
-/**
- * The class for connecting a Method to this interpreter as a function.
- */
-final class MethodToFunctionAdapter extends AbstractFunction {
-
-	/** The method to be connected as a function. */
-	private volatile Method method;
-
-	/** The instance of the object to which the method belongs. */
-	private Object objectInstance;
-
-	/**
-	 * Creates the adapter to connect the specified method as a function.
-	 *
-	 * @param method The method to be connected as a function
-	 * @param objectInstance The instance of the object to which the method belongs.
-	 */
-	public MethodToFunctionAdapter(Method method, Object objectInstance) {
-		this.method = method;
-		this.objectInstance = objectInstance;
-	}
-
-	@Override
-	public String getFunctionName() {
-		return this.method.getName();
-	}
-
-	@Override
-	public String[] getParameterNames() {
-		int parameterCount = this.method.getParameterCount();
-		String[] parameterNames = new String[parameterCount];
-		for (int iparam=0; iparam<parameterCount; iparam++) {
-			parameterNames[iparam] = "arg" + iparam;
-		}
-		return parameterNames;
-	}
-
-	@Override
-	public double invoke(double[] arguments) {
-		int argCount = arguments.length;
-		Object[] argObjects = new Object[argCount];
-		for (int iarg=0; iarg<argCount; iarg++) {
-			argObjects[iarg] = arguments[iarg];
-		}
-
-		double returnedValue = Double.NaN;
-		try {
-			returnedValue = (double)this.method.invoke(this.objectInstance, argObjects);
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			throw new Exevalator.ExevalatorException("Can not invoke the function: " + this.method.getName(), e);
-		}
-		return returnedValue;
-	}
-}
-
-
-/**
- * The class to provide objects shared among multiple components of this interpreter.
- */
-class Interconnect {
-
-	/** The table mapping from names of functions to instances of functions. */
-	private volatile ConcurrentHashMap<String, AbstractFunction> functionTable;
-
-	/**
-	 * Creates an Interconnect instance to which nothing is connected.
-	 */
-	public Interconnect() {
-		this.functionTable = new ConcurrentHashMap<String, AbstractFunction>();
-	}
-
-	/**
-	 * Connects the new function to share it between components of this interpreter.
-	 *
-	 * @param variable The function to be connected.
-	 */
-	public synchronized void connectFunction(AbstractFunction function) {
-		// Append the number of parameters to the tail of the function name, to support function-overloading.
-		String key = function.getFunctionName() + "$" + function.getParameterNames().length;
-		this.functionTable.put(key, function);
-	}
-
-	/**
-	 * Returns the function having the specified information, if it is connected.
-	 *
-	 * @param functionName The name of the function to be gotten.
-	 * @param parameterCount The number of parameters of the function to be gotten.
-	 * @return The function having the specified information.
-	 */
-	public synchronized AbstractFunction getFunction(String functionName, int parameterCount) {
-		String key = functionName + "$" + parameterCount; // See the comment in "connectFunction" method.
-		return this.functionTable.get(key);
-	}
-
-	/**
-	 * Checks whether the function having the specified information is connected or not.
-	 *
-	 * @param functionName The name of the function to be checked.
-	 * @param parameterCount The number of parameters of the function to be checked.
-	 * @return True if the function having the specified information is connected.
-	 */
-	public synchronized boolean isFunctionConnected(String functionName, int parameterCount) {
-		String key = functionName + "$" + parameterCount; // See the comment in "connectFunction" method.
-		return this.functionTable.containsKey(key);
-	}
-
-	/**
-	 * Disconnects the function having the specified information.
-	 *
-	 * @param functionName The name of the function to be disconnected.
-	 * @param parameterCount The number of parameters of the function to be disconnected.
-	 */
-	public synchronized void disconnectFunction(String functionName, int parameterCount) {
-		String key = functionName + "$" + parameterCount; // See the comment in "connectFunction" method.
-		this.functionTable.remove(key);
-	}
-
-	/**
-	 * Disconnects all functions.
-	 */
-	public synchronized void disconnectAllFunctions() {
-		this.functionTable.clear();
 	}
 }
 
