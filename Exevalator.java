@@ -205,25 +205,6 @@ final class LexicalAnalyzer {
 	 */
 	public Token[] analyze(String expression) {
 
-		// Split the expression into token words.
-		String[] tokenWords = this.splitExpressionIntoTokenWords(expression);
-
-		// Create Token instances.
-		Token[] tokens = this.createTokensFromTokenWords(tokenWords);
-
-		// Analyze detailed information for operator tokens.
-		tokens = this.analyzeInformationOfOperands(tokens);
-		return tokens;
-	}
-
-	/**
-	 * Splits the inputted expression into token words.
-	 *
-	 * @param expression The inputted expression
-	 * @return Splitted token words
-	 */
-	private String[] splitExpressionIntoTokenWords(String expression) {
-
 		// Firstly, to simplify the tokenization,
 		// replace number literals in the expression to the escaped representation: "@NUMBER_LITERAL",
 		// because number literals may contains "+" or "-" in their exponent part.
@@ -235,26 +216,24 @@ final class LexicalAnalyzer {
 			expression = expression.replace(Character.toString(splitter), " " + splitter + " ");
 		}
 		String[] tokenWords = expression.trim().split("\\s+");
-		int tokenCount = tokenWords.length;
 
-		// Recover escaped number literals.
-		int numberLiteralIndex = 0;
-		for (int itoken=0; itoken<tokenCount; itoken++) {
-			if (tokenWords[itoken].equals(StaticSettings.ESCAPED_NUMBER_LITERAL)) {
-				tokenWords[itoken] = numberLiteralList.get(numberLiteralIndex);
-				numberLiteralIndex++;
-			}
-		}
-		return tokenWords;
+		// Create Token instances.
+		// Also, escaped number literals will be recovered.
+		Token[] tokens = this.createTokensFromTokenWords(tokenWords, numberLiteralList);
+
+		// Analyze detailed information for operator tokens.
+		tokens = this.analyzeInformationOfOperands(tokens);
+		return tokens;
 	}
 
 	/**
 	 * Creates Token-type instances from token words (String).
 	 *
 	 * @param tokenWords Token words (String) to be converted to Token instances
+	 * @param numberLiteralList The List storing number literals.
 	 * @return Created Token instances
 	 */
-	private Token[] createTokensFromTokenWords(String[] tokenWords) {
+	private Token[] createTokensFromTokenWords(String[] tokenWords, List<String> numberLiterals) {
 		int tokenCount = tokenWords.length;
 
 		// Stores the parenthesis-depth, which will increase at "(" and decrease at ")".
@@ -265,7 +244,7 @@ final class LexicalAnalyzer {
 		Set<Integer> callParenthesisDepths = new HashSet<Integer>();
 
 		Token[] tokens = new Token[tokenCount];
-		String numberLiteralRegexForMatching = "^" + StaticSettings.NUMBER_LITERAL_REGEX + "$";
+		int iliteral = 0;
 		for (int itoken=0; itoken<tokenCount; itoken++) {
 			String word = tokenWords[itoken];
 
@@ -292,8 +271,9 @@ final class LexicalAnalyzer {
 			// Cases of operator, literals, and separator.
 			} else if (word.length() == 1 && StaticSettings.OPERATOR_SYMBOL_SET.contains(word.charAt(0))) {
 				tokens[itoken] = new Token(TokenType.OPERATOR, word);
-			} else if (word.matches(numberLiteralRegexForMatching)) {
-				tokens[itoken] = new Token(TokenType.NUMBER_LITERAL, word);
+			} else if (word.equals(StaticSettings.ESCAPED_NUMBER_LITERAL)) {
+				tokens[itoken] = new Token(TokenType.NUMBER_LITERAL, numberLiterals.get(iliteral));
+				iliteral++;
 			} else if (word.equals(",")) {
 				tokens[itoken] = new Token(TokenType.EXPRESSION_SEPARATOR, word);
 
