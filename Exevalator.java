@@ -48,10 +48,10 @@ public final class Exevalator {
 	public double eval(String expression) {
 
 		// Split the expression into tokens, and analyze them.
-		Token[] tokens = new LexicalAnalyzer().analyze(expression);
+		Token[] tokens = LexicalAnalyzer.analyze(expression);
 
 		// Construct AST (Abstract Syntax Tree) by parsing tokens.
-		AstNode ast = new Parser().parse(tokens);
+		AstNode ast = Parser.parse(tokens);
 
 		// Evaluate (compute) the value of the root node of the AST.
 		ast.initializeEvaluatorUnit(this.interconnect);
@@ -200,13 +200,13 @@ final class LexicalAnalyzer {
 	 * @param expression The expression to be tokenized/analyzed
 	 * @return Analyzed tokens
 	 */
-	public Token[] analyze(String expression) {
+	public static Token[] analyze(String expression) {
 
 		// Firstly, to simplify the tokenization,
 		// replace number literals in the expression to the escaped representation: "@NUMBER_LITERAL",
 		// because number literals may contains "+" or "-" in their exponent part.
 		List<String> numberLiteralList = new ArrayList<String>();
-		expression = this.escapeNumberLiterals(expression, numberLiteralList);
+		expression = escapeNumberLiterals(expression, numberLiteralList);
 
 		// Tokenize (split) the expression into token words.
 		for (char splitter: StaticSettings.TOKEN_SPLITTER_SYMBOL_LIST) {
@@ -216,12 +216,12 @@ final class LexicalAnalyzer {
 
 		// Create Token instances.
 		// Also, escaped number literals will be recovered.
-		Token[] tokens = this.createTokensFromTokenWords(tokenWords, numberLiteralList);
+		Token[] tokens = createTokensFromTokenWords(tokenWords, numberLiteralList);
 
 		// Checks syntactic correctness of tokens of inputted expressions.
-		this.checkParenthesisOpeningClosings(tokens);
-		this.checkEmptyParentheses(tokens);
-		this.checkLocationsOfOperatorsAndLeafs(tokens);
+		checkParenthesisOpeningClosings(tokens);
+		checkEmptyParentheses(tokens);
+		checkLocationsOfOperatorsAndLeafs(tokens);
 
 		return tokens;
 	}
@@ -233,7 +233,7 @@ final class LexicalAnalyzer {
 	 * @param numberLiteralList The List storing number literals.
 	 * @return Created Token instances
 	 */
-	private Token[] createTokensFromTokenWords(String[] tokenWords, List<String> numberLiterals) {
+	private static Token[] createTokensFromTokenWords(String[] tokenWords, List<String> numberLiterals) {
 		int tokenCount = tokenWords.length;
 
 		// Stores the parenthesis-depth, which will increase at "(" and decrease at ")".
@@ -327,7 +327,7 @@ final class LexicalAnalyzer {
 	 * @param literalStoreList The list to which number literals will be added
 	 * @return The expression in which number literals are escaped.
 	 */
-	private String escapeNumberLiterals(String expression, List<String> literalStoreList) {
+	private static String escapeNumberLiterals(String expression, List<String> literalStoreList) {
 		Pattern numberLiteralPattern = Pattern.compile(StaticSettings.NUMBER_LITERAL_REGEX);
 		Matcher numberLiteralMatcher = numberLiteralPattern.matcher(expression);
 
@@ -354,7 +354,7 @@ final class LexicalAnalyzer {
 	 *
 	 * @param tokens Tokens of the inputted expression.
 	 */
-	private void checkParenthesisOpeningClosings(Token[] tokens) {
+	private static void checkParenthesisOpeningClosings(Token[] tokens) {
 		int tokenCount = tokens.length;
 		int hierarchy = 0; // Increases at "(" and decreases at ")".
 
@@ -390,7 +390,7 @@ final class LexicalAnalyzer {
 	 *
 	 * @param tokens Tokens of the inputted expression.
 	 */
-	private void checkEmptyParentheses(Token[] tokens) {
+	private static void checkEmptyParentheses(Token[] tokens) {
 		int tokenCount = tokens.length;
 		int contentCounter = 0;
 		for (int tokenIndex=0; tokenIndex<tokenCount; tokenIndex++) {
@@ -418,7 +418,7 @@ final class LexicalAnalyzer {
 	 *
 	 * @param tokens Tokens of the inputted expression.
 	 */
-	private void checkLocationsOfOperatorsAndLeafs(Token[] tokens) {
+	private static void checkLocationsOfOperatorsAndLeafs(Token[] tokens) {
 		int tokenCount = tokens.length;
 		Set<TokenType> leafTypeSet = EnumSet.noneOf(TokenType.class);
 		leafTypeSet.add(TokenType.NUMBER_LITERAL);
@@ -498,7 +498,7 @@ final class Parser {
 	 * @param tokens Tokens to be parsed
 	 * @return The root node of the constructed AST
 	 */
-	public AstNode parse(Token[] tokens) {
+	public static AstNode parse(Token[] tokens) {
 
 		/* In this method, we use a non-recursive algorithm for the parsing.
 		* Processing cost is maybe O(N), where N is the number of tokens. */
@@ -516,7 +516,7 @@ final class Parser {
 
 		// The array storing next operator's precedence for each token.
 		// At [i], it is stored that the precedence of the first operator of which token-index is greater than i.
-		int[] nextOperatorPrecedences = this.getNextOperatorPrecedences(tokens);
+		int[] nextOperatorPrecedences = getNextOperatorPrecedences(tokens);
 
 		// Read tokens from left to right.
 		int itoken = 0;
@@ -539,7 +539,7 @@ final class Parser {
 					itoken++;
 					continue;
 				} else { // Case of ")"
-					operatorNode = this.popPartialExprNodes(stack, parenthesisStackLid)[0];
+					operatorNode = popPartialExprNodes(stack, parenthesisStackLid)[0];
 				}
 
 			// Case of separator: ","
@@ -556,7 +556,7 @@ final class Parser {
 				// Case of unary-prefix operators:
 				// * Connect the node of right-token as an operand, if necessary (depending the next operator's precedence).
 				if (token.operator.type == OperatorType.UNARY_PREFIX) {
-					if (this.shouldAddRightOperand(token.operator.precedence, nextOpPrecedence)) {
+					if (shouldAddRightOperand(token.operator.precedence, nextOpPrecedence)) {
 						operatorNode.childNodeList.add(new AstNode(tokens[itoken + 1]));
 						itoken++;
 					} // else: Operand will be connected later. See the bottom of this loop.
@@ -566,7 +566,7 @@ final class Parser {
 				// * Connect the node of right-token as an operand, if necessary (depending the next operator's precedence).
 				} else if (token.operator.type == OperatorType.BINARY) {
 					operatorNode.childNodeList.add(stack.pop());
-					if (this.shouldAddRightOperand(token.operator.precedence, nextOpPrecedence)) {
+					if (shouldAddRightOperand(token.operator.precedence, nextOpPrecedence)) {
 						operatorNode.childNodeList.add(new AstNode(tokens[itoken + 1]));
 						itoken++;
 					} // else: Right-operand will be connected later. See the bottom of this loop.
@@ -580,7 +580,7 @@ final class Parser {
 						itoken++;
 						continue;
 					} else { // Case of ")"
-						AstNode[] argNodes = this.popPartialExprNodes(stack, callBeginStackLid);
+						AstNode[] argNodes = popPartialExprNodes(stack, callBeginStackLid);
 						operatorNode = stack.pop();
 						for (AstNode argNode: argNodes) {
 							operatorNode.childNodeList.add(argNode);
@@ -591,7 +591,7 @@ final class Parser {
 
 			// If the precedence of the operator at the top of the stack is stronger than the next operator,
 			// connect all "unconnected yet" operands and operators in the stack.
-			while (this.shouldAddRightOperandToStackedOperator(stack, nextOperatorPrecedences[itoken])) {
+			while (shouldAddRightOperandToStackedOperator(stack, nextOperatorPrecedences[itoken])) {
 				AstNode oldOperatorNode = operatorNode;
 				operatorNode = stack.pop();
 				operatorNode.childNodeList.add(oldOperatorNode);
@@ -612,7 +612,7 @@ final class Parser {
 	 * @param nextOperatorPrecedence The precedence of the next operator (smaller value gives higher precedence).
 	 * @return Returns true if the right-side token (operand) should be connected to the target operator
 	 */
-	private boolean shouldAddRightOperand(int targetOperatorPrecedence, int nextOperatorPrecedence) {
+	private static boolean shouldAddRightOperand(int targetOperatorPrecedence, int nextOperatorPrecedence) {
 		return targetOperatorPrecedence <= nextOperatorPrecedence; // left is stronger
 	}
 
@@ -624,11 +624,11 @@ final class Parser {
 	 * @param nextOperatorPrecedence The precedence of the next operator (smaller value gives higher precedence).
 	 * @return Returns true if the right-side token (operand) should be connected to the operator at the top of the stack
 	 */
-	private boolean shouldAddRightOperandToStackedOperator(Deque<AstNode> stack, int nextOperatorPrecedence) {
+	private static boolean shouldAddRightOperandToStackedOperator(Deque<AstNode> stack, int nextOperatorPrecedence) {
 		if (stack.size() == 0 || stack.peek().token.type != TokenType.OPERATOR) {
 			return false;
 		}
-		return this.shouldAddRightOperand(stack.peek().token.operator.precedence, nextOperatorPrecedence);
+		return shouldAddRightOperand(stack.peek().token.operator.precedence, nextOperatorPrecedence);
 	}
 
 	/**
@@ -638,7 +638,7 @@ final class Parser {
 	 * @param targetStackLidNode The temporary node pushed in the stack, at the end of partial expressions to be popped
 	 * @return Root nodes of ASTs of partial expressions
 	 */
-	private AstNode[] popPartialExprNodes(Deque<AstNode> stack, AstNode endStackLidNode) {
+	private static AstNode[] popPartialExprNodes(Deque<AstNode> stack, AstNode endStackLidNode) {
 		if (stack.size() == 0) {
 			throw new Exevalator.ExevalatorException("Unexpected end of a partial expression");
 		}
@@ -664,7 +664,7 @@ final class Parser {
 	 * @param tokens All tokens to be parsed
 	 * @return The array storing next operator's precedence for each token
 	 */
-	private int[] getNextOperatorPrecedences(Token[] tokens) {
+	private static int[] getNextOperatorPrecedences(Token[] tokens) {
 		int tokenCount = tokens.length;
 		int lastOperatorPrecedence = Integer.MAX_VALUE; // least prior
 		int[] nextOperatorPrecedences = new int[tokenCount];
