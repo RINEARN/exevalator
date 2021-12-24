@@ -230,8 +230,8 @@ final class LexicalAnalyzer {
 		expression = this.escapeNumberLiterals(expression, numberLiteralList);
 
 		// Tokenize (split) the expression into token words.
-		for (String splitter: StaticSettings.TOKEN_SPLITTER_SYMBOL_LIST) {
-			expression = expression.replace(splitter, " " + splitter + " ");
+		for (char splitter: StaticSettings.TOKEN_SPLITTER_SYMBOL_LIST) {
+			expression = expression.replace(Character.toString(splitter), " " + splitter + " ");
 		}
 		String[] tokenWords = expression.trim().split("\\s+");
 		int tokenCount = tokenWords.length;
@@ -289,7 +289,7 @@ final class LexicalAnalyzer {
 				parenthesisDepth--;
 
 			// Cases of operator, literals, and separator.
-			} else if (StaticSettings.OPERATOR_SYMBOL_SET.contains(word)) {
+			} else if (word.length() == 1 && StaticSettings.OPERATOR_SYMBOL_SET.contains(word.charAt(0))) {
 				tokens[itoken] = new Token(TokenType.OPERATOR, word);
 			} else if (word.matches(numberLiteralRegexForMatching)) {
 				tokens[itoken] = new Token(TokenType.NUMBER_LITERAL, word);
@@ -331,19 +331,19 @@ final class LexicalAnalyzer {
 
 			// Cases of function call operators.
 			if (token.word.equals("(") || token.word.equals(")") ) {
-				operator = StaticSettings.searchOperator(OperatorType.CALL, token.word);
+				operator = StaticSettings.searchOperator(OperatorType.CALL, token.word.charAt(0));
 
 			// Cases of unary-prefix operators.
 			} else if (lastToken == null
 					|| lastToken.word.equals("(")
 					|| (lastToken.type == TokenType.OPERATOR && lastToken.operator.type != OperatorType.CALL) ) {
-				operator = StaticSettings.searchOperator(OperatorType.UNARY_PREFIX, token.word);
+				operator = StaticSettings.searchOperator(OperatorType.UNARY_PREFIX, token.word.charAt(0));
 
 			// Cases of binary operators.
 			} else if (lastToken.word.equals(")")
 					|| lastToken.type == TokenType.NUMBER_LITERAL
 					|| lastToken.type == TokenType.VARIABLE_IDENTIFIER) {
-				operator = StaticSettings.searchOperator(OperatorType.BINARY, token.word);
+				operator = StaticSettings.searchOperator(OperatorType.BINARY, token.word.charAt(0));
 
 			} else {
 				throw new Exevalator.ExevalatorException("Unexpected operator syntax: " + token.word);
@@ -766,7 +766,7 @@ enum OperatorType {
 final class Operator {
 
 	/** The symbol of this operator (for example: '+'). */
-	public final String symbol;
+	public final char symbol;
 
 	/** The precedence of this operator (smaller value gives higher precedence). */
 	public final int precedence;
@@ -781,7 +781,7 @@ final class Operator {
 	 * @param symbol The symbol of this operator
 	 * @param precedence The precedence of this operator
 	 */
-	public Operator(OperatorType type, String symbol, int precedence) {
+	public Operator(OperatorType type, char symbol, int precedence) {
 		this.type = type;
 		this.symbol = symbol;
 		this.precedence = precedence;
@@ -1595,25 +1595,25 @@ final class StaticSettings {
 	public static final String ESCAPED_NUMBER_LITERAL = "@NUMBER_LITERAL@";
 
 	/** The instance of addition operator. */
-	public static final Operator ADDITION_OPERATOR = new Operator(OperatorType.BINARY, "+", 400);
+	public static final Operator ADDITION_OPERATOR = new Operator(OperatorType.BINARY, '+', 400);
 
 	/** The instance of subtraction operator. */
-	public static final Operator SUBTRACTION_OPERATOR = new Operator(OperatorType.BINARY, "-", 400);
+	public static final Operator SUBTRACTION_OPERATOR = new Operator(OperatorType.BINARY, '-', 400);
 
 	/** The instance of multiplication operator. */
-	public static final Operator MULTIPLICATION_OPERATOR = new Operator(OperatorType.BINARY, "*", 300);
+	public static final Operator MULTIPLICATION_OPERATOR = new Operator(OperatorType.BINARY, '*', 300);
 
 	/** The instance of division operator. */
-	public static final Operator DIVISION_OPERATOR = new Operator(OperatorType.BINARY, "/", 300);
+	public static final Operator DIVISION_OPERATOR = new Operator(OperatorType.BINARY, '/', 300);
 
 	/** The instance of unary-minus operator. */
-	public static final Operator MINUS_OPERATOR = new Operator(OperatorType.UNARY_PREFIX, "-", 200);
+	public static final Operator MINUS_OPERATOR = new Operator(OperatorType.UNARY_PREFIX, '-', 200);
 
 	/** The instance of the beginning of call operator. */
-	public static final Operator CALL_BEGIN_OPERATOR = new Operator(OperatorType.CALL, "(", 100);
+	public static final Operator CALL_BEGIN_OPERATOR = new Operator(OperatorType.CALL, '(', 100);
 
 	/** The instance of the end of call operator. */
-	public static final Operator CALL_END_OPERATOR = new Operator(OperatorType.CALL, ")", Integer.MAX_VALUE); // least prior
+	public static final Operator CALL_END_OPERATOR = new Operator(OperatorType.CALL, ')', Integer.MAX_VALUE); // least prior
 
 	/** The list of available operators. */
 	public static final List<Operator> OPERATOR_LIST = new ArrayList<Operator>();
@@ -1629,25 +1629,25 @@ final class StaticSettings {
 
 	/** The set of symbols of available operators. */
 	@SuppressWarnings("serial")
-	public static final Set<String> OPERATOR_SYMBOL_SET = new HashSet<String>() {{
-		add("+");
-		add("-");
-		add("*");
-		add("/");
-		add("(");
-		add(")");
+	public static final Set<Character> OPERATOR_SYMBOL_SET = new HashSet<Character>() {{
+		add('+');
+		add('-');
+		add('*');
+		add('/');
+		add('(');
+		add(')');
 	}};
 
 	/** The list of symbols to split an expression into tokens. */
-	public static final List<String> TOKEN_SPLITTER_SYMBOL_LIST = new ArrayList<String>();
+	public static final List<Character> TOKEN_SPLITTER_SYMBOL_LIST = new ArrayList<Character>();
 	static {
-		TOKEN_SPLITTER_SYMBOL_LIST.add("+");
-		TOKEN_SPLITTER_SYMBOL_LIST.add("-");
-		TOKEN_SPLITTER_SYMBOL_LIST.add("*");
-		TOKEN_SPLITTER_SYMBOL_LIST.add("/");
-		TOKEN_SPLITTER_SYMBOL_LIST.add("(");
-		TOKEN_SPLITTER_SYMBOL_LIST.add(")");
-		TOKEN_SPLITTER_SYMBOL_LIST.add(",");
+		TOKEN_SPLITTER_SYMBOL_LIST.add('+');
+		TOKEN_SPLITTER_SYMBOL_LIST.add('-');
+		TOKEN_SPLITTER_SYMBOL_LIST.add('*');
+		TOKEN_SPLITTER_SYMBOL_LIST.add('/');
+		TOKEN_SPLITTER_SYMBOL_LIST.add('(');
+		TOKEN_SPLITTER_SYMBOL_LIST.add(')');
+		TOKEN_SPLITTER_SYMBOL_LIST.add(',');
 	};
 
 	/**
@@ -1657,9 +1657,9 @@ final class StaticSettings {
 	 * @param symbol The symbol of the operator to be searched
 	 * @return The Operator matching specified conditions
 	 */
-	public static final Operator searchOperator(OperatorType type, String symbol) {
+	public static final Operator searchOperator(OperatorType type, char symbol) {
 		for (Operator operator: OPERATOR_LIST) {
-			if (operator.type == type && operator.symbol.equals(symbol)) {
+			if (operator.type == type && operator.symbol == symbol) {
 				return operator;
 			}
 		}
