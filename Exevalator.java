@@ -338,12 +338,20 @@ final class LexicalAnalyzer {
 			} else if (lastToken == null
 					|| lastToken.word.equals("(")
 					|| (lastToken.type == TokenType.OPERATOR && lastToken.operator.type != OperatorType.CALL) ) {
+
+				if (!StaticSettings.UNARY_PREFIX_OPERATOR_SYMBOL_MAP.containsKey(token.word.charAt(0))) {
+					throw new Exevalator.ExevalatorException("Unknown unary-prefix operator: " + token.word);
+				}
 				operator = StaticSettings.UNARY_PREFIX_OPERATOR_SYMBOL_MAP.get(token.word.charAt(0));
 
 			// Cases of binary operators.
 			} else if (lastToken.word.equals(")")
 					|| lastToken.type == TokenType.NUMBER_LITERAL
 					|| lastToken.type == TokenType.VARIABLE_IDENTIFIER) {
+
+				if (!StaticSettings.BINARY_OPERATOR_SYMBOL_MAP.containsKey(token.word.charAt(0))) {
+					throw new Exevalator.ExevalatorException("Unknown binary operator: " + token.word);
+				}
 				operator = StaticSettings.BINARY_OPERATOR_SYMBOL_MAP.get(token.word.charAt(0));
 
 			} else {
