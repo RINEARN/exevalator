@@ -67,13 +67,23 @@ public final class Exevalator {
 	 * @return The evaluated value
 	 */
 	public synchronized double eval(String expression) {
+		if (expression == null) {
+			throw new NullPointerException();
+		}
+		if (StaticSettings.MAX_EXPRESSION_CHAR_COUNT < expression.length()) {
+			throw new Exevalator.Exception(
+				"The length of the expression exceeds the limit "
+				+ "(StaticSettings.MAX_EXPRESSION_CHAR_COUNT: "
+				+ StaticSettings.MAX_EXPRESSION_CHAR_COUNT + ")"
+			);
+		}
 
 		boolean expressionChanged = expression != this.lastEvaluatedExpression
-			&& !expression.equals(this.lastEvaluatedExpression);
+		&& !expression.equals(this.lastEvaluatedExpression);
 
         // If the expression changed from the last-evaluated expression, re-parsing is necessary.
 		if (this.evaluatorUnit == null || expressionChanged) {
-
+			
 			// Split the expression into tokens, and analyze them.
 			Token[] tokens = LexicalAnalyzer.analyze(expression);
 
@@ -112,6 +122,15 @@ public final class Exevalator {
 	 * 	        See "writeVariableAt" and "readVariableAt" method.
 	 */
 	public synchronized int declareVariable(String name) {
+		if (name == null) {
+			throw new NullPointerException();
+		}
+		if (StaticSettings.MAX_NAME_CHAR_COUNT < name.length()) {
+			throw new Exevalator.Exception(
+				"The length of the variable name exceeds the limit (StaticSettings.MAX_NAME_CHAR_COUNT: "
+				+ StaticSettings.MAX_NAME_CHAR_COUNT + ")"
+			);
+		}
 
 		// If the memory is full, expand the memory size.
 		if (this.memory.length == this.memoryUsage) {
@@ -136,7 +155,10 @@ public final class Exevalator {
      * @param value The new value of the variable
 	 */
 	public synchronized void writeVariable(String name, double value) {
-		if (!this.variableTable.containsKey(name)) {
+		if (name == null) {
+			throw new NullPointerException();
+		}
+		if (StaticSettings.MAX_NAME_CHAR_COUNT < name.length() || !this.variableTable.containsKey(name)) {
 			throw new Exevalator.Exception("Variable not found: " + name);
 		}
 		int address = this.variableTable.get(name);
@@ -164,7 +186,10 @@ public final class Exevalator {
 	 * @return The current value of the variable
 	 */
 	public synchronized double readVariable(String name) {
-		if (!this.variableTable.containsKey(name)) {
+		if (name == null) {
+			throw new NullPointerException();
+		}
+		if (StaticSettings.MAX_NAME_CHAR_COUNT < name.length() || !this.variableTable.containsKey(name)) {
 			throw new Exevalator.Exception("Variable not found: " + name);
 		}
 		int address = this.variableTable.get(name);
@@ -192,6 +217,15 @@ public final class Exevalator {
 	 * @param function The function to be connected
 	 */
 	public synchronized void connectFunction(String name, FunctionInterface function) {
+		if (name == null || function == null) {
+			throw new NullPointerException();
+		}
+		if (StaticSettings.MAX_NAME_CHAR_COUNT < name.length()) {
+			throw new Exevalator.Exception(
+				"The length of the variable name exceeds the limit (StaticSettings.MAX_NAME_CHAR_COUNT: "
+				+ StaticSettings.MAX_NAME_CHAR_COUNT + ")"
+			);
+		}
 		this.functionTable.put(name, function);
 	}
 
@@ -1307,6 +1341,12 @@ final class Evaluator {
  * The class defining static setting values.
  */
 final class StaticSettings {
+
+	/** The maximum number of characters in an expression. */
+	public static final int MAX_EXPRESSION_CHAR_COUNT = 256;
+
+	/** The maximum number of characters of variable/function names. */
+	public static final int MAX_NAME_CHAR_COUNT = 64;
 
 	/** The indent used in text representations of ASTs. */
 	public static final String AST_INDENT = "  ";
