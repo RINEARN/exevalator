@@ -178,7 +178,7 @@ Microsoft&reg; Windows&reg; を使用している場合は:
 <a id="credits"></a>
 ## 本文中の商標など
 
-- Rustは、Mozilla Foundation の米国及びその他の国における登録商標です。文中の社名、商品名等は各社の商標または登録商標である場合があります。 
+- Rustは、Mozilla Foundation の米国及びその他の国における登録商標です。
 
 - Windows は、米国 Microsoft Corporation の米国およびその他の国における登録商標です。
 

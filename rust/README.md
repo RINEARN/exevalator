@@ -165,7 +165,7 @@ You can connect the above function to Exevalator, and use it in expressions:
 <a id="credits"></a>
 ## Credits
 
-- Rust is registered trademarks of Oracle and/or its affiliates. 
+- Rust is registered trademarks of Mozilla Foundation and/or its affiliates 
 
 - Microsoft Windows is either a registered trademarks or trademarks of Microsoft Corporation in the United States and/or other countries.
 
