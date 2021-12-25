@@ -2,7 +2,7 @@ name: Standard Build/Test CI
 on: push
 jobs:
 
-  build-and-test-java:
+  test-for-java:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -35,7 +35,7 @@ jobs:
 
 
 
-  build-and-test-for-cpp:
+  test-for-cpp:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -64,7 +64,7 @@ jobs:
 
 
 
-  build-and-test-for-rust:
+  test-for-for-rust:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

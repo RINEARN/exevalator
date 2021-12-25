@@ -2,7 +2,7 @@ name: Old-Env Build/Test CI
 on: push
 jobs:
 
-  build-and-test:
+  test-for-java:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
