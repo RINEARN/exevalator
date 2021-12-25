@@ -178,11 +178,11 @@ Exevalator のインタープリタは、ファイル「 cpp/exevalator.cpp 」�
 
 ### 3. 関数の使用
 
-式の中で使用するための関数も作成できます。それには、ExevalatorFunctionInterface インターフェース（抽象クラス）を継承したクラスを作成します：
+式の中で使用するための関数も作成できます。それには、ExevalatorFunctionInterface（抽象クラス）を継承したクラスを作成します：
 
 	// 式内で使用できる関数を作成
 	class MyFun : public exevalator::ExevalatorFunctionInterface {
-		virtual double operator()(std::vector<double> arguments) {
+		double operator()(std::vector<double> arguments) {
 			if (arguments.size() != 2) {
 				throw new exevalator::ExevalatorException("Incorrect number of args");
 			}
