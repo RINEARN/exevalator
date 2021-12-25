@@ -35,21 +35,21 @@ If you want to locate "exevalator.rs" into non-root directory, it is necessary t
 
 Then, you can load the Exevalator from any your source code and compute expressions as follows:
 
-    mod exevalator;
-    use exevalator::Exevalator;
-    ...
+	mod exevalator;
+	use exevalator::Exevalator;
+	...
 
-    // Create an interpreter for evaluating expressions
-    let mut exevalator = Exevalator::new();
+	// Create an interpreter for evaluating expressions
+	let mut exevalator = Exevalator::new();
 
-    // Evaluate (compute) the value of an expression
-    let result: f64 = match exevalator.eval("1.2 + 3.4") {
-        Ok(eval_value) => eval_value,
-        Err(eval_error) => panic!("{}", eval_error),
-    };
+	// Evaluate (compute) the value of an expression
+	let result: f64 = match exevalator.eval("1.2 + 3.4") {
+		Ok(eval_value) => eval_value,
+		Err(eval_error) => panic!("{}", eval_error),
+	};
 
-    // Display the result
-    println!("result = {}", result);    
+	// Display the result
+	println!("result = {}", result);	
 
 Note that, all numbers in expressions will be handled as f64-type values on Exevalator.
 The evaluated (computed) value is always f64-type.
@@ -66,19 +66,19 @@ Simple example code "rust/example*.rs" are bundled in this repository. You can c
 
 How to execute is, if you are using Linux&reg; and so on:
 
-    ./example1
+	./example1
 
 If you are using Microsoft&reg; Windows&reg;:
 
-    example1.exe
+	example1.exe
 
 By the way, "example1.rs" is an example for computing the value of "1.2 + 3.4" by using Exevalator. Its code is almost the same as "YourClass" in the previous section:
 
-    ...
-    let result: f64 = match exevalator.eval("1.2 + 3.4") {
-        Ok(eval_value) => eval_value,
-        Err(eval_error) => panic!("{}", eval_error),
-    };
+	...
+	let result: f64 = match exevalator.eval("1.2 + 3.4") {
+		Ok(eval_value) => eval_value,
+		Err(eval_error) => panic!("{}", eval_error),
+	};
 
 So the result is:
 
@@ -96,13 +96,13 @@ The followings are main features of Exevalator.
 
 As shown in the previous sections, Exevalator can evaluate (compute) the value of an expression:
 
-    let result: f64 = match exevalator.eval("(-(1.2 + 3.4) * 5) / 2") {
-        Ok(eval_value) => eval_value,
-        Err(eval_error) => panic!("{}", eval_error),
-    };
-    // result: -11.5
+	let result: f64 = match exevalator.eval("(-(1.2 + 3.4) * 5) / 2") {
+		Ok(eval_value) => eval_value,
+		Err(eval_error) => panic!("{}", eval_error),
+	};
+	// result: -11.5
 
-    (See: rust/example2.rs)
+	(See: rust/example2.rs)
 
 As the above, you can use "+" (addition), "-" (subtraction), "\*" (multiplication), and "/" (division) operators in an expression. Operations of "\*" and "/" are prioritized than "+" and "-".
 
@@ -113,24 +113,24 @@ You can use variables in expressions:
 
 If you change the value of a variable very frequently, access to the variable by the address as follows:
 
-    // Declare a new variable and set the value
-    match exevalator.declare_variable("x") {
-        Ok(address) => address,
-        Err(declaration_error) => panic!("{}", declaration_error)
-    };
-    match exevalator.write_variable("x", 1.25) {
-        Some(access_error) => panic!("{}", access_error),
-        None => {},
-    };
+	// Declare a new variable and set the value
+	match exevalator.declare_variable("x") {
+		Ok(address) => address,
+		Err(declaration_error) => panic!("{}", declaration_error)
+	};
+	match exevalator.write_variable("x", 1.25) {
+		Some(access_error) => panic!("{}", access_error),
+		None => {},
+	};
 
-    // Evaluate (compute) the value of an expression
-    let result: f64 = match exevalator.eval("x + 1") {
-        Ok(eval_value) => eval_value,
-        Err(eval_error) => panic!("{}", eval_error),
-    };
-    // result: 2.25
+	// Evaluate (compute) the value of an expression
+	let result: f64 = match exevalator.eval("x + 1") {
+		Ok(eval_value) => eval_value,
+		Err(eval_error) => panic!("{}", eval_error),
+	};
+	// result: 2.25
 
-    (See: rust/example3.rs)
+	(See: rust/example3.rs)
 
 This way works faster than accessings by the name.
 
@@ -138,27 +138,27 @@ This way works faster than accessings by the name.
 
 You can define functions available in expressions. Functions having the signature **"fn function(arguments: Vec<f64>) -> Result<f64, ExevalatorError>"** is available. For example:
 
-    /// The function available in expressions
-    fn my_function(arguments: Vec<f64>) -> Result<f64, ExevalatorError> {
-        return Ok(arguments[0] + arguments[1]);
-    } 
+	/// The function available in expressions
+	fn my_function(arguments: Vec<f64>) -> Result<f64, ExevalatorError> {
+		return Ok(arguments[0] + arguments[1]);
+	} 
 
 You can connect the above function to Exevalator, and use it in expressions:
 
-    // Connect the above function to use it in expressions
-    let address: usize = match exevalator.connect_function("fun", my_function) {
-        Ok(connected_function_address) => connected_function_address,
-        Err(connection_error) => panic!("{}", connection_error),
-    };
-    
-    // Evaluate (compute) the value of an expression
-    let result: f64 = match exevalator.eval("fun(1.2, 3.4)") {
-        Ok(eval_value) => eval_value,
-        Err(eval_error) => panic!("{}", eval_error),
-    };
-    // result: 4.6
+	// Connect the above function to use it in expressions
+	let address: usize = match exevalator.connect_function("fun", my_function) {
+		Ok(connected_function_address) => connected_function_address,
+		Err(connection_error) => panic!("{}", connection_error),
+	};
+	
+	// Evaluate (compute) the value of an expression
+	let result: f64 = match exevalator.eval("fun(1.2, 3.4)") {
+		Ok(eval_value) => eval_value,
+		Err(eval_error) => panic!("{}", eval_error),
+	};
+	// result: 4.6
 
-    (See: rust/example5.rs)
+	(See: rust/example5.rs)
 
 
 

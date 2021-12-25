@@ -132,10 +132,10 @@ Exevalator のインタープリタは、単一のファイル「 csharp/Exevala
 	// 式内で使用できる関数を作成
 	class MyFunction : IExevalatorFunction
 	{
-	    public double invoke(double[] arguments)
-    	{
+		public double invoke(double[] arguments)
+		{
 			return arguments[0] + arguments[1];
-    	}
+		}
 	}
 	...
 

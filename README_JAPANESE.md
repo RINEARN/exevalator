@@ -58,12 +58,12 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、アプリケーシ
 
 	(in rust/example1.rs)
 
-    let mut exevalator = Exevalator::new();
-    let result: f64 = match exevalator.eval("1.2 + 3.4") {
-        Ok(eval_value) => eval_value,
-        Err(eval_error) => panic!("{}", eval_error),
-    };
-    println!("result = {}", result);
+	let mut exevalator = Exevalator::new();
+	let result: f64 = match exevalator.eval("1.2 + 3.4") {
+		Ok(eval_value) => eval_value,
+		Err(eval_error) => panic!("{}", eval_error),
+	};
+	println!("result = {}", result);
 
 このコードをコンパイルして実行するには：
 
@@ -89,9 +89,9 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、アプリケーシ
 
 	(in csharp/Example1.cs)
 
-    Exevalator exevalator = new Exevalator();
-    double result = exevalator.Eval("1.2 + 3.4");
-    Console.WriteLine("Result: " + result);
+	Exevalator exevalator = new Exevalator();
+	double result = exevalator.Eval("1.2 + 3.4");
+	Console.WriteLine("Result: " + result);
 
 このコードは、Visual Studio&reg;上で適当なプロジェクト内に取り込んでも実行できますが、ここで即席で動かして確認するには、コマンドラインが便利です。Visual Studio 付属の Developer Command Prompt（スタートボタン > Visual Studio 20** > … ）を起動し、その上でリポジトリのフォルダに cd して、以下のようにコンパイル/実行できます：
 

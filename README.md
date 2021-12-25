@@ -58,17 +58,17 @@ In "rust" folder, the Rust implementation version of Exevalator, various example
 
 	(in rust/example1.rs)
 
-    // Create an instance of Exevalator Engine
-    let mut exevalator = Exevalator::new();
+	// Create an instance of Exevalator Engine
+	let mut exevalator = Exevalator::new();
 
-    // Evaluate the value of an expression
-    let result: f64 = match exevalator.eval("1.2 + 3.4") {
-        Ok(eval_value) => eval_value,
-        Err(eval_error) => panic!("{}", eval_error),
-    };
+	// Evaluate the value of an expression
+	let result: f64 = match exevalator.eval("1.2 + 3.4") {
+		Ok(eval_value) => eval_value,
+		Err(eval_error) => panic!("{}", eval_error),
+	};
 
-    // Display the result
-    println!("result = {}", result);
+	// Display the result
+	println!("result = {}", result);
 
 How to compile/run this code is:
 
@@ -93,9 +93,9 @@ In "csharp" folder, the C# implementation version of Exevalator, various example
 
 	(in csharp/Example1.cs)
 
-    Exevalator exevalator = new Exevalator();
-    double result = exevalator.Eval("1.2 + 3.4");
-    Console.WriteLine("Result: " + result);
+	Exevalator exevalator = new Exevalator();
+	double result = exevalator.Eval("1.2 + 3.4");
+	Console.WriteLine("Result: " + result);
 
 You can run the above code by importing it from any project on Visual Studio&reg;, and you also can run it in command-lines. The latter is more simple way, so Let's do it here. At first, launch "Developer Command Prompt" which is bundled in Visual Studio (Start button > Visual Studio 20** > ... ). Next, "cd" into the folder of this repository. Then compile example code and run it as follows:
 
