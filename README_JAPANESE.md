@@ -12,6 +12,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 	- <a href="#how-to-use-rust">Rustでの使用方法</a>
 	- <a href="#how-to-use-csharp">C#での使用方法</a>
 	- <a href="#how-to-use-cpp">C++での使用方法</a>
+- <a href="#performance">処理速度の目安</a>
 - <a href="#about-us">開発元について</a>
 
 
@@ -135,6 +136,50 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 
 	4.6
 
+
+<a id="performance"></a>
+## 処理速度の目安と留意点
+
+Exevalator は、計算/データ解析用のソフトなどでの利用を考慮して、処理速度をある程度重視した設計を採用しています。特に、同じ式を繰り返し計算する際などに、最も高速になります。以下は典型例です：
+
+
+	// 変数「x」を宣言してアドレスを取得
+	int varAddress = exevalator.declareVariable("x");
+
+	// 変数の値を変えながら、式の値を計算して積算するループ（10演算/周）
+	double result = 0.0;
+	for (long i=0; i<loops; ++i) {
+		exevalator.writeVariableAt(varAddress, (double)i);
+		result += exevalator.eval("x + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1");
+	}
+
+上記自体は意味のないコードですが、似たような形の処理は、計算用途などではよくあります。
+
+このコードのループは、環境にもよりますが、だいたい数千万回/秒くらいのスピードで回ります。従って演算速度は数億回/秒（数百 MFLOPS）程度の水準になります。これは、それなりの長さの配列データに変換をかけたり、密に刻んだ点で式の座標値をサンプリングしたりするのに実用的な速度です。
+
+
+一方で、上記の速度水準は、式が毎回同じであり、従って解析処理の大部分を Exevalator 内部でキャッシュして、毎回流用できる事が大きく効いています。それが無理な場合、例えば：
+
+	...
+	for (long i=0; i<loops; ++i) {
+		exevalator.writeVariableAt(varAddress, (double)i);
+		result += exevalator.eval("x + 1 - 1 + 1 - 1 + 1"); // 微妙に下と違う式
+		result += exevalator.eval("x - 1 + 1 - 1 + 1 - 1"); // 微妙に上と違う式
+	}
+
+このような場合には、ループはだいたい数万～数十万回/秒のスピードで回ります。演算回数では数十～数百万回/秒（～数MFLOPS）程度です。先ほどの100倍以上も遅い水準ですね。
+
+しかしこの種の速度低下は、Exevalator のインスタンスを式ごとに複数用意して、それぞれは同じ式を計算するようにすれば回避できます：
+
+	...
+	for (long i=0; i<loops; ++i) {
+		exevalatorA.writeVariableAt(varAddressA, (double)i);
+		exevalatorB.writeVariableAt(varAddressB, (double)i);
+		result += exevalatorA.eval("x + 1 - 1 + 1 - 1 + 1"); // 微妙に下と違う式
+		result += exevalatorB.eval("x - 1 + 1 - 1 + 1 - 1"); // 微妙に上と違う式
+	}
+
+このようにインスタンスを分けると、キャッシュがよく効き、再び100倍くらい速くなります。
 
 <a id="about-us"></a>
 ## 開発元について
