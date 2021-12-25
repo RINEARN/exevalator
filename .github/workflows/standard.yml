@@ -25,6 +25,15 @@ jobs:
         javac Example5.java
       working-directory: ./java
 
+    - name: Run Example Code
+      run: |
+        java Example1
+        java Example2
+        java Example3
+        java Example4
+        java Example5
+      working-directory: ./java
+
     - name: Compile Test Code
       run: javac Test.java
       working-directory: ./java
@@ -52,6 +61,15 @@ jobs:
         clang++ -std=c++17 -Wall -o example3 example3.cpp
         clang++ -std=c++17 -Wall -o example4 example4.cpp
         clang++ -std=c++17 -Wall -o example5 example5.cpp
+      working-directory: ./cpp
+
+    - name: Run Example Code
+      run: |
+        ./example1
+        ./example2
+        ./example3
+        ./example4
+        ./example5
       working-directory: ./cpp
 
     - name: Compile Test Code
@@ -83,6 +101,15 @@ jobs:
         rustc example3.rs
         rustc example4.rs
         rustc example5.rs
+      working-directory: ./rust
+
+    - name: Run Example Code
+      run: |
+        ./example1
+        ./example2
+        ./example3
+        ./example4
+        ./example5
       working-directory: ./rust
 
     - name: Compile Test Code
