@@ -84,7 +84,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、アプリケーシ
 <a id="how-to-use-csharp"></a>
 ### C#での使用方法
 
-「 csharp 」フォルダ内に、C#実装版の Exevalator と用例サンプルコード類、があります。
+「 csharp 」フォルダ内に、C#実装版の Exevalator と用例サンプルコード類、および [C#用README](./csharp/README_JAPANESE.md) があります。
 最もシンプルな用例は「 Example1.cs 」で、以下のように単純な式「 1.2 + 3.4 」を計算する内容になっています：
 
 	(in csharp/Example1.cs)
@@ -102,6 +102,8 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、アプリケーシ
 結果は以下の通りです：
 
 	4.6
+
+より詳しい解説や機能一覧については [C#用README](./csharp/README_JAPANESE.md) をご参照ください。
 
 
 <a id="about-us"></a>
