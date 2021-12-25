@@ -93,3 +93,36 @@ jobs:
       run: ./test
       working-directory: ./rust
 
+
+  test-for-csharp:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.x'
+
+    - name: Run Example Code
+      run: |
+        dotnet new console -n Examples
+        cp ./Exevalator.cs ./Examples/Exevalator.cs
+        cp -f ./Example1.cs ./Examples/Program.cs
+        dotnet run --project ./Examples
+        cp -f ./Example2.cs ./Examples/Program.cs
+        dotnet run --project ./Examples
+        cp -f ./Example3.cs ./Examples/Program.cs
+        dotnet run --project ./Examples
+        cp -f ./Example4.cs ./Examples/Program.cs
+        dotnet run --project ./Examples
+        cp -f ./Example5.cs ./Examples/Program.cs
+        dotnet run --project ./Examples
+      working-directory: ./csharp
+
+    - name: Run Test Code
+      run: |
+        dotnet new console -n Test
+        cp ./Exevalator.cs ./Test/Exevalator.cs
+        cp -f ./Test.cs ./Test/Program.cs
+        dotnet run --project ./Test
+      working-directory: ./csharp
+
