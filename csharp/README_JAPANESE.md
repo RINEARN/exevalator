@@ -40,10 +40,11 @@ Exevalator のインタープリタは、単一のファイル「 csharp/Exevala
 	using Rinearn.ExevalatorCS;
 	...
 
-	public class YourClass {
+	class YourClass
+	{
 		...
-		public void yourMethod() {
-			
+		void YourMethod()
+		{
 			// Exevalator のインタープリタを生成
 			Exevalator exevalator = new Exevalator();
 
@@ -57,7 +58,7 @@ Exevalator のインタープリタは、単一のファイル「 csharp/Exevala
 	}
 
 なお、Exevalator では、式の中のすべての数値は double 型で扱われます。従って、結果も常に double 型です。
-ただし、式の内容がおかしい場合など、計算に失敗した場合は、Eval メソッドを呼んでいる箇所で例外 ExevalatorException がスローされます。必要に応じて catch してください。
+ただし、式の内容がおかしい場合や、未宣言の変数を使った場合など、計算に失敗する場合もあり得ます。その場合は、Eval メソッドを呼んでいる箇所で例外 ExevalatorException がスローされますので、必要に応じて catch してハンドルしてください。
 
 
 <a id="example-code"></a>
@@ -139,17 +140,16 @@ Exevalator のインタープリタは、単一のファイル「 csharp/Exevala
 	...
 
 	// 上記の関数を式内で使用できるよう接続
-    Exevalator exevalator = new Exevalator();
-    MyFunction fun = new MyFunction();
-    exevalator.ConnectFunction("fun", fun);
+	Exevalator exevalator = new Exevalator();
+	MyFunction fun = new MyFunction();
+	exevalator.ConnectFunction("fun", fun);
 
 	// 関数を使う式を計算する
-    double result = exevalator.Eval("fun(1.2, 3.4)");
+	double result = exevalator.Eval("fun(1.2, 3.4)");
+	Console.WriteLine("Result: " + result);
 	// result: 4.6
 
 	(参照: csharp/Example5.cs)
-
-
 
 
 

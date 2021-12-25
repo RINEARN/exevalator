@@ -89,7 +89,7 @@ For more details, see [README for using in Rust](./rust/README.md).
 <a id="how-to-use-csharp"></a>
 ### How to Use in C#
 
-In "csharp" folder, the C# implementation version of Exevalator, and various example code are locating. Most simple example code is "Example1.cs", which computes the value of a simple expression "1.2 + 3.4" as follows:
+In "csharp" folder, the C# implementation version of Exevalator, various example code, and [README for using in C#](./csharp/README.md) are locating. Most simple example code is "Example1.cs", which computes the value of a simple expression "1.2 + 3.4" as follows:
 
 	(in csharp/Example1.cs)
 
@@ -106,6 +106,8 @@ You can run the above code by importing it from any project on Visual Studio&reg
 The result is:
 
 	4.6
+
+For more details, see [README for using in C#](./csharp/README.md).
 
 
 <a id="about-us"></a>
