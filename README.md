@@ -1,7 +1,7 @@
 # Exevalator
 
 Exevalator (an abbreviation for **Ex**pression-**Eval**u**ator**) is a compact interpreter embeddable in applications, for computing values of expressions.
-Exevalator is currently available for applications written in Java&reg; and Rust&reg;.
+Exevalator is currently available for applications written in Java&reg;, Rust&reg;, and C#&reg;.
 
 
 &raquo; [Japanese README](./README_JAPANESE.md)
@@ -10,8 +10,9 @@ Exevalator is currently available for applications written in Java&reg; and Rust
 ## English README Index
 - <a href="#license">License</a>
 - <a href="#how-to-use">How to Use for Each Language</a>
-	- <a href="#how-to-use-java">How to Use in Java&reg;</a>
-	- <a href="#how-to-use-rust">How to Use in Rust&reg;</a>
+	- <a href="#how-to-use-java">How to Use in Java</a>
+	- <a href="#how-to-use-rust">How to Use in Rust</a>
+	- <a href="#how-to-use-csharp">How to Use in C#</a>
 - <a href="#about-us">About Us</a>
 
 
@@ -26,7 +27,7 @@ This software is released under the MIT License.
 ## How to Use for Each Language
 
 <a id="how-to-use-java"></a>
-### How to Use in Java&reg;
+### How to Use in Java
 
 In "java" folder, the Java implementation version of Exevalator, various example code, and [README for using in Java](./java/README.md) are locating. Most simple example code is "Example1.java", which computes the value of a simple expression "1.2 + 3.4" as follows:
 
@@ -51,7 +52,7 @@ For more details, see [README for using in Java](./java/README.md).
 
 
 <a id="how-to-use-rust"></a>
-### How to Use in Rust&reg;
+### How to Use in Rust
 
 In "rust" folder, the Rust implementation version of Exevalator, various example code, and [README for using in Rust](./rust/README.md) are locating. Most simple example code is "example1.rs", which computes the value of a simple expression "1.2 + 3.4" as follows:
 
@@ -85,6 +86,28 @@ The result is:
 For more details, see [README for using in Rust](./rust/README.md).
 
 
+<a id="how-to-use-csharp"></a>
+### How to Use in C#
+
+In "csharp" folder, the C# implementation version of Exevalator, and various example code are locating. Most simple example code is "Example1.cs", which computes the value of a simple expression "1.2 + 3.4" as follows:
+
+	(in csharp/Example1.cs)
+
+    Exevalator exevalator = new Exevalator();
+    double result = exevalator.Eval("1.2 + 3.4");
+    Console.WriteLine("Result: " + result);
+
+You can run the above code by importing it from any project on Visual Studio&reg;, and you also can run it in command-lines. The latter is more simple way, so Let's do it here. At first, launch "Developer Command Prompt" which is bundled in Visual Studio (Start button > Visual Studio 20** > ... ). Next, "cd" into the folder of this repository. Then compile example code and run it as follows:
+
+	cd csharp
+	csc Exevalator.cs Example1.cs
+	Example1.exe
+
+The result is:
+
+	4.6
+
+
 <a id="about-us"></a>
 ## About Us
 
@@ -99,6 +122,8 @@ Please free to contact us if you have any questions, feedbacks, and so on!
 - Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
 
 - Rust is registered trademarks of Mozilla Foundation and/or its affiliates. 
+
+- Microsoft Windows, C#, and Visual Studio are either a registered trademarks or trademarks of Microsoft Corporation in the United States and/or other countries.
 
 - Other names may be either a registered trademarks or trademarks of their respective owners. 
 

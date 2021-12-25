@@ -1,6 +1,6 @@
 # Exevalator
 
-Exevalator（**Ex**pression-**Eval**u**ator** の略） は、アプリケーション内に組み込んで、式の値を計算するための、コンパクトなインタープリタです。Java&reg;言語および Rust&reg;製のアプリケーションにおいて使用できます。
+Exevalator（**Ex**pression-**Eval**u**ator** の略） は、アプリケーション内に組み込んで、式の値を計算するための、コンパクトなインタープリタです。Java&reg;言語、Rust&reg;、C#&reg;製のアプリケーションにおいて使用できます。
 
 &raquo; [English README](./README.md)
 
@@ -8,8 +8,9 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、アプリケーシ
 ## 日本語版 README 目次
 - <a href="#license">ライセンス</a>
 - <a href="#how-to-use">各言語ごとの使用方法</a>
-	- <a href="#how-to-use-java">Java&reg;言語での使用方法</a>
-	- <a href="#how-to-use-rust">Rust&reg;での使用方法</a>
+	- <a href="#how-to-use-java">Java言語での使用方法</a>
+	- <a href="#how-to-use-rust">Rustでの使用方法</a>
+	- <a href="#how-to-use-csharp">C#での使用方法</a>
 - <a href="#about-us">開発元について</a>
 
 
@@ -24,7 +25,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、アプリケーシ
 ## 各言語ごとの使用方法
 
 <a id="how-to-use-java"></a>
-### Java&reg;言語での使用方法
+### Java言語での使用方法
 
 「 java 」フォルダ内に、Java言語実装版の Exevalator と用例サンプルコード類、および [Java言語用README](./java/README_JAPANESE.md) があります。
 最もシンプルな用例は「 Example1.java 」で、以下のように単純な式「 1.2 + 3.4 」を計算する内容になっています：
@@ -50,7 +51,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、アプリケーシ
 
 
 <a id="how-to-use-rust"></a>
-### Rust&reg;での使用方法
+### Rustでの使用方法
 
 「 rust 」フォルダ内に、Rust実装版の Exevalator と用例サンプルコード類、および [Rust用README](./rust/README_JAPANESE.md) があります。
 最もシンプルな用例は「 example1.rs 」で、以下のように単純な式「 1.2 + 3.4 」を計算する内容になっています：
@@ -80,6 +81,29 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、アプリケーシ
 より詳しい解説や機能一覧については [Rust用README](./rust/README_JAPANESE.md) をご参照ください。
 
 
+<a id="how-to-use-csharp"></a>
+### C#での使用方法
+
+「 csharp 」フォルダ内に、C#実装版の Exevalator と用例サンプルコード類、があります。
+最もシンプルな用例は「 Example1.cs 」で、以下のように単純な式「 1.2 + 3.4 」を計算する内容になっています：
+
+	(in csharp/Example1.cs)
+
+    Exevalator exevalator = new Exevalator();
+    double result = exevalator.Eval("1.2 + 3.4");
+    Console.WriteLine("Result: " + result);
+
+このコードは、Visual Studio&reg;上で適当なプロジェクト内に取り込んでも実行できますが、ここで即席で動かして確認するには、コマンドラインが便利です。Visual Studio 付属の Developer Command Prompt（スタートボタン > Visual Studio 20** > … ）を起動し、その上でリポジトリのフォルダに cd して、以下のようにコンパイル/実行できます：
+
+	cd csharp
+	csc Exevalator.cs Example1.cs
+	Example1.exe
+
+結果は以下の通りです：
+
+	4.6
+
+
 <a id="about-us"></a>
 ## 開発元について
 
@@ -91,7 +115,9 @@ Exevalator は、日本の個人運営の開発スタジオ [RINEARN](https://ww
 
 - OracleとJavaは、Oracle Corporation 及びその子会社、関連会社の米国及びその他の国における登録商標です。文中の社名、商品名等は各社の商標または登録商標である場合があります。 
 
-- Rustは、Mozilla Foundation の米国及びその他の国における登録商標です。文中の社名、商品名等は各社の商標または登録商標である場合があります。 
+- Rustは、Mozilla Foundation の米国及びその他の国における登録商標です。 
+
+- Windows、C#、Visual Studio は米国 Microsoft Corporation の米国およびその他の国における登録商標です。
 
 - その他、文中に使用されている商標は、その商標を保持する各社の各国における商標または登録商標です。
 
