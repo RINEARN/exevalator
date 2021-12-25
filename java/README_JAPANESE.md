@@ -64,6 +64,7 @@ Exevalator のインタープリタは、単一のファイル「 java/Exevalato
 	}
 
 なお、Exevalator では、式の中のすべての数値は double 型で扱われます。従って、結果も常に double 型です。
+ただし、式の内容がおかしい場合や、未宣言の変数を使った場合など、計算に失敗する場合もあり得ます。その場合は、eval メソッドを呼んでいる箇所で例外 Exevalator.Exception がスローされますので、必要に応じて catch してハンドルしてください。
 
 
 <a id="example-code"></a>
@@ -103,15 +104,18 @@ Exevalator のインタープリタは、単一のファイル「 java/Exevalato
 
 	(参照: java/Example2.java)
 
-上記のように、"+" (足し算)、 "-" (引き算), "\*" (掛け算), "/" (割り算) の演算子が使用可能です。なお、"\*" と "/" の計算は、"+" と "-" よりも優先されます。
+上記のように、"+" (足し算)、 "-" (引き算や数値のマイナス化)、"\*" (掛け算)、"/" (割り算) の演算を行えます。なお、掛け算と割り算は、足し算と引き算よりも、順序的に優先されます。
 
 
 ### 2. 変数の使用
 
 変数を宣言し、その値に式の中からアクセスできます：
 
+	// 変数を宣言して値を設定
 	exevalator.declareVariable("x");
 	exevalator.writeVariable("x", 1.25);
+
+	// 変数の値を使う式を計算する
 	double result = exevalator.eval("x + 1");
 	// result: 2.25
 
@@ -131,15 +135,20 @@ Exevalator のインタープリタは、単一のファイル「 java/Exevalato
 
 式の中で使用するための関数も作成できます。それには、Exevalator.FunctionInterface インターフェースを実装したクラスを作成します：
 
-	class MyFunction implements Exevalator.Function {
+	// 式内で使用できる関数を作成
+	class MyFunction implements Exevalator.FunctionInterface {
 		@Override
 		public double invoke (double[] arguments) {
 			return arguments[0] + arguments[1];
 		}
 	}
 	...
+	
+	// 上記の関数を式内で使用できるよう接続
 	MyFunction fun = new MyFunction();
 	exevalator.connectFunction("fun", fun);
+
+	// 関数を使う式を計算する
 	double result = exevalator.eval("fun(1.2, 3.4)");
 	// result: 4.6
 

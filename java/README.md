@@ -61,8 +61,8 @@ Now you are ready to use Exevalator! You can import the Exevalator from any your
 		...
 	}
 
-Note that, all numbers in expressions will be handled as double-type values on Exevalator.
-The result is also double-type.
+On Exevalator, all numbers in expressions will be handled as double-type values, so the result is always double-type.
+However, the computation may fail when an incorrect expression is inputted, or when an undeclared variable is accessed, and so on. If a computation failed, "eval" method throws an Exevalator.Exception, so catch and handle it if necessary.
 
 
 <a id="example-code"></a>
@@ -95,22 +95,25 @@ The followings are main features of Exevalator.
 
 ### 1. Evaluate (Compute) Expressions
 
-As shown in the previous sections, Exevalator can evaluate (compute) the value of an expression:
+As shown in previous sections, Exevalator can evaluate (compute) the value of an expression:
 
 	double result = exevalator.eval("(-(1.2 + 3.4) * 5) / 2");
 	// result: -11.5
 
 	(See: java/Example2.java)
 
-As the above, you can use "+" (addition), "-" (subtraction), "\*" (multiplication), and "/" (division) operators in an expression. Operations of "\*" and "/" are prioritized than "+" and "-".
+As the above, you can use "+" (addition), "-" (subtraction and unary-minus operation), "\*" (multiplication), and "/" (division) operators in an expression. In order of operations, "multiplications and divisions" are prioritized than "additions and subtractions".
 
 
 ### 2. Use Variables
 
 You can use variables in expressions:
 
+	// Declare a variable available in expressions
 	exevalator.declareVariable("x");
 	exevalator.writeVariable("x", 1.25);
+
+	// Compute the expression in which the above variable is used
 	double result = exevalator.eval("x + 1");
 	// result: 2.25
 
@@ -130,15 +133,20 @@ This way works faster than accessings by the name.
 
 You can create functions available in expressions, by implementing Exevalator.FunctionInterface:
 
-	class MyFunction implements Exevalator.Function {
+	// Create a function available in expressions.
+	class MyFunction implements Exevalator.FunctionInterface {
 		@Override
 		public double invoke (double[] arguments) {
 			return arguments[0] + arguments[1];
 		}
 	}
 	...
+
+	// Connect the above function for using it in expressions
 	MyFunction fun = new MyFunction();
 	exevalator.connectFunction("fun", fun);
+
+	// Compute the expression in which the above function is used
 	double result = exevalator.eval("fun(1.2, 3.4)");
 	// result: 4.6
 
