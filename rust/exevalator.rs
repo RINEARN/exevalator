@@ -263,7 +263,7 @@ impl LexicalAnalyzer {
             Err(tokenization_error) => return Err(tokenization_error),
         };
 
-		// Checks the total number of tokens.
+        // Checks the total number of tokens.
         if settings.max_token_count < tokens.len() {
             return Err(ExevalatorError::new(&format!(
                 "The number of tokens exceeds the limit (Settings.max_token_count: {})", settings.max_token_count
@@ -791,7 +791,7 @@ impl Parser {
         // The AST has been constructed on the stack, and only its root node is stored in the stack.
         let root_node_of_expression_ast: AstNode = stack.pop_back().unwrap();
 
-		// Check that the depth of the constructed AST does not exceeds the limit,
+        // Check that the depth of the constructed AST does not exceeds the limit,
         // and return the AST if its depth does not exceed the limti. 
         match root_node_of_expression_ast.check_depth(1, settings.max_ast_depth) {
             Some(ast_depth_error) => return Err(ast_depth_error),
@@ -1169,24 +1169,24 @@ impl AstNode {
         }
     }
 
-	/// Checks that depths in the AST of all nodes under this node (child nodes, grandchild nodes, and so on)
-	/// does not exceeds the specified maximum value.
-	/// An ExevalatorError will be returned when the depth exceeds the maximum value.
-	/// If the depth does not exceeds the maximum value, nothing will be returned.
-	///
-	/// * `depthOfThisNode` The depth of this node in the AST.
-	/// `maxAstDepth` The maximum value of the depth of the AST.
-	///
+    /// Checks that depths in the AST of all nodes under this node (child nodes, grandchild nodes, and so on)
+    /// does not exceeds the specified maximum value.
+    /// An ExevalatorError will be returned when the depth exceeds the maximum value.
+    /// If the depth does not exceeds the maximum value, nothing will be returned.
+    ///
+    /// * `depthOfThisNode` The depth of this node in the AST.
+    /// `maxAstDepth` The maximum value of the depth of the AST.
+    ///
     fn check_depth(&self, depth_of_this_node: u64, max_ast_depth: u64) -> Option<ExevalatorError> {
-		if max_ast_depth < depth_of_this_node {
-			return Some(ExevalatorError::new(&format!(
-				"The depth of the AST exceeds the limit (Settings.max_ast_depth: {})",
-				max_ast_depth
+        if max_ast_depth < depth_of_this_node {
+            return Some(ExevalatorError::new(&format!(
+                "The depth of the AST exceeds the limit (Settings.max_ast_depth: {})",
+                max_ast_depth
             )));
-		}
-		for child_node in &self.child_nodes {
-			child_node.check_depth(depth_of_this_node + 1, max_ast_depth);
-		}
+        }
+        for child_node in &self.child_nodes {
+            child_node.check_depth(depth_of_this_node + 1, max_ast_depth);
+        }
         return None;
     }
 
@@ -1403,16 +1403,16 @@ impl EvaluatorUnit for FunctionEvaluatorUnit {
 /// The struct storing values of setting items.
 struct Settings {
 
-	/// The maximum number of characters in an expression.
-	max_expression_char_count: usize,
+    /// The maximum number of characters in an expression.
+    max_expression_char_count: usize,
 
-	/// The maximum number of characters of variable/function names.
-	max_name_char_count: usize,
+    /// The maximum number of characters of variable/function names.
+    max_name_char_count: usize,
 
-	/// The maximum number of tokens in an expression.
+    /// The maximum number of tokens in an expression.
     max_token_count: usize,
 
-	/// The maximum depth of an Abstract Syntax Tree (AST).
+    /// The maximum depth of an Abstract Syntax Tree (AST).
     max_ast_depth: u64,
 
     /// Set instance storing all symbols of operators.
