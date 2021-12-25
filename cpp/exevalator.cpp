@@ -70,7 +70,7 @@ double Exevalator::eval(const std::string &expression) {
         */
 
         // Perform parsing, and get AST(Abstract Syntax Tree) from tokens.
-        std::unique_ptr<AstNode> ast = std::move(Parser::parse(tokens));
+        std::unique_ptr<AstNode> ast = Parser::parse(tokens);
 
         /*
         // Temporary, for debugging AST
@@ -79,8 +79,8 @@ double Exevalator::eval(const std::string &expression) {
 
         // Evaluate the value of the expression, and return it.
         std::unique_ptr<Evaluator::EvaluatorUnit> evaluator_unit;
-        this->evaluator_unit = std::move(
-            ast->create_evaluator_unit(this->settings, this->variable_table, this->function_table)
+        this->evaluator_unit = ast->create_evaluator_unit(
+            this->settings, this->variable_table, this->function_table
         );
 
         this->last_evaluated_expression = expression;
@@ -382,7 +382,6 @@ std::vector<std::string> LexicalAnalyzer::split_expression_into_token_words(
 
     std::string spaced_expression;
     size_t char_count = expression.length();
-    size_t splitter_count = settings.token_splitter_character_list.size();
 
     for (size_t ichar=0; ichar<char_count; ++ichar) {
         char ch = expression.at(ichar);
@@ -694,7 +693,6 @@ std::unique_ptr<AstNode> Parser::parse(const std::vector<Token> &tokens) {
 
         Token token = tokens[itoken];
         std::unique_ptr<AstNode> operator_node;
-        bool has_operator_node = false;
 
         // Case of literals and identifiers: "1.23", "x", "f", etc.
         if (token.type == TokenType::NUMBER_LITERAL
@@ -954,55 +952,43 @@ std::unique_ptr<Evaluator::EvaluatorUnit> AstNode::create_evaluator_unit(const S
             std::string error_message = std::string { "Invalid number literal: " } + token.word;
             throw ExevalatorException { error_message.c_str() };
         }
-        return std::move(
-            std::make_unique<Evaluator::NumberLiteralEvaluatorUnit>(literal_value)
-        );
+        return std::make_unique<Evaluator::NumberLiteralEvaluatorUnit>(literal_value);
 
     // Create units for evaluating operators.
     } else if (this->token.type == TokenType::OPERATOR) {
 
         // Unary operator "-"
         if (this->token.opinfo.type == OperatorType::UNARY_PREFIX && this->token.word == "-") {
-            return std::move(
-                std::make_unique<Evaluator::MinusEvaluatorUnit>(
-                    std::move( this->child_nodes[0]->create_evaluator_unit(settings, variable_table, function_table) )
-                )
+            return std::make_unique<Evaluator::MinusEvaluatorUnit>(
+                this->child_nodes[0]->create_evaluator_unit(settings, variable_table, function_table)
             );
 
         // Binary operator "+"
         } else if (this->token.opinfo.type == OperatorType::BINARY && this->token.word == "+") {
-            return std::move(
-                std::make_unique<Evaluator::AdditionEvaluatorUnit>(
-                    std::move( this->child_nodes[0]->create_evaluator_unit(settings, variable_table, function_table) ),
-                    std::move( this->child_nodes[1]->create_evaluator_unit(settings, variable_table, function_table) )
-                )
+            return std::make_unique<Evaluator::AdditionEvaluatorUnit>(
+                this->child_nodes[0]->create_evaluator_unit(settings, variable_table, function_table),
+                this->child_nodes[1]->create_evaluator_unit(settings, variable_table, function_table)
             );
 
         // Binary operator "-"
         } else if (this->token.opinfo.type == OperatorType::BINARY && this->token.word == "-") {
-            return std::move(
-                std::make_unique<Evaluator::SubtractionEvaluatorUnit>(
-                    std::move( this->child_nodes[0]->create_evaluator_unit(settings, variable_table, function_table) ),
-                    std::move( this->child_nodes[1]->create_evaluator_unit(settings, variable_table, function_table) )
-                )
+            return std::make_unique<Evaluator::SubtractionEvaluatorUnit>(
+                this->child_nodes[0]->create_evaluator_unit(settings, variable_table, function_table),
+                this->child_nodes[1]->create_evaluator_unit(settings, variable_table, function_table)
             );
 
         // Binary operator "*"
         } else if (this->token.opinfo.type == OperatorType::BINARY && this->token.word == "*") {
-            return std::move(
-                std::make_unique<Evaluator::MultiplicationEvaluatorUnit>(
-                    std::move( this->child_nodes[0]->create_evaluator_unit(settings, variable_table, function_table) ),
-                    std::move( this->child_nodes[1]->create_evaluator_unit(settings, variable_table, function_table) )
-                )
+            return std::make_unique<Evaluator::MultiplicationEvaluatorUnit>(
+                this->child_nodes[0]->create_evaluator_unit(settings, variable_table, function_table),
+                this->child_nodes[1]->create_evaluator_unit(settings, variable_table, function_table)
             );
 
         // Binary operator "/"
         } else if (this->token.opinfo.type == OperatorType::BINARY && this->token.word == "/") {
-            return std::move(
-                std::make_unique<Evaluator::DivisionEvaluatorUnit>(
-                    std::move( this->child_nodes[0]->create_evaluator_unit(settings, variable_table, function_table) ),
-                    std::move( this->child_nodes[1]->create_evaluator_unit(settings, variable_table, function_table) )
-                )
+            return std::make_unique<Evaluator::DivisionEvaluatorUnit>(
+                this->child_nodes[0]->create_evaluator_unit(settings, variable_table, function_table),
+                this->child_nodes[1]->create_evaluator_unit(settings, variable_table, function_table)
             );
 
         // Function call operator "("
@@ -1015,14 +1001,12 @@ std::unique_ptr<Evaluator::EvaluatorUnit> AstNode::create_evaluator_unit(const S
             std::shared_ptr<ExevalatorFunctionInterface> function_ptr = function_table.at(identifier);
             std::vector<std::unique_ptr<Evaluator::EvaluatorUnit>> arguments;
             for (size_t ichild=1; ichild<child_count; ++ichild) {
-                arguments.push_back(std::move(
+                arguments.push_back(
                     this->child_nodes[ichild]->create_evaluator_unit(settings, variable_table, function_table)
-                ));
+                );
             }
-            return std::move(
-                std::make_unique<Evaluator::FunctionEvaluatorUnit>(
-                    function_ptr, identifier, arguments
-                )
+            return std::make_unique<Evaluator::FunctionEvaluatorUnit>(
+                function_ptr, identifier, arguments
             );
         } else {
             std::string error_message = std::string { "Unexpected operator: " } + this->token.opinfo.symbol;
@@ -1036,9 +1020,7 @@ std::unique_ptr<Evaluator::EvaluatorUnit> AstNode::create_evaluator_unit(const S
             throw ExevalatorException(("Variable not found: " + identifier).c_str());
         }
         size_t address = variable_table.at(identifier);
-        return std::move(
-            std::make_unique<Evaluator::VariableEvaluatorUnit>(address)
-        );
+        return std::make_unique<Evaluator::VariableEvaluatorUnit>(address);
 
     } else {
         throw ExevalatorException(std::string("Unexpected token type: ").append(token_type_name(this->token.type)).c_str());
