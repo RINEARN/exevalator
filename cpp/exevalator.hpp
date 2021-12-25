@@ -6,6 +6,7 @@
 #include <map>
 #include <set>
 #include <memory>
+#include <limits>
 #include <cctype>
 #include <cstdint>
 #include <cstdlib>
