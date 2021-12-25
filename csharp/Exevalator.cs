@@ -15,6 +15,7 @@ using System.Text.RegularExpressions;
 
 namespace Rinearn.ExevalatorCS
 {
+#nullable enable
 
     /// <summary>
     /// Interpreter Engine of Exevalator.
