@@ -14,6 +14,7 @@ Exevalator is currently available for programs/apps written in Java&reg;, Rust&r
 	- <a href="#how-to-use-rust">How to Use in Rust</a>
 	- <a href="#how-to-use-csharp">How to Use in C#</a>
 	- <a href="#how-to-use-cpp">How to Use in C++</a>
+- <a href="#performance">How to Tune Performance</a>
 - <a href="#about-us">About Us</a>
 
 
@@ -139,6 +140,53 @@ The result is:
 
 	4.6
 
+
+
+
+<a id="performance"></a>
+## How to Tune Performance
+
+One of the assumed use of Exevalator is calculation/data-analysis software, so when we designed internal architecture of Exevalator, we placed importance on processing speed.
+
+Especially, Exevalator works in high speed when evaluating (computing) the same expression repeatedly. For example:
+
+	// Declate an variable "x" and get the address
+	int varAddress = exevalator.declareVariable("x");
+
+	// Loop taking sum of values of an expression, with changing the value of "x"
+	// (10 numerical operations per cycle)
+	double result = 0.0;
+	for (long i=0; i<loops; ++i) {
+		exevalator.writeVariableAt(varAddress, (double)i);
+		result += exevalator.eval("x + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1");
+	}
+
+The above code is practically useless, but there are many practical calculation code having similar pattern everywhere.
+
+The for-loop in the above code runs in the speed of **some tens of millions of cycles per second** (depending on your environment). In the above loop, 10 numerical operations are performed for each cycle, so the operating speed is **some hundreds of MFLOPS**. We think that this speed is enough for converting values of arrays, or sampling coordinates of curves of expressions, and so on.
+
+Exevalator realizes the above processing speed by caching results of parsing and lexical-analysis of the previously-inputted expression. Hence, if an different expressions are inputted into an instance of Exevalator frequently, the cache does not work effective. For example:
+
+	...
+	for (long i=0; i<loops; ++i) {
+		exevalator.writeVariableAt(varAddress, (double)i);
+		result += exevalator.eval("x + 1 - 1 + 1 - 1 + 1"); // Different with the below
+		result += exevalator.eval("x - 1 + 1 - 1 + 1 - 1"); // Different with the above
+	}
+
+In the above code, the for-loop runs in the speed of **some tens/hundreds of thousands of times cycles second**. It is about 100 times slower than the previous example code.
+
+You can avoid this kind of performance-down by creating an independent instance of Exevalator for each expression:
+
+	...
+	for (long i=0; i<loops; ++i) {
+		exevalatorA.writeVariableAt(varAddressA, (double)i);
+		exevalatorB.writeVariableAt(varAddressB, (double)i);
+		result += exevalatorA.eval("x + 1 - 1 + 1 - 1 + 1"); // Different with the below
+		result += exevalatorB.eval("x - 1 + 1 - 1 + 1 - 1"); // Different with the above
+	}
+
+In the above code, caches in each instances of Exevalator work well, so it runs about 100 times faster than the previous code.
 
 
 
