@@ -2,23 +2,63 @@ name: Standard Build/Test CI
 on: push
 jobs:
 
-  build-and-test:
+  build-and-test-java:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Set-up environment
+
+    - name: Set-up Environment
       uses: actions/setup-java@v1
       with:
         java-version: 17
+
     - name: Compile Exevalator
       run: javac Exevalator.java
       working-directory: ./java
-    - name: Compile Example Code 1
-      run: javac Example1.java
+
+    - name: Compile Example Code
+      run: |
+        javac Example1.java
+        javac Example2.java
+        javac Example3.java
+        javac Example4.java
+        javac Example5.java
       working-directory: ./java
+
     - name: Compile Test Code
       run: javac Test.java
       working-directory: ./java
+
     - name: Run Test Code
       run: java Test
       working-directory: ./java
+
+
+
+  build-and-test-for-cpp:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set-up Environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install clang
+
+    - name: Compile Example Code
+      run: |
+        clang++ -std=c++17 -Wall -o example1 example1.cpp
+        clang++ -std=c++17 -Wall -o example2 example2.cpp
+        clang++ -std=c++17 -Wall -o example3 example3.cpp
+        clang++ -std=c++17 -Wall -o example4 example4.cpp
+        clang++ -std=c++17 -Wall -o example5 example5.cpp
+      working-directory: ./cpp
+
+    - name: Compile Test Code
+      run: clang++ -std=c++17 -Wall -o test test.cpp
+      working-directory: ./cpp
+
+    - name: Run Test Code
+      run: ./test
+      working-directory: ./cpp
+
