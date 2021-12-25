@@ -62,3 +62,34 @@ jobs:
       run: ./test
       working-directory: ./cpp
 
+
+
+  build-and-test-for-rust:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set-up Environment
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+
+    - name: Compile Example Code
+      run: |
+        rustc example1.rs
+        rustc example2.rs
+        rustc example3.rs
+        rustc example4.rs
+        rustc example5.rs
+      working-directory: ./rust
+
+    - name: Compile Test Code
+      run: rustc test.rs
+      working-directory: ./rust
+
+    - name: Run Test Code
+      run: ./test
+      working-directory: ./rust
+
