@@ -14,8 +14,8 @@ fn main() {
     let mut exevalator = Exevalator::new();
 
     // Connects the function available for using it in expressions
-    let address: usize = match exevalator.connect_function("fun", my_function) {
-        Ok(connected_function_address) => connected_function_address,
+    match exevalator.connect_function("fun", my_function) {
+        Ok(_) => {},
         Err(connection_error) => panic!("{}", connection_error),
     };
 
