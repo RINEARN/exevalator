@@ -1,6 +1,6 @@
 # Exevalator
 
-Exevalator（**Ex**pression-**Eval**u**ator** の略） は、アプリケーション内に組み込んで、式の値を計算するための、コンパクトなインタープリタです。Java&reg;言語、Rust&reg;、C#&reg;製のアプリケーションにおいて使用できます。
+Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムやアプリ内に組み込んで、式の値の計算に使うための、コンパクトなインタープリタです。複数言語対応で、Java&reg;言語、Rust&reg;、C#&reg;、C++製のプログラムに組み込んで使用できます。
 
 &raquo; [English README](./README.md)
 
@@ -11,6 +11,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、アプリケーシ
 	- <a href="#how-to-use-java">Java言語での使用方法</a>
 	- <a href="#how-to-use-rust">Rustでの使用方法</a>
 	- <a href="#how-to-use-csharp">C#での使用方法</a>
+	- <a href="#how-to-use-cpp">C++での使用方法</a>
 - <a href="#about-us">開発元について</a>
 
 
@@ -106,6 +107,35 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、アプリケーシ
 より詳しい解説や機能一覧については [C#用README](./csharp/README_JAPANESE.md) をご参照ください。
 
 
+<a id="how-to-use-cpp"></a>
+### C++での使用方法
+
+「 cpp 」フォルダ内に、C++実装版の Exevalator と用例サンプルコード類があります。
+最もシンプルな用例は「 example1.cpp 」で、以下のように単純な式「 1.2 + 3.4 」を計算する内容になっています：
+
+	(in cpp/example1.cpp)
+
+	exevalator::Exevalator exevalator;
+	try {
+		double result = exevalator.eval("1.2 + 3.4");
+		std::cout << "Result: " << result << std::endl;
+	} catch (exevalator::ExevalatorException &e) {
+		std::cerr << e.what() << std::endl;
+	}
+
+このコードをコンパイルして実行する方法は、環境やコンパイラによって異なりますが、一例としては：
+
+	(If you are using clang++ on Linux)
+
+	cd cpp
+	clang++ -std=c++17 -Wall -o example1 example1.cpp
+	./example1
+
+結果は以下の通りです：
+
+	4.6
+
+
 <a id="about-us"></a>
 ## 開発元について
 
@@ -120,6 +150,8 @@ Exevalator は、日本の個人運営の開発スタジオ [RINEARN](https://ww
 - Rustは、Mozilla Foundation の米国及びその他の国における登録商標です。 
 
 - Windows、C#、Visual Studio は米国 Microsoft Corporation の米国およびその他の国における登録商標です。
+
+- Linux は、Linus Torvalds 氏の米国およびその他の国における商標または登録商標です。
 
 - その他、文中に使用されている商標は、その商標を保持する各社の各国における商標または登録商標です。
 

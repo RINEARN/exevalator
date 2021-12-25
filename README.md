@@ -1,7 +1,7 @@
 # Exevalator
 
-Exevalator (an abbreviation for **Ex**pression-**Eval**u**ator**) is a compact interpreter embeddable in applications, for computing values of expressions.
-Exevalator is currently available for applications written in Java&reg;, Rust&reg;, and C#&reg;.
+Exevalator (an abbreviation for **Ex**pression-**Eval**u**ator**) is a compact interpreter embeddable in your programs/apps, for computing values of expressions.
+Exevalator is currently available for programs/apps written in Java&reg;, Rust&reg;, C#&reg;, and C++.
 
 
 &raquo; [Japanese README](./README_JAPANESE.md)
@@ -13,6 +13,7 @@ Exevalator is currently available for applications written in Java&reg;, Rust&re
 	- <a href="#how-to-use-java">How to Use in Java</a>
 	- <a href="#how-to-use-rust">How to Use in Rust</a>
 	- <a href="#how-to-use-csharp">How to Use in C#</a>
+	- <a href="#how-to-use-cpp">How to Use in C++</a>
 - <a href="#about-us">About Us</a>
 
 
@@ -110,6 +111,37 @@ The result is:
 For more details, see [README for using in C#](./csharp/README.md).
 
 
+
+<a id="how-to-use-cpp"></a>
+### How to Use in C++
+
+In "cpp" folder, the C++ implementation version of Exevalator and various example code are locating. Most simple example code is "example1.cpp", which computes the value of a simple expression "1.2 + 3.4" as follows:
+
+	(in cpp/example1.cpp)
+
+	exevalator::Exevalator exevalator;
+	try {
+		double result = exevalator.eval("1.2 + 3.4");
+		std::cout << "Result: " << result << std::endl;
+	} catch (exevalator::ExevalatorException &e) {
+		std::cerr << e.what() << std::endl;
+	}
+
+How to compile/run this code depends on your environment and compiler. As an example:
+
+	(If you are using clang++ on Linux)
+
+	cd cpp
+	clang++ -std=c++17 -Wall -o example1 example1.cpp
+	./example1
+
+The result is:
+
+	4.6
+
+
+
+
 <a id="about-us"></a>
 ## About Us
 
@@ -126,6 +158,8 @@ Please free to contact us if you have any questions, feedbacks, and so on!
 - Rust is registered trademarks of Mozilla Foundation and/or its affiliates. 
 
 - Microsoft Windows, C#, and Visual Studio are either a registered trademarks or trademarks of Microsoft Corporation in the United States and/or other countries.
+
+- Linux is a trademark of linus torvalds in the United States and/or other countries.
 
 - Other names may be either a registered trademarks or trademarks of their respective owners. 
 
