@@ -100,7 +100,7 @@ Exevalator のインタープリタは、ファイル「 cpp/exevalator.cpp 」�
 
 これで各ファイルのコンパイル結果モジュール「 exevalator.o 」と「 example.o 」ができるので、最終的にそれらをリンクして実行ファイルを生成します：
 
-	clang++ -o linked_example exevalator.o example.o
+	clang++ -o linked_example example.o exevalator.o
 
 これで実行ファイル「 linked_example 」ができるので、実行すると：
 
