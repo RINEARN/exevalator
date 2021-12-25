@@ -12,7 +12,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 	- <a href="#how-to-use-rust">Rustでの使用方法</a>
 	- <a href="#how-to-use-csharp">C#での使用方法</a>
 	- <a href="#how-to-use-cpp">C++での使用方法</a>
-- <a href="#performance">処理速度の目安</a>
+- <a href="#performance">処理速度の目安とパフォーマンスチューニング</a>
 - <a href="#about-us">開発元について</a>
 
 
@@ -138,7 +138,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 
 
 <a id="performance"></a>
-## 処理速度の目安と留意点
+## 処理速度の目安とパフォーマンスチューニング
 
 Exevalator は、計算/データ解析用のソフトなどでの利用を考慮して、処理速度をある程度重視した設計を採用しています。特に、同じ式を繰り返し計算する際などに、最も高速になります。以下は典型例です：
 
