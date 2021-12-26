@@ -21,6 +21,7 @@ int main() {
 
     } catch (exevalator::ExevalatorException &e) {
         std::cout << "Error occurred: " << e.what() << std::endl;
+        return EXIT_FAILURE;
     }
 
     return EXIT_SUCCESS;
