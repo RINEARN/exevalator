@@ -1,0 +1,222 @@
+# C++ での Exevalator の使用方法
+
+&raquo; [English](./README.md)
+
+
+## 日本語版 目次
+- <a href="#requirements">必要な環境</a>
+- <a href="#how-to-use">使用方法</a>
+- <a href="#example-code">サンプルコードの実行方法（およびコマンドラインでの使用方法）</a>
+- <a href="#features">主な機能</a>
+
+
+
+
+
+<a id="requirements"></a>
+## 必要な環境
+
+* C++17以降に対応可能なC++コンパイラ<br />( このドキュメント内の作業例では、Linux 上で clang++ を使用します。 )
+
+
+<a id="how-to-use"></a>
+## 使用方法
+
+Exevalator のインタープリタは、ファイル「 cpp/exevalator.cpp 」内に実装されています。ヘッダファイルは「 cpp/exevalator.hpp 」として分割されています。Exevalator を使用するのに必要なのは、これら 2 つのファイルだけです。以下では例として、実際に使用してみるまでの流れを掲載します。
+
+
+### 1. 開発プログラムのソースコードフォルダ内に配置
+
+まずは上記のファイルを、Exevalator を使用したいプログラムの、ソースコードフォルダ内に配置してください。
+
+フォルダ分けやビルド処理などが、ある程度整理されたプロジェクトでは、恐らく「 exevalator.hpp 」はヘッダ用のフォルダ内に、「 cpp/exevalator.cpp 」は実装コード用のフォルダ内に配置して、ビルドファイル等を適切に編集する必要があります。
+
+しかし、もっと非常に単純な、例えば「 1 個のフォルダ内に数枚のソースファイルがあって、main 関数のあるソースからそれらを include しているだけ 」といった場合には、そのフォルダ内に「 exevalator.hpp 」と「 exevalator.cpp 」を一緒に放り込んでください。
+
+
+### 2. 使用したいコードから読み込んで使用する
+
+あとは、式の計算を行いたいコードから include すれば使用できます。特に分割コンパイル等や行儀作法を深く考えない場合は、以下のように「 exevalator.hpp 」と「 exevalator.cpp 」を一緒に読み込んでしまうのが手短です：
+
+	#include <iostream>
+	#include <cstdlib>
+	#include "exevalator.hpp"
+	#include "exevalator.cpp"
+
+	int main() {
+
+		// Exevalator のインタープリタを生成
+		exevalator::Exevalator exevalator;
+
+		try {
+
+			// 式の値を計算（評価）する
+			double result = exevalator.eval("1.2 + 3.4");
+			
+			// 結果を表示
+			std::cout << "Result: " << result << std::endl;
+
+		// 式の計算でエラーが発生した場合
+		} catch (exevalator::ExevalatorException &e) {
+			std::cout << "Error occurred: " << e.what() << std::endl;
+			return EXIT_FAILURE;
+		}
+
+		return EXIT_SUCCESS;
+	}
+
+上記のコードは、Exevalator を用いて、式「 1.2 + 3.4 」の値を計算し、結果を表示する内容になっています。このコードのファイル名を example.cpp としましょう。コンパイル/実行するには：
+
+	clang++ -std=c++17 -o example example.cpp
+	./example
+
+結果は:
+
+	4.6
+
+と、この通り「 1.2 + 3.4 」の正しい値を計算できた事がわかります。
+
+なお、Exevalator では、式の中のすべての数値は double 型で扱われます。従って、結果も常に double 型です。
+ただし、式の内容がおかしい場合や、未宣言の変数を使った場合など、計算に失敗する場合もあり得ます。その際には eval メソッドを呼んでいる箇所で例外 ExevalatorException がスローされます。従って、上記のように catch してハンドルするようにしてください。
+
+### 3. 分割コンパイルしたい場合
+
+現実的なプロジェクトにおいては、モジュールをなるべく細かい規模で分割コンパイルし、それらを後でリンクする場合も多いと思います。そのような場合は、Exevalator を使用するコードからはヘッダ「 exevalator.hpp 」のみを include します。例えば先ほどの example.cpp では：
+
+	#include <iostream>
+	#include <cstdlib>
+	#include "exevalator.hpp" // cpp の方は include しない
+
+	int main() {
+
+		// Exevalator のインタープリタを生成
+		exevalator::Exevalator exevalator;
+	...
+
+とします。そして上記と exevalator.cpp は別々にコンパイルします。
+
+	clang++ -std=c++17 -c exevalator.cpp
+	clang++ -std=c++17 -c example.cpp
+
+これで各ファイルのコンパイル結果モジュール「 exevalator.o 」と「 example.o 」ができるので、最終的にそれらをリンクして実行ファイルを生成します：
+
+	clang++ -o linked_example exevalator.o example.o
+
+これで実行ファイル「 linked_example 」ができるので、実行すると：
+
+	./linked_example
+
+	4.6
+
+と、この通り先ほどの場合と同じ結果が得られました。正しく動作した事がわかります。
+
+実際には、分割コンパイルとリンクをするような場面では、各手順は Makefile 等のビルドファイルに記載されており、ビルドツールによって自動で行われる事が多いと思います。上記はあくまでも手動での一例ですので、それを参考として、ビルドファイルを適切に編集してください。
+
+
+<a id="example-code"></a>
+## サンプルコードの使用方法
+
+このリポジトリ内には、実際に Exevalator を使用する簡単なサンプルコード類「 cpp/example*.cpp 」も同梱されています。
+
+これらは、先のセクションの 2. で例示した通り、特に分割コンパイル等を考えなくても単純にコンパイル/実行できるようになっています。例えば「 example1.cpp 」の場合は：
+
+	clang++ -std=c++17 -o example1 example1.cpp
+	./example1
+
+上記の「 example1.cpp 」は、"1.2 + 3.4" の値を Exevalator で計算するサンプルコードで、先ほど例示した「 example.cpp 」とほぼ同一です。従って実行結果は：
+
+	4.6
+
+この通り、"1.2 + 3.4" の計算結果が表示されます。
+
+他のサンプルコードも、全く同じようにコンパイル/実行できます。
+
+
+<a id="features"></a>
+## 主な機能
+
+以下では、Exevalator の主な機能を紹介します.
+
+### 1. 式の評価（計算）
+
+これまでのセクションでも見てきたように、Exevalator で式の値を計算できます: 
+
+	double result = exevalator.eval("(-(1.2 + 3.4) * 5) / 2");
+	// result: -11.5
+
+	(参照: cpp/example2.cpp)
+
+上記のように、"+" (足し算)、 "-" (引き算や数値のマイナス化)、"\*" (掛け算)、"/" (割り算) の演算を行えます。なお、掛け算と割り算は、足し算と引き算よりも、順序的に優先されます。
+
+
+### 2. 変数の使用
+
+変数を宣言し、その値に式の中からアクセスできます：
+
+	// 変数を宣言して値を設定
+	exevalator.declare_variable("x");
+	exevalator.write_variable("x", 1.25);
+
+	// 変数の値を使う式を計算する
+	double result = exevalator.eval("x + 1");
+	// result: 2.25
+
+	(参照: cpp/example3.cpp)
+
+変数の値を非常に頻繁に書き変えるような用途では、書き変え対象の変数を、以下のようにアドレスによって指定する事も有用です：
+
+	size_t address = exevalator.declare_variable("x");
+	exevalator.write_variable_at(address, 1.25);
+	...
+
+	(参照: cpp/example4.cpp)
+
+この方法は、書き変え対象変数を名前で指定するよりも高速です。
+
+なお、上記のように変数にアクセスする処理は、eval メソッド同様、失敗時に例外 ExevalatorException をスローする場合がある事に留意してください。
+
+
+### 3. 関数の使用
+
+式の中で使用するための関数も作成できます。それには、ExevalatorFunctionInterface インターフェース（抽象クラス）を継承したクラスを作成します：
+
+	// 式内で使用できる関数を作成
+	class MyFun : public exevalator::ExevalatorFunctionInterface {
+		virtual double operator()(std::vector<double> arguments) {
+			if (arguments.size() != 2) {
+				throw new exevalator::ExevalatorException("Incorrect number of args");
+			}
+			return arguments[0] + arguments[1];
+		}
+	}
+	...
+
+	// 上記の関数を式内で使用できるよう接続
+	//（インターフェース継承クラスのインスタンスを shared_ptr を介して渡します）
+	exevalator::Exevalator exevalator;
+	exevalator.connect_function("fun", std::make_shared<MyFun>());
+
+	// 関数を使う式を計算する
+	double result = exevalator.eval("fun(1.2, 3.4)");
+	std::cout << "result=" << result << std::endl;
+	// result: 4.6
+
+	(参照: cpp/example5.cpp)
+
+この通りです。
+
+なお、上記のように関数を接続したりする箇所でも、eval メソッド同様、失敗時に例外 ExevalatorException がスローされる場合がある事に留意してください。
+さらに、eval メソッドで計算している式の中で関数が呼ばれ、その関数処理の中で例外が発生するかもしれません
+（実際に上の例では、作成した MyFun クラスの関数処理の中で、引数の個数が想定外だった場合に例外をスローしています）。
+そういった場合、eval メソッドは例外を ExevalatorException でラップして、呼び出し元に再スローしてきます。
+
+
+
+<a id="credits"></a>
+## 本文中の商標など
+
+- Linux は、Linus Torvalds 氏の米国およびその他の国における商標または登録商標です。
+
+- その他、文中に使用されている商標は、その商標を保持する各社の各国における商標または登録商標です。
+
+

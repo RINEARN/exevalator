@@ -111,7 +111,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 <a id="how-to-use-cpp"></a>
 ### C++での使用方法
 
-「 cpp 」フォルダ内に、C++実装版の Exevalator と用例サンプルコード類があります。
+「 cpp 」フォルダ内に、C++実装版の Exevalator と用例サンプルコード類、および [C++用README](./cpp/README_JAPANESE.md) があります。
 最もシンプルな用例は「 example1.cpp 」で、以下のように単純な式「 1.2 + 3.4 」を計算する内容になっています：
 
 	(in cpp/example1.cpp)
@@ -135,6 +135,8 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 結果は以下の通りです：
 
 	4.6
+
+より詳しい解説や機能一覧については [C++用README](./cpp/README_JAPANESE.md) をご参照ください。
 
 
 <a id="performance"></a>
