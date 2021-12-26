@@ -6,7 +6,7 @@
 ## 日本語版 目次
 - <a href="#requirements">必要な環境</a>
 - <a href="#how-to-use">使用方法</a>
-- <a href="#example-code">サンプルコードの実行方法（およびコマンドラインでの使用方法）</a>
+- <a href="#example-code">サンプルコードの実行方法</a>
 - <a href="#features">主な機能</a>
 
 
