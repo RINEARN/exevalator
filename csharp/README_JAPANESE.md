@@ -134,6 +134,10 @@ Exevalator のインタープリタは、単一のファイル「 csharp/Exevala
 	{
 		public double invoke(double[] arguments)
 		{
+			if (arguments.Length != 2)
+			{
+				throw new ExevalatorException("Incorrected number of args");
+			}
 			return arguments[0] + arguments[1];
 		}
 	}

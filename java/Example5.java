@@ -13,6 +13,9 @@ class MyFunction implements Exevalator.FunctionInterface {
 	 */
 	@Override
 	public double invoke(double[] arguments) {
+		if (arguments.length != 2) {
+			throw new Exevalator.Exception("Incorrected number of args");
+		}
 		return arguments[0] + arguments[1];
 	}
 }

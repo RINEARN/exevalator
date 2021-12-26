@@ -139,6 +139,10 @@ You can create functions available in expressions, by implementing IExevalatorFu
 	{
 		public double invoke(double[] arguments)
 		{
+			if (arguments.Length != 2)
+			{
+				throw new ExevalatorException("Incorrected number of args");
+			}
 			return arguments[0] + arguments[1];
 		}
 	}

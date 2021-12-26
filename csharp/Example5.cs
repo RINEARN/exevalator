@@ -13,6 +13,10 @@ class MyFunction : IExevalatorFunction
     /// <returns>The return value of the function.</returns>
     public double invoke(double[] arguments)
     {
+        if (arguments.Length != 2)
+        {
+            throw new ExevalatorException("Incorrected number of args");
+        }
         return arguments[0] + arguments[1];
     }
 }

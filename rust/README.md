@@ -140,6 +140,9 @@ You can define functions available in expressions. Functions having the signatur
 
 	/// The function available in expressions
 	fn my_function(arguments: Vec<f64>) -> Result<f64, ExevalatorError> {
+		if arguments.len() != 2 {
+			return Err(ExevalatorError::new("Incorrect number of args"));
+		}
 		return Ok(arguments[0] + arguments[1]);
 	} 
 

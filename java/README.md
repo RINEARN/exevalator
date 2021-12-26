@@ -137,6 +137,9 @@ You can create functions available in expressions, by implementing Exevalator.Fu
 	class MyFunction implements Exevalator.FunctionInterface {
 		@Override
 		public double invoke (double[] arguments) {
+			if (arguments.length != 2) {
+				throw new Exevalator.Exception("Incorrected number of args");
+			}
 			return arguments[0] + arguments[1];
 		}
 	}

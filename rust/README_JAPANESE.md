@@ -153,6 +153,9 @@ Microsoft&reg; Windows&reg; を使用している場合は:
 
 	/// 式内で使用可能な関数を定義
 	fn my_function(arguments: Vec<f64>) -> Result<f64, ExevalatorError> {
+		if arguments.len() != 2 {
+			return Err(ExevalatorError::new("Incorrect number of args"));
+		}
 		return Ok(arguments[0] + arguments[1]);
 	} 
 
