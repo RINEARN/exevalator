@@ -116,7 +116,7 @@ For more details, see [README for using in C#](./csharp/README.md).
 <a id="how-to-use-cpp"></a>
 ### How to Use in C++
 
-In "cpp" folder, the C++ implementation version of Exevalator and various example code are locating. Most simple example code is "example1.cpp", which computes the value of a simple expression "1.2 + 3.4" as follows:
+In "cpp" folder, the C++ implementation version of Exevalator and various example code, and [README for using in C++](./cpp/README.md) are locating. Most simple example code is "example1.cpp", which computes the value of a simple expression "1.2 + 3.4" as follows:
 
 	(in cpp/example1.cpp)
 
@@ -139,6 +139,8 @@ How to compile/run this code depends on your environment and compiler. As an exa
 The result is:
 
 	4.6
+
+For more details, see [README for using in C++](./cpp/README.md).
 
 
 
@@ -174,7 +176,7 @@ Exevalator realizes the above processing speed by caching results of parsing and
 		result += exevalator.eval("x - 1 + 1 - 1 + 1 - 1"); // Different with the above
 	}
 
-In the above code, the for-loop runs in the speed of **some tens/hundreds of thousands of times cycles second**. It is about 100 times slower than the previous example code.
+In the above code, the for-loop runs in the speed of **some tens/hundreds of thousands of cycles per second**. It is about 100 times slower than the previous example code.
 
 You can avoid this kind of performance-down by creating an independent instance of Exevalator for each expression:
 
