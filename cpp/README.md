@@ -91,7 +91,7 @@ However, the computation may fail when an incorrect expression is inputted, or w
 
 ### 3. How to compile separately and link
 
-On many projects developing software in C++, source file are compiled separately as modules, and they are linked at the end of building steps.
+On many projects developing software in C++, source files are compiled separately as modules, and they are linked at the end of building steps.
 If you want to use Exevalator in such project, include ONLY header file "exevalator.hpp" from your code. For example, modify the previous example code as follows:
 
 	#include <iostream>
@@ -106,8 +106,8 @@ If you want to use Exevalator in such project, include ONLY header file "exevala
 
 You can compile the above code and "exevalator.cpp" separately as follows:
 
-	clang++ -std=c++17 -o exevalator.cpp
-	clang++ -std=c++17 -o example.cpp
+	clang++ -std=c++17 -c exevalator.cpp
+	clang++ -std=c++17 -c example.cpp
 
 Above command lines generates two compiled module files: "exevalator.o" and "example.o". You can link them as:
 
