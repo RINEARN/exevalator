@@ -42,6 +42,6 @@ public class Example5 {
 		double result = exevalator.eval("fun(1.2, 3.4)");
 
 		// Display the result
-		System.out.println("Result: " + result);
+		System.out.println("result: " + result);
 	}
 }

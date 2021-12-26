@@ -29,5 +29,5 @@ fn main() {
     };
 
     // Display the result
-    println!("result = {}", result);    
+    println!("result: {}", result);    
 }

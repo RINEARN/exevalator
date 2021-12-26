@@ -17,7 +17,7 @@ int main() {
         double result = exevalator.eval("(-(1.2 + 3.4) * 5) / 2");
 
         // Display the result
-        std::cout << "result=" << result << std::endl;
+        std::cout << "result: " << result << std::endl;
 
     } catch (exevalator::ExevalatorException &e) {
         std::cout << "Error occurred: " << e.what() << std::endl;

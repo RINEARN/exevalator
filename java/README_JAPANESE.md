@@ -58,7 +58,7 @@ Exevalator のインタープリタは、単一のファイル「 java/Exevalato
 			double result = exevalator.eval("1.2 + 3.4");
 			
 			// 結果を表示
-			System.out.println("Result: " + result);
+			System.out.println("result: " + result);
 		}
 		...
 	}
@@ -85,7 +85,7 @@ Exevalator のインタープリタは、単一のファイル「 java/Exevalato
 
 実行結果は：
 
-	4.6
+	result: 4.6
 
 この通り、"1.2 + 3.4" の計算結果が表示されます。
 

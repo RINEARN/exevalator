@@ -36,7 +36,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 
 	Exevalator exevalator = new Exevalator();
 	double result = exevalator.eval("1.2 + 3.4");
-	System.out.println("Result: " + result);
+	System.out.println("result: " + result);
 
 このコードをコンパイルして実行するには：
 
@@ -47,7 +47,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 
 結果は以下の通りです：
 
-	4.6
+	result: 4.6
 
 より詳しい解説や機能一覧については [Java言語用README](./java/README_JAPANESE.md) をご参照ください。
 
@@ -65,7 +65,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 		Ok(eval_value) => eval_value,
 		Err(eval_error) => panic!("{}", eval_error),
 	};
-	println!("result = {}", result);
+	println!("result: {}", result);
 
 このコードをコンパイルして実行するには：
 
@@ -78,7 +78,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 
 結果は以下の通りです：
 
-	4.6
+	result: 4.6
 
 より詳しい解説や機能一覧については [Rust用README](./rust/README_JAPANESE.md) をご参照ください。
 
@@ -93,7 +93,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 
 	Exevalator exevalator = new Exevalator();
 	double result = exevalator.Eval("1.2 + 3.4");
-	Console.WriteLine("Result: " + result);
+	Console.WriteLine("result: " + result);
 
 このコードは、Visual Studio&reg;上で適当なプロジェクト内に取り込んでも実行できますが、ここで即席で動かして確認するには、コマンドラインが便利です。Visual Studio 付属の Developer Command Prompt（スタートボタン > Visual Studio 20** > … ）を起動し、その上でリポジトリのフォルダに cd して、以下のようにコンパイル/実行できます：
 
@@ -103,7 +103,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 
 結果は以下の通りです：
 
-	4.6
+	result: 4.6
 
 より詳しい解説や機能一覧については [C#用README](./csharp/README_JAPANESE.md) をご参照ください。
 
@@ -119,7 +119,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 	exevalator::Exevalator exevalator;
 	try {
 		double result = exevalator.eval("1.2 + 3.4");
-		std::cout << "Result: " << result << std::endl;
+		std::cout << "result: " << result << std::endl;
 	} catch (exevalator::ExevalatorException &e) {
 		std::cerr << e.what() << std::endl;
 	}
@@ -134,7 +134,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 
 結果は以下の通りです：
 
-	4.6
+	result: 4.6
 
 より詳しい解説や機能一覧については [C++用README](./cpp/README_JAPANESE.md) をご参照ください。
 

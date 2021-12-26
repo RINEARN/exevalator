@@ -37,7 +37,7 @@ In "java" folder, the Java implementation version of Exevalator, various example
 
 	Exevalator exevalator = new Exevalator();
 	double result = exevalator.eval("1.2 + 3.4");
-	System.out.println("Result: " + result);
+	System.out.println("result: " + result);
 
 How to compile/run this code is:
 
@@ -48,7 +48,7 @@ How to compile/run this code is:
 
 The result is:
 
-	4.6
+	result: 4.6
 
 For more details, see [README for using in Java](./java/README.md).
 
@@ -70,7 +70,7 @@ In "rust" folder, the Rust implementation version of Exevalator, various example
 	};
 
 	// Display the result
-	println!("result = {}", result);
+	println!("result: {}", result);
 
 How to compile/run this code is:
 
@@ -83,7 +83,7 @@ How to compile/run this code is:
 
 The result is:
 
-	4.6
+	result: 4.6
 
 For more details, see [README for using in Rust](./rust/README.md).
 
@@ -97,7 +97,7 @@ In "csharp" folder, the C# implementation version of Exevalator, various example
 
 	Exevalator exevalator = new Exevalator();
 	double result = exevalator.Eval("1.2 + 3.4");
-	Console.WriteLine("Result: " + result);
+	Console.WriteLine("result: " + result);
 
 You can run the above code by importing it from any project on Visual Studio&reg;, and you also can run it in command-lines. The latter is more simple way, so Let's do it here. At first, launch "Developer Command Prompt" which is bundled in Visual Studio (Start button > Visual Studio 20** > ... ). Next, "cd" into the folder of this repository. Then compile example code and run it as follows:
 
@@ -107,7 +107,7 @@ You can run the above code by importing it from any project on Visual Studio&reg
 
 The result is:
 
-	4.6
+	result: 4.6
 
 For more details, see [README for using in C#](./csharp/README.md).
 
@@ -123,7 +123,7 @@ In "cpp" folder, the C++ implementation version of Exevalator and various exampl
 	exevalator::Exevalator exevalator;
 	try {
 		double result = exevalator.eval("1.2 + 3.4");
-		std::cout << "Result: " << result << std::endl;
+		std::cout << "result: " << result << std::endl;
 	} catch (exevalator::ExevalatorException &e) {
 		std::cerr << e.what() << std::endl;
 	}
@@ -138,7 +138,7 @@ How to compile/run this code depends on your environment and compiler. As an exa
 
 The result is:
 
-	4.6
+	result: 4.6
 
 For more details, see [README for using in C++](./cpp/README.md).
 

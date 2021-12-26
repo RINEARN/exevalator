@@ -18,6 +18,6 @@ public class Example2 {
 		double result = exevalator.eval("(-(1.2 + 3.4) * 5) / 2");
 
 		// Display the result
-		System.out.println("Result: " + result);
+		System.out.println("result: " + result);
 	}
 }

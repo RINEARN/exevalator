@@ -22,6 +22,6 @@ public class Example3 {
 		double result = exevalator.eval("x + 1");
 
 		// Display the result
-		System.out.println("Result: " + result);
+		System.out.println("result: " + result);
 	}
 }

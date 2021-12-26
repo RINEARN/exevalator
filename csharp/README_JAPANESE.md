@@ -52,7 +52,7 @@ Exevalator のインタープリタは、単一のファイル「 csharp/Exevala
 			double result = exevalator.Eval("1.2 + 3.4");
 			
 			// 結果を表示
-			Console.WriteLine("Result: " + result);
+			Console.WriteLine("result: " + result);
 		}
 		...
 	}
@@ -79,7 +79,7 @@ Exevalator のインタープリタは、単一のファイル「 csharp/Exevala
 
 実行結果は：
 
-	4.6
+	result: 4.6
 
 この通り、"1.2 + 3.4" の計算結果が表示されます。
 

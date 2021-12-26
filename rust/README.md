@@ -49,7 +49,7 @@ Then, you can load the Exevalator from any your source code and compute expressi
 	};
 
 	// Display the result
-	println!("result = {}", result);	
+	println!("result: {}", result);	
 
 Note that, all numbers in expressions will be handled as f64-type values on Exevalator.
 The evaluated (computed) value is always f64-type.
@@ -82,7 +82,7 @@ By the way, "example1.rs" is an example for computing the value of "1.2 + 3.4" b
 
 So the result is:
 
-	4.6
+	result: 4.6
 
 As the above, the computed value of "1.2 + 3.4" will be displayed.
 

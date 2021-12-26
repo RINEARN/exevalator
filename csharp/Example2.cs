@@ -15,6 +15,6 @@ static class Example2
         double result = exevalator.Eval("(-(1.2 + 3.4) * 5) / 2");
 
         // Display the result
-        Console.WriteLine("Result: " + result);
+        Console.WriteLine("result: " + result);
     }
 }

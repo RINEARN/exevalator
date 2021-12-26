@@ -18,6 +18,6 @@ public class Example1 {
 		double result = exevalator.eval("1.2 + 3.4");
 
 		// Display the result
-		System.out.println("Result: " + result);
+		System.out.println("result: " + result);
 	}
 }

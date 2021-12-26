@@ -54,7 +54,7 @@ Next, load Exevalator from your code as: "using Rinearn.ExevalatorCS;". Then you
 			double result = exevalator.Eval("1.2 + 3.4");
 			
 			// Display the result
-			Console.WriteLine("Result: " + result);
+			Console.WriteLine("result: " + result);
 		}
 		...
 	}
@@ -84,7 +84,7 @@ At first, launch "Developer Command Prompt" which is bundled in Visual Studio (S
 
 The result is:
 
-	4.6
+	result: 4.6
 
 As the above, the computed value of "1.2 + 3.4" will be displayed.
 

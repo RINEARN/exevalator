@@ -19,6 +19,6 @@ static class Example3
         double result = exevalator.Eval("x + 1");
 
         // Display the result
-        Console.WriteLine("Result: " + result);
+        Console.WriteLine("result: " + result);
     }
 }

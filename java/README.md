@@ -56,7 +56,7 @@ Now you are ready to use Exevalator! You can import the Exevalator from any your
 			double result = exevalator.eval("1.2 + 3.4");
 			
 			// Display the result
-			System.out.println("Result: " + result);
+			System.out.println("result: " + result);
 		}
 		...
 	}
@@ -83,7 +83,7 @@ Simple example code "java/Example*.java" are bundled in this repository. You can
 
 The result is:
 
-	4.6
+	result: 4.6
 
 As the above, the computed value of "1.2 + 3.4" will be displayed.
 

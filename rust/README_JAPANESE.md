@@ -49,7 +49,7 @@ Exevalator のインタープリタは、単一のファイル「 rust/exevalato
 	};
 
 	// 結果を画面に表示
-	println!("result = {}", result);	
+	println!("result: {}", result);	
 
 
 なお、Exevalator では、式の中のすべての数値は f64 型で扱われます。従って、計算結果も常に f64 型です。
@@ -83,7 +83,7 @@ Microsoft&reg; Windows&reg; を使用している場合は:
 
 従って実行結果は：
 
-	4.6
+	result: 4.6
 
 この通り、"1.2 + 3.4" の計算結果が表示されます。
 

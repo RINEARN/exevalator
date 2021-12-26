@@ -62,7 +62,7 @@ Next, load Exevalator from your code. If you don't care much about manners, it i
 			double result = exevalator.eval("1.2 + 3.4");
 
 			// Display the result
-			std::cout << "Result: " << result << std::endl;
+			std::cout << "result: " << result << std::endl;
 
 		// If any error occurred when evaluating the expression, handle it
 		} catch (exevalator::ExevalatorException &e) {
@@ -211,7 +211,6 @@ You can create functions available in expressions, by inheriting the abstract cl
 
 	// Compute the expression in which the above function is used
 	double result = exevalator.eval("fun(1.2, 3.4)");
-	std::cout << "result: " << result << std::endl;
 	// result: 4.6
 
 	(See: cpp/example5.cpp)
