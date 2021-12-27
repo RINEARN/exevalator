@@ -1,6 +1,8 @@
 # Exevalator
 
-Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムやアプリ内に組み込んで、式の値の計算に使うための、コンパクトなインタープリタです。複数言語対応で、Java&reg;言語、Rust&reg;、C#&reg;、C++製のプログラムに組み込んで使用できます。
+![logo](logo.png)
+
+Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムやアプリ内に組み込んで、式の値の計算に使うための、コンパクトで高速なインタープリタです。複数言語対応で、Java&reg;言語、Rust&reg;、C#&reg;、C++製のプログラムに組み込んで使用できます。
 
 &raquo; [English README](./README.md)
 
