@@ -30,7 +30,18 @@ int main() {
 
         std::chrono::system_clock::time_point begin_time = std::chrono::system_clock::now();
         for (uint64_t i=1UL; i<=loops; ++i) {
-            sum += exevalator.eval("x + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1");
+            exevalator.write_variable_at(address, (double)i);
+            sum += exevalator.eval("x + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1");        
+
+            // If you need more speed, use "reeval()" instead of "eval(expression)"
+            // after the first evaluation (then it becomes about 1.4 times faster):
+            /*
+            if (i == 1UL) {
+                sum += exevalator.eval("x + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1");        
+            } else {
+                sum += exevalator.reeval();
+            }
+            */
         }
         std::chrono::system_clock::time_point end_time = std::chrono::system_clock::now();
 

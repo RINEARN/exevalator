@@ -2,6 +2,12 @@ mod exevalator;
 use std::time::Instant;
 use exevalator::Exevalator;
 
+/*
+ * !!! DON'T FORGET TO SPECIFY OPTIMIZATION OPTIONS WHEN YOU COMPILE THIS CODE !!!
+ *     e.g.:
+ *           rustc -C opt-level=3 benchmark.rs
+ */
+
 /// A benchmark to measure the speed of repeated calculations.
 fn main() {
     println!("Please wait...");
@@ -16,12 +22,23 @@ fn main() {
     // Measure required time for evaluating a expression repeatedly for 100M times,
     // where each 10 numerical operations are required for each evaluation.
     let begin_time: Instant = Instant::now();
-    for i in 1..(loops + 1u64) {
+    for i in 1u64..(loops + 1u64) {
         exevalator.write_variable_at(address, i as f64);
         sum += match exevalator.eval("x + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1") {
             Ok(eval_value) => eval_value,
             Err(eval_error) => panic!("{}", eval_error),
         };
+
+        // If you need more speed, use "reeval()" instead of "eval(expression)"
+        // after the first evaluation (then it becomes 10 ~ 20% faster):
+        // 
+        // if i == 1u64 {
+        //     sum += match exevalator.eval("x + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1") {
+        //     ...
+        // } else {
+        //     sum += match exevalator.reeval() {
+        //     ...
+        // }
     }
     let elapsed_sec: f64 = begin_time.elapsed().as_secs_f64();
     

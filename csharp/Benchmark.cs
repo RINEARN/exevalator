@@ -2,6 +2,12 @@ using System;
 using System.Diagnostics;
 using Rinearn.ExevalatorCS;
 
+/*
+ * !!! DON'T FORGET TO SPECIFY OPTIMIZATION OPTIONS WHEN YOU COMPILE THIS CODE !!!
+ *     e.g.:
+ *           csc -optimize Exevalator.cs Benchmark.cs
+ */
+
 /// <summary>
 /// A benchmark to measure the speed of repeated calculations.
 /// </summary>
@@ -22,7 +28,7 @@ static class Example1
         // where each 10 numerical operations are required for each evaluation.
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.Start();
-        for (ulong i=1; i<=loops; ++i)
+        for (ulong i=1UL; i<=loops; ++i)
         {
             exevalator.WriteVariableAt(address, (double)i);
             sum += exevalator.Eval("x + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1");
