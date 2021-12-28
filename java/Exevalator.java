@@ -98,7 +98,7 @@ public final class Exevalator {
             System.out.println(ast.toMarkuppedText());
             */
 
-            // Evaluate (compute) the value of the root node of the AST.
+            // Create the tree of evaluator units, and get the the root unit of it.
             this.evaluatorUnit = ast.createEvaluatorUnit(this.variableTable, this.functionTable);
 
             this.lastEvaluatedExpression = expression;

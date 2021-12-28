@@ -92,6 +92,7 @@ namespace Rinearn.ExevalatorCS
                 Console.WriteLine(ast.ToMarkuppedText());
                 */
 
+                // Create the tree of evaluator units, and get the the root unit of it.
                 this.EvaluatorUnit = ast.CreateEvaluatorUnit(this.VariableTable, this.FunctionTable);
             }
 

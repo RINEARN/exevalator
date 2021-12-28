@@ -78,7 +78,7 @@ double Exevalator::eval(const std::string &expression) {
         std::cout << ast->to_markupped_text(0) << std::endl;
         */
 
-        // Evaluate the value of the expression, and return it.
+        // Create the tree of evaluator units, and get the the root unit of it.
         std::unique_ptr<Evaluator::EvaluatorUnit> evaluator_unit;
         this->evaluator_unit = ast->create_evaluator_unit(
             this->settings, this->variable_table, this->function_table

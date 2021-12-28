@@ -78,7 +78,7 @@ impl<'exvlife> Exevalator<'exvlife> {
                 Err(parser_error) => return Err(parser_error),
             };
 
-            //let ast: AstNode = Parser::new(&self.settings).parse(&tokens);
+            // Create the tree of evaluator units, and get the the root unit of it.
             self.evaluator_unit = 
             match ast.create_evaluator_unit(&self.variable_table, &self.function_table, &self.settings) {
                 Ok(created_unit) => Some(created_unit),
