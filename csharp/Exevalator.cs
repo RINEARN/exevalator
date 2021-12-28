@@ -94,6 +94,8 @@ namespace Rinearn.ExevalatorCS
 
                 // Create the tree of evaluator units, and get the the root unit of it.
                 this.EvaluatorUnit = ast.CreateEvaluatorUnit(this.VariableTable, this.FunctionTable);
+
+                this.LastEvaluatedExpression = expression;
             }
 
             // Evaluate the value of the expression, and return it.
