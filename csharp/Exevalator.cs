@@ -104,6 +104,23 @@ namespace Rinearn.ExevalatorCS
         }
 
         /// <summary>
+        /// Re-evaluates (re-computes) the value of the expression evaluated by "eval" method last time.
+        /// This method may (slightly) work faster than calling "eval" method repeatedly for the same expression.
+        /// Note that, the result value may different with the last evaluated value, 
+        /// if values of variables or behaviour of functions had changed.
+        /// </summary>
+        /// <returns>The evaluated value</returns>
+        public double Reeval()
+        {
+            if (this.EvaluatorUnit == null) {
+                throw new ExevalatorException("\"Reeval\" is not available before using \"Eval\"");
+            } else {
+                double evaluatedValue = this.EvaluatorUnit.evaluate(this.Memory);
+                return evaluatedValue;
+            }
+        }
+
+        /// <summary>
         /// Declares a new variable, for using the value of it in expressions.
         /// </summary>
         /// <param name="name">The name of the variable to be declared</param>

@@ -773,7 +773,17 @@ public:
      * @return The evaluated value
      */
     double eval(const std::string &expression);
-    
+
+    /**
+     * Re-evaluates (re-computes) the value of the expression evaluated by "eval" method last time.
+     * This method works faster than calling "eval" method repeatedly for the same expression.
+     * Note that, the result value may different with the last evaluated value, 
+     * if values of variables or behaviour of functions had changed.
+     * 
+     * @return The evaluated value
+     */
+    double reeval();
+
     /**
      * Declares a new variable, for using the value of it in expressions.
      * 

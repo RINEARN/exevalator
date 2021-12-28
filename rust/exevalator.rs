@@ -100,6 +100,26 @@ impl<'exvlife> Exevalator<'exvlife> {
         }
     }
 
+    /// Re-evaluates (re-computes) the value of the expression evaluated by "eval" method last time.
+    /// This method works faster than calling "eval" method repeatedly for the same expression.
+    /// Note that, the result value may different with the last evaluated value, 
+    /// if values of variables or behaviour of functions had changed.
+    /// 
+    /// * Return value - The evaluated value, or ExevalatorError if any error detected.
+    ///
+    #[allow(dead_code)]
+    pub fn reeval(&mut self) -> Result<f64,ExevalatorError> {
+        if self.evaluator_unit.is_none() {
+            return Err(ExevalatorError::new("\"reeval\" is not available before using \"eval\""));
+        } else {
+            let unit: &Box<dyn EvaluatorUnit> = &(*self.evaluator_unit.as_ref().unwrap());
+            match unit.evaluate(&self.memory) {
+                Ok(evaluated_value) => return Ok(evaluated_value),
+                Err(evaluation_error) => return Err(evaluation_error),
+            };
+        }
+    }
+
     /// Declares a new variable, for using the value of it in the expression.
     /// 
     /// * `name` - The name of the variable to be declared.

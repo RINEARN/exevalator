@@ -110,6 +110,23 @@ public final class Exevalator {
     }
 
     /**
+     * Re-evaluates (re-computes) the value of the expression evaluated by "eval" method last time.
+     * This method may (slightly) work faster than calling "eval" method repeatedly for the same expression.
+     * Note that, the result value may different with the last evaluated value, 
+     * if values of variables or behaviour of functions had changed.
+     * 
+     * @return The evaluated value
+     */
+    public synchronized double reeval() {
+        if (this.evaluatorUnit == null) {
+            throw new Exevalator.Exception("\"reeval\" is not available before using \"eval\"");
+        } else {
+            double evaluatedValue = this.evaluatorUnit.evaluate(this.memory);
+            return evaluatedValue;
+        }
+    }
+
+    /**
      * Declares a new variable, for using the value of it in expressions.
      *
      * @param name The name of the variable to be declared.
