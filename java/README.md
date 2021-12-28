@@ -85,7 +85,9 @@ The result is:
 
 	result: 4.6
 
-As the above, the computed value of "1.2 + 3.4" will be displayed.
+As the above, the computed value of "1.2 + 3.4" will be displayed. You can compile/run other examples in the same way.
+
+Also, a benchmark program "java/Benchmark.java" for measuring processing speed of Exevalator is bundled in this repository. You can compile/run it in the same way as other example code.
 
 
 <a id="features"></a>

@@ -140,9 +140,13 @@ The code of "example1.cpp" is almost the same as "example.cpp" in the previous s
 
 	result: 4.6
 
-As the above, the computed value of an expression "1.2 + 3.4" will be displayed.
+As the above, the computed value of an expression "1.2 + 3.4" will be displayed. You can compile/run other examples in the same way. 
 
-You can execute/run other examples in the same way.
+Also, a benchmark program "cpp/benchmark.cpp" for measuring processing speed of Exevalator is bundled in this repository. For compiling it, specify the optimization-option as:
+
+	clang++ -std=c++17 -O2 -o benchmark benchmark.cpp
+
+In the above, "-O2" is the optimization option. If you forget it, Exevalator can not work in full-speed.
 
 
 <a id="features"></a>

@@ -84,7 +84,14 @@ So the result is:
 
 	result: 4.6
 
-As the above, the computed value of "1.2 + 3.4" will be displayed.
+As the above, the computed value of "1.2 + 3.4" will be displayed. You can compile/run other examples in the same way.
+
+Also, a benchmark program "rust/benchmark.rs" for measuring processing speed of Exevalator is bundled in this repository. For compiling it, specify the optimization-option as:
+
+	rustc -C opt-level=3 benchmark.rs
+
+In the above, "-C opt-level=3" is the specification of the level of the optimization. If you forget it, Exevalator can not work in full-speed.
+
 
 
 <a id="features"></a>
