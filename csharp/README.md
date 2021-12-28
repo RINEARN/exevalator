@@ -4,11 +4,20 @@
 
 
 ## English Index
-- <a href="#requirements">Requirements</a>
-- <a href="#how-to-use">How to Use</a>
-- <a href="#example-code">Example Code (and How to Use in Command Lines)</a>
-- <a href="#features">Features</a>
-
+- [Requirements](#requirements)
+- [How to Use](#how-to-use)
+- [Example Code (and How to Use in Command Lines)](#example-code)
+- [Features](#features)
+- [List of Methods/Specifications](#methods)
+	- [Constructor](#methods-constructor)
+	- [double Eval(string expression)](#methods-eval)
+	- [double Reeval()](#methods-reeval)
+	- [int DeclareVariable(string name)](#methods-declare-variable)
+	- [void WriteVariable(string name, double value)](#methods-write-variable)
+	- [void WriteVariableAt(int address, double value)](#methods-write-variable-at)
+	- [double ReadVariable(string name)](#methods-read-variable)
+	- [double ReadVariableAt(int address)](#methods-read-variable-at)
+	- [void ConnectFunction(string name, IExevalatorFunction function)](#methods-connect-function)
 
 
 
@@ -144,7 +153,7 @@ You can create functions available in expressions, by implementing IExevalatorFu
 	// Create a function available in expressions.
 	class MyFunction : IExevalatorFunction
 	{
-		public double invoke(double[] arguments)
+		public double Invoke(double[] arguments)
 		{
 			if (arguments.Length != 2)
 			{
@@ -166,6 +175,104 @@ You can create functions available in expressions, by implementing IExevalatorFu
 	(See: csharp/Example5.cs)
 
 
+
+<a id="methods"></a>
+## List of Methods/Specifications
+
+The list of methods of Exevalator class, and their specifications.
+
+- [Constructor](#methods-constructor)
+- [double Eval(string expression)](#methods-eval)
+- [double Reeval()](#methods-reeval)
+- [int DeclareVariable(string name)](#methods-declare-variable)
+- [void WriteVariable(string name, double value)](#methods-write-variable)
+- [void WriteVariableAt(int address, double value)](#methods-write-variable-at)
+- [double ReadVariable(string name)](#methods-read-variable)
+- [double ReadVariableAt(int address)](#methods-read-variable-at)
+- [void ConnectFunction(string name, IExevalatorFunction function)](#methods-connect-function)
+
+
+<a id="methods-constructor"></a>
+| Signature | (constructor) Exevalator() |
+|:---|:---|
+| Description | Creates a new interpreter of the Exevalator. |
+| Parameters | None |
+| Return | The created instance. |
+
+
+<a id="methods-eval"></a>
+| Signature | double Eval(string expression) |
+|:---|:---|
+| Description | Evaluates (computes) the value of an expression. |
+| Parameters | expression: The expression to be evaluated. |
+| Return | The evaluated value. |
+| Exception | ExevalatorException will be thrown if any error occurred when evaluating the expression. |
+
+
+<a id="methods-reeval"></a>
+| Signature | double Reeval() |
+|:---|:---|
+| Description | Re-evaluates (re-computes) the value of the expression evaluated by "eval" method last time.<br>This method may (slightly) work faster than calling "eval" method repeatedly for the same expression.<br>Note that, the result value may different with the last evaluated value, if values of variables or behaviour of functions had changed. |
+| Parameters | None |
+| Return | The evaluated value. |
+| Exception | ExevalatorException will be thrown if any error occurred when evaluating the expression. |
+
+
+<a id="methods-declare-variable"></a>
+| Signature | int DeclareVariable(string name) |
+|:---|:---|
+| Description | Declares a new variable, for using the value of it in expressions. |
+| Parameters | name: The name of the variable to be declared. |
+| Return | The virtual address of the declared variable, which is useful for accessing to the variable faster.<br>See "WriteVariableAt" and "ReadVariableAt" method. |
+| Exception | ExevalatorException will be thrown if invalid name is specified. |
+
+
+<a id="methods-write-variable"></a>
+| Signature | void WriteVariable(string name, double value) |
+|:---|:---|
+| Description | Writes the value to the variable having the specified name. |
+| Parameters | name: The name of the variable to be written.<br>value: The new value of the variable. |
+| Return | None |
+| Exception | ExevalatorException will be thrown if the specified variable is not found, or invalid name is specified. |
+
+
+<a id="methods-write-variable-at"></a>
+| Signature | void WriteVariableAt(int address, double value) |
+|:---|:---|
+| Description | Writes the value to the variable at the specified virtual address.<br>This method works faster than "WriteVariable" method. |
+| Parameters | address: The virtual address of the variable to be written.<br>value: The new value of the variable. |
+| Return | None |
+| Exception | ExevalatorException will be thrown if the invalid address is specified. |
+
+
+<a id="methods-read-variable"></a>
+| Signature | double ReadVariable(string name) |
+|:---|:---|
+| Description | Reads the value of the variable having the specified name. |
+| Parameters | name: The name of the variable to be read. |
+| Return | The current value of the variable. |
+| Exception | ExevalatorException will be thrown if the specified variable is not found, or invalid name is specified. |
+
+
+<a id="methods-read-variable-at"></a>
+| Signature | double ReadVariableAt(int address) |
+|:---|:---|
+| Description | Reads the value of the variable at the specified virtual address.<br>This method works faster than "ReadVariable" method. |
+| Parameters | address: The virtual address of the variable to be read. |
+| Return | The current value of the variable. |
+| Exception | ExevalatorException will be thrown if the invalid address is specified. |
+
+
+<a id="methods-connect-function"></a>
+| Signature | void ConnectFunction(String name, IExevalatorFunction function) |
+|:---|:---|
+| Description | Connects a function, for using it in expressions. |
+| Parameters | name: The name of the function used in the expression.<br>function: The function to be connected. It is an instance of the class implementing Exevalator.IExevalatorFunction (only "double Invoke(double[] arguments)" method is defined, to implement the process of a function). |
+| Return | None |
+| Exception | ExevalatorException will be thrown if invalid name is specified. |
+
+
+<hr />
 
 <a id="credits"></a>
 ## Credits

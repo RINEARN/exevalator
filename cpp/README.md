@@ -4,10 +4,20 @@
 
 
 ## English Index
-- <a href="#requirements">Requirements</a>
-- <a href="#how-to-use">How to Use</a>
-- <a href="#example-code">Example Code</a>
-- <a href="#features">Features</a>
+- [Requirements](#requirements)
+- [How to Use](#how-to-use)
+- [Example Code](#example-code)
+- [Features](#features)
+- [List of Methods/Specifications](#methods)
+	- [Constructor](#methods-constructor)
+	- [double eval(const std::string &expression)](#methods-eval)
+	- [double reeval()](#methods-reeval)
+	- [size_t declare_variable(const std::string &name)](#methods-declare-variable)
+	- [void write_variable(const std::string &name, double value)](#methods-write-variable)
+	- [void write_variable_at(size_t address, double value)](#methods-write-variable-at)
+	- [double read_variable(const std::string &name)](#methods-read-variable)
+	- [double read_variable_at(size_t address)](#methods-read-variable-at)
+	- [size_t connect_function(const std::string &name, const std::shared_ptr&lt;ExevalatorFunctionInterface&gt; &function_ptr)](#methods-connect-function)
 
 
 
@@ -199,7 +209,7 @@ You can create functions available in expressions, by inheriting the abstract cl
 
 	// Create a function available in expressions
 	class MyFun : public exevalator::ExevalatorFunctionInterface {
-		double operator()(std::vector<double> arguments) {
+		double operator()(const std::vector<double> &arguments) {
 			if (arguments.size() != 2) {
 				throw new exevalator::ExevalatorException("Incorrect number of args");
 			}
@@ -224,6 +234,105 @@ In addition, exception may occur in process of a functions called in an expressi
 (For example, in the above example, the function implemented in MyFun class throws an exception when too many/few arguments are passed.)
 In such case, "eval" method re-throws the exception by wrapping ExevalatorException.
 
+
+<a id="methods"></a>
+## List of Methods/Specifications
+
+The list of methods of Exevalator class, and their specifications.
+
+- [Constructor](#methods-constructor)
+- [double eval(const std::string &amp;expression)](#methods-eval)
+- [double reeval()](#methods-reeval)
+- [size_t declare_variable(const std::string &amp;name)](#methods-declare-variable)
+- [void write_variable(const std::string &amp;name, double value)](#methods-write-variable)
+- [void write_variable_at(size_t address, double value)](#methods-write-variable-at)
+- [double read_variable(const std::string &amp;name)](#methods-read-variable)
+- [double read_variable_at(size_t address)](#methods-read-variable-at)
+- [size_t connect_function(const std::string &amp;name, const std::shared_ptr&lt;ExevalatorFunctionInterface&gt; &amp;function_ptr)](#methods-connect-function)
+
+
+<a id="methods-constructor"></a>
+| Signature | (constructor) Exevalator() |
+|:---|:---|
+| Description | Creates a new interpreter of the Exevalator. |
+| Parameters | None |
+| Return | The created instance. |
+
+
+<a id="methods-eval"></a>
+| Signature | double eval(const std::string &amp;expression) |
+|:---|:---|
+| Description | Evaluates (computes) the value of an expression. |
+| Parameters | expression: The expression to be evaluated. |
+| Return | The evaluated value. |
+| Exception | ExevalatorException will be thrown if any error occurred when evaluating the expression. |
+
+
+<a id="methods-reeval"></a>
+| Signature | double reeval() |
+|:---|:---|
+| Description | Re-evaluates (re-computes) the value of the expression evaluated by "eval" method last time.<br>This method works faster than calling "eval" method repeatedly for the same expression.<br>Note that, the result value may different with the last evaluated value, if values of variables or behaviour of functions had changed. |
+| Parameters | None |
+| Return | The evaluated value. |
+| Exception | ExevalatorException will be thrown if any error occurred when evaluating the expression. |
+
+
+<a id="methods-declare-variable"></a>
+| Signature | size_t declare_variable(const std::string &amp;name) |
+|:---|:---|
+| Description | Declares a new variable, for using the value of it in expressions. |
+| Parameters | name: The name of the variable to be declared. |
+| Return | The virtual address of the declared variable, which is useful for accessing to the variable faster.<br>See "write_variable_at" and "read_variable_at" method. |
+| Exception | ExevalatorException will be thrown if invalid name is specified. |
+
+
+<a id="methods-write-variable"></a>
+| Signature | void write_variable(const std::string &amp;name, double value) |
+|:---|:---|
+| Description | Writes the value to the variable having the specified name. |
+| Parameters | name: The name of the variable to be written.<br>value: The new value of the variable. |
+| Return | None |
+| Exception | ExevalatorException will be thrown if the specified variable is not found, or invalid name is specified. |
+
+
+<a id="methods-write-variable-at"></a>
+| Signature | void write_variable_at(size_t address, double value) |
+|:---|:---|
+| Description | Writes the value to the variable at the specified virtual address.<br>This method works faster than "write_variable" method. |
+| Parameters | address: The virtual address of the variable to be written.<br>value: The new value of the variable. |
+| Return | None |
+| Exception | ExevalatorException will be thrown if the invalid address is specified. |
+
+
+<a id="methods-read-variable"></a>
+| Signature | double read_variable(const std::string &amp;name) |
+|:---|:---|
+| Description | Reads the value of the variable having the specified name. |
+| Parameters | name: The name of the variable to be read. |
+| Return | The current value of the variable. |
+| Exception | ExevalatorException will be thrown if the specified variable is not found, or invalid name is specified. |
+
+
+<a id="methods-read-variable-at"></a>
+| Signature | double read_variable_at(size_t address) |
+|:---|:---|
+| Description | Reads the value of the variable at the specified virtual address.<br>This method works faster than "read_variable" method. |
+| Parameters | address: The virtual address of the variable to be read. |
+| Return | The current value of the variable. |
+| Exception | ExevalatorException will be thrown if the invalid address is specified. |
+
+
+<a id="methods-connect-function"></a>
+| Signature | size_t connect_function(const std::string &amp;name, const std::shared_ptr&lt;ExevalatorFunctionInterface&gt; &amp;function_ptr) |
+|:---|:---|
+| Description | Connects a function, for using it in expressions. |
+| Parameters | name: The name of the function used in the expression.<br>function_ptr: The shared_ptr pointing to the function to be connected. The function is an instance of the class inheriting ExevalatorFunctionInterface (only "double invoke(const std::vector&lt;double&gt; &amp;arguments)" method is defined, to implement the process of a function). |
+| Return | Unused in this version |
+| Exception | ExevalatorException will be thrown if invalid name is specified. |
+
+
+
+<hr />
 
 <a id="credits"></a>
 ## Credits

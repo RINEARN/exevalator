@@ -180,7 +180,7 @@ public final class Exevalator {
 
     /**
      * Writes the value to the variable at the specified virtual address.
-     * This function works faster than "WriteVariable" function.
+     * This method works faster than "WriteVariable" method.
      *
      * @param address The virtual address of the variable to be written.
      * @param value The new value of the variable.
@@ -211,7 +211,7 @@ public final class Exevalator {
 
     /**
      * Reads the value of the variable at the specified virtual address.
-     * This function works faster than "EeadVariable" function.
+     * This method works faster than "EeadVariable" method.
      *
      * @param address The virtual address of the variable to be read.
      * @return The current value of the variable.

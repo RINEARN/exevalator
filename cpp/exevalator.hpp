@@ -47,7 +47,7 @@ public:
      * @param arguments The vector storing values of arguments
      * @return The return value of the function
      */
-    virtual double operator()(std::vector<double> arguments) = 0;
+    virtual double operator()(const std::vector<double> &arguments) = 0;
     virtual ~ExevalatorFunctionInterface() = 0;
 };
 

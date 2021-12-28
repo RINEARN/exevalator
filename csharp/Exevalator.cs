@@ -127,7 +127,7 @@ namespace Rinearn.ExevalatorCS
         /// <returns>
         ///     The virtual address of the declared variable,
         ///     which useful for accessing to the variable faster.
-        ///     See "WriteVariableAt" and "ReadVariableAt" function.
+        ///     See "WriteVariableAt" and "ReadVariableAt" method.
         /// </returns>
         public int DeclareVariable(string name)
         {
@@ -169,7 +169,7 @@ namespace Rinearn.ExevalatorCS
 
         /// <summary>
         /// Writes the value to the variable at the specified virtual address.
-        /// This function works faster than "WriteVariable" function.
+        /// This method works faster than "WriteVariable" method.
         /// </summary>
         /// <param name="address">The virtual address of the variable to be written</param>
         /// <param name="value">The new value of the variable</param>
@@ -203,7 +203,7 @@ namespace Rinearn.ExevalatorCS
 
         /// <summary>
         /// Reads the value of the variable at the specified virtual address.
-        /// This function works faster than "EeadVariable" function.
+        /// This method works faster than "EeadVariable" method.
         /// </summary>
         /// <param name="address">The virtual address of the variable to be read</param>
         /// <returns>The current value of the variable</returns>
@@ -249,7 +249,7 @@ namespace Rinearn.ExevalatorCS
 
     public interface IExevalatorFunction
     {
-        double invoke(double[] arguments);
+        double Invoke(double[] arguments);
     }
 
 
@@ -1579,7 +1579,7 @@ namespace Rinearn.ExevalatorCS
                 {
                     this.ArgumentArrayBuffer[iarg] = this.ArgumentEvalUnits[iarg].evaluate(memory);
                 }
-                return this.Function.invoke(this.ArgumentArrayBuffer);
+                return this.Function.Invoke(this.ArgumentArrayBuffer);
             }
         }
 

@@ -4,12 +4,22 @@
 
 
 ## 日本語版 目次
-- <a href="#requirements">必要な環境</a>
-- <a href="#how-to-use">使用方法</a>
-- <a href="#example-code">サンプルコードの実行方法</a>
-- <a href="#features">主な機能</a>
-- <a href="#vnano">もっと機能が必要な場合は: Vnano</a>
 
+- [必要な環境](#requirements)
+- [使用方法](#how-to-use)
+- [サンプルコードの実行方法](#example-code)
+- [主な機能](#features)
+- [メソッド仕様一覧](#methods)
+	- [コンストラクタ](#methods-constructor)
+	- [double eval(String expression)](#methods-eval)
+	- [double reeval()](#methods-reeval)
+	- [int declareVariable(String name)](#methods-declare-variable)
+	- [void writeVariable(String name, double value)](#methods-write-variable)
+	- [void writeVariableAt(int address, double value)](#methods-write-variable-at)
+	- [double readVariable(String name)](#methods-read-variable)
+	- [double readVariableAt(int address)](#methods-read-variable-at)
+	- [void connectFunction(String name, FunctionInterface function)](#methods-connect-function)
+- [もっと機能が必要な場合は: Vnano](#vnano)
 
 
 
@@ -160,6 +170,106 @@ Exevalator のインタープリタは、単一のファイル「 java/Exevalato
 	(参照: java/Example5.java)
 
 
+
+<a id="methods"></a>
+## メソッド仕様一覧
+
+Exevalator クラスで提供されている各メソッドの一覧と詳細仕様です。
+
+* [コンストラクタ](#methods-constructor)
+* [double eval(String expression)](#methods-eval)
+* [double reeval()](#methods-reeval)
+* [int declareVariable(String name)](#methods-declare-variable)
+* [void writeVariable(String name, double value)](#methods-write-variable)
+* [void writeVariableAt(int address, double value)](#methods-write-variable-at)
+* [double readVariable(String name)](#methods-read-variable)
+* [double readVariableAt(int address)](#methods-read-variable-at)
+* [void connectFunction(String name, FunctionInterface function)](#methods-connect-function)
+
+
+<a id="methods-constructor"></a>
+| 形式 | (コンストラクタ) Exevalator() |
+|:---|:---|
+| 説明 | 新しい Exevalator のインタープリタ インスタンスを生成します。 |
+| 引数 | なし |
+| 戻り値 | 生成されたインスタンス |
+
+
+<a id="methods-eval"></a>
+| 形式 | double eval(String expression) |
+|:---|:---|
+| 説明 | 式の値を評価（計算）します。 |
+| 引数 | expression: 評価（計算）対象の式 |
+| 戻り値 | 評価（計算）結果の値 |
+| 例外 | 式の評価中にエラーが発生した場合に Exevalator.Exception がスローされます。 |
+
+
+<a id="methods-reeval"></a>
+| 形式 | double reeval() |
+|:---|:---|
+| 説明 | 前回 eval メソッドによって評価されたのと同じ式を、再評価（再計算）します。<br>このメソッドは、繰り返し使用した場合に eval メソッドよりも僅かに高速な場合があります。<br>なお、変数の値や関数の振る舞いが、前回評価時から変化している場合、式の評価結果も前回とは変わり得る事に留意してください。 |
+| 引数 | なし |
+| 戻り値 | 評価（計算）結果の値 |
+| 例外 | 式の評価中にエラーが発生した場合に Exevalator.Exception がスローされます。 |
+
+
+<a id="methods-declare-variable"></a>
+| 形式 | int declareVariable(String name) |
+|:---|:---|
+| 説明 | 式の中で使用するための変数を、新規に宣言します。 |
+| 引数 | name: 宣言する変数の名前 |
+| 戻り値 | 宣言した変数に割り当てられた仮想アドレス<br>（高速に読み書きしたい場合に "writeVariableAt" や "readVariableAt" メソッドで使用） |
+| 例外 | 無効な変数名が指定された場合に Exevalator.Exception がスローされます。 |
+
+
+<a id="methods-write-variable"></a>
+| 形式 | void writeVariable(String name, double value) |
+|:---|:---|
+| 説明 | 指定された名前の変数に、値を書き込みます。 |
+| 引数 | name: 書き込み対象の変数の名前<br>value: 書き込む値 |
+| 戻り値 | なし |
+| 例外 | 指定された名前の変数が存在しない場合や、無効な変数名が指定された場合に Exevalator.Exception がスローされます。 |
+
+
+<a id="methods-write-variable-at"></a>
+| 形式 | void writeVariableAt(int address, double value) |
+|:---|:---|
+| 説明 | 指定された仮想アドレスの位置にある変数に、値を書き込みます。<br>なお、このメソッドは "writeVariable" メソッドよりも高速です。 |
+| 引数 | address: 書き込み対象の変数の仮想アドレス<br>value: 書き込む値 |
+| 戻り値 | なし |
+| 例外 | 無効なアドレスが指定された場合に Exevalator.Exception がスローされます。 |
+
+
+<a id="methods-read-variable"></a>
+| 形式 | double readVariable(String name) |
+|:---|:---|
+| 説明 | 指定された名前の変数の値を読み込みます。 |
+| 引数 | name: 読み込み対称の変数の名前 |
+| 戻り値 | 変数の現在の値 |
+| 例外 | 指定された名前の変数が存在しない場合や、無効な変数名が指定された場合に Exevalator.Exception がスローされます。 |
+
+
+<a id="methods-read-variable-at"></a>
+| 形式 | double readVariableAt(int address) |
+|:---|:---|
+| 説明 | 指定された仮想アドレスの位置にある変数の値を読み込みます。<br>なお、このメソッドは "readVariable" メソッドよりも高速です。 |
+| 引数 | address: 読み込み対象の変数の仮想アドレス
+| 戻り値 | 変数の現在の値 |
+| 例外 | 無効なアドレスが指定された場合に Exevalator.Exception がスローされます。 |
+
+
+<a id="methods-connect-function"></a>
+| 形式 | void connectFunction(String name, Exevalator.FunctionInterface function) |
+|:---|:---|
+| 説明 | 式の中で使用するための関数を接続します。 |
+| 引数 | name: 接続する関数の名前<br>function: 関数の処理を提供する Exevalator.FunctionInterface 実装クラスのインスタンス<br>（「 double invoke(double[] arguments) 」メソッドのみが定義されており、このメソッドに関数処理を実装します） |
+| 戻り値 | なし |
+| 例外 | 無効な関数名が指定された場合に Exevalator.Exception がスローされます。 |
+
+
+
+
+
 <a id="vnano"></a>
 ## もっと機能が必要な場合は: Vnano
 
@@ -169,6 +279,7 @@ Exevalator では、インタープリタの規模をコンパクトに抑える
 Vnano では、条件分岐や繰り返しも含めた、それなりに複雑な処理を実行できます。
 
 
+<hr />
 
 <a id="credits"></a>
 ## 本文中の商標など

@@ -14,7 +14,7 @@ class MyFun : public exevalator::ExevalatorFunctionInterface {
      * @param arguments The vector storing values of arguments.
      * @return double The return value of this function.
      */
-    double operator()(std::vector<double> arguments) {
+    double operator()(const std::vector<double> &arguments) {
         if (arguments.size() != 2) {
             throw new exevalator::ExevalatorException("Incorrect number of args");
         }

@@ -4,11 +4,20 @@
 
 
 ## 日本語版 目次
-- <a href="#requirements">必要な環境</a>
-- <a href="#how-to-use">使用方法</a>
-- <a href="#example-code">サンプルコードの実行方法（およびコマンドラインでの使用方法）</a>
-- <a href="#features">主な機能</a>
-
+- [必要な環境](#requirements)
+- [使用方法](#how-to-use)
+- [サンプルコードの実行方法（およびコマンドラインでの使用方法）](#example-code)
+- [主な機能](#features)
+- [メソッド仕様一覧](#methods)
+	- [コンストラクタ](#methods-constructor)
+	- [double Eval(string expression)](#methods-eval)
+	- [double Reeval()](#methods-reeval)
+	- [int DeclareVariable(string name)](#methods-declare-variable)
+	- [void WriteVariable(string name, double value)](#methods-write-variable)
+	- [void WriteVariableAt(int address, double value)](#methods-write-variable-at)
+	- [double ReadVariable(string name)](#methods-read-variable)
+	- [double ReadVariableAt(int address)](#methods-read-variable-at)
+	- [void ConnectFunction(string name, IExevalatorFunction function)](#methods-connect-function)
 
 
 
@@ -162,6 +171,107 @@ Exevalator のインタープリタは、単一のファイル「 csharp/Exevala
 	(参照: csharp/Example5.cs)
 
 
+
+
+<a id="methods"></a>
+## メソッド仕様一覧
+
+Exevalator クラスで提供されている各メソッドの一覧と詳細仕様です。
+
+- [コンストラクタ](#methods-constructor)
+- [double Eval(string expression)](#methods-eval)
+- [double Reeval()](#methods-reeval)
+- [int DeclareVariable(string name)](#methods-declare-variable)
+- [void WriteVariable(string name, double value)](#methods-write-variable)
+- [void WriteVariableAt(int address, double value)](#methods-write-variable-at)
+- [double ReadVariable(string name)](#methods-read-variable)
+- [double ReadVariableAt(int address)](#methods-read-variable-at)
+- [void ConnectFunction(string name, IExevalatorFunction function)](#methods-connect-function)
+
+
+<a id="methods-constructor"></a>
+| 形式 | (コンストラクタ) Exevalator() |
+|:---|:---|
+| 説明 | 新しい Exevalator のインタープリタ インスタンスを生成します。 |
+| 引数 | なし |
+| 戻り値 | 生成されたインスタンス |
+
+
+<a id="methods-eval"></a>
+| 形式 | double Eval(string expression) |
+|:---|:---|
+| 説明 | 式の値を評価（計算）します。 |
+| 引数 | expression: 評価（計算）対象の式 |
+| 戻り値 | 評価（計算）結果の値 |
+| 例外 | 式の評価中にエラーが発生した場合に ExevalatorException がスローされます。 |
+
+
+<a id="methods-reeval"></a>
+| 形式 | double Reeval() |
+|:---|:---|
+| 説明 | 前回 eval メソッドによって評価されたのと同じ式を、再評価（再計算）します。<br>このメソッドは、繰り返し使用した場合に eval メソッドよりも僅かに高速な場合があります。<br>なお、変数の値や関数の振る舞いが、前回評価時から変化している場合、式の評価結果も前回とは変わり得る事に留意してください。 |
+| 引数 | なし |
+| 戻り値 | 評価（計算）結果の値 |
+| 例外 | 式の評価中にエラーが発生した場合に ExevalatorException がスローされます。 |
+
+
+<a id="methods-declare-variable"></a>
+| 形式 | int DeclareVariable(string name) |
+|:---|:---|
+| 説明 | 式の中で使用するための変数を、新規に宣言します。 |
+| 引数 | name: 宣言する変数の名前 |
+| 戻り値 | 宣言した変数に割り当てられた仮想アドレス<br>（高速に読み書きしたい場合に "WriteVariableAt" や "ReadVariableAt" メソッドで使用） |
+| 例外 | 無効な変数名が指定された場合に ExevalatorException がスローされます。 |
+
+
+<a id="methods-write-variable"></a>
+| 形式 | void WriteVariable(string name, double value) |
+|:---|:---|
+| 説明 | 指定された名前の変数に、値を書き込みます。 |
+| 引数 | name: 書き込み対象の変数の名前<br>value: 書き込む値 |
+| 戻り値 | なし |
+| 例外 | 指定された名前の変数が存在しない場合や、無効な変数名が指定された場合に ExevalatorException がスローされます。 |
+
+
+<a id="methods-write-variable-at"></a>
+| 形式 | void WriteVariableAt(int address, double value) |
+|:---|:---|
+| 説明 | 指定された仮想アドレスの位置にある変数に、値を書き込みます。<br>なお、このメソッドは "WriteVariable" メソッドよりも高速です。 |
+| 引数 | address: 書き込み対象の変数の仮想アドレス<br>value: 書き込む値 |
+| 戻り値 | なし |
+| 例外 | 無効なアドレスが指定された場合に ExevalatorException がスローされます。 |
+
+
+<a id="methods-read-variable"></a>
+| 形式 | double ReadVariable(string name) |
+|:---|:---|
+| 説明 | 指定された名前の変数の値を読み込みます。 |
+| 引数 | name: 読み込み対称の変数の名前 |
+| 戻り値 | 変数の現在の値 |
+| 例外 | 指定された名前の変数が存在しない場合や、無効な変数名が指定された場合に ExevalatorException がスローされます。 |
+
+
+<a id="methods-read-variable-at"></a>
+| 形式 | double ReadVariableAt(int address) |
+|:---|:---|
+| 説明 | 指定された仮想アドレスの位置にある変数の値を読み込みます。<br>なお、このメソッドは "ReadVariable" メソッドよりも高速です。 |
+| 引数 | address: 読み込み対象の変数の仮想アドレス
+| 戻り値 | 変数の現在の値 |
+| 例外 | 無効なアドレスが指定された場合に ExevalatorException がスローされます。 |
+
+
+<a id="methods-connect-function"></a>
+| 形式 | void ConnectFunction(string name, IExevalatorFunction function) |
+|:---|:---|
+| 説明 | 式の中で使用するための関数を接続します。 |
+| 引数 | name: 接続する関数の名前<br>function: 関数の処理を提供する IExevalatorFunction 実装クラスのインスタンス<br>（「 double Invoke(double[] arguments) 」メソッドのみが定義されており、このメソッドに関数処理を実装します） |
+| 戻り値 | なし |
+| 例外 | 無効な関数名が指定された場合に ExevalatorException がスローされます。 |
+
+
+
+
+<hr />
 
 <a id="credits"></a>
 ## 本文中の商標など

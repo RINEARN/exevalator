@@ -4,11 +4,21 @@
 
 
 ## English Index
-- <a href="#requirements">Requirements</a>
-- <a href="#how-to-use">How to Use</a>
-- <a href="#example-code">Example Code</a>
-- <a href="#features">Features</a>
-- <a href="#vnano">If You Want More Features: Try to Use Vnano</a>
+- [Requirements](#requirements)
+- [How to Use](#how-to-use)
+- [Example Code](#example-code)
+- [Features](#features)
+- [List of Methods/Specifications](#methods)
+	- [Constructor](#methods-constructor)
+	- [double eval(String expression)](#methods-eval)
+	- [double reeval()](#methods-reeval)
+	- [int declareVariable(String name)](#methods-declare-variable)
+	- [void writeVariable(String name, double value)](#methods-write-variable)
+	- [void writeVariableAt(int address, double value)](#methods-write-variable-at)
+	- [double readVariable(String name)](#methods-read-variable)
+	- [double readVariableAt(int address)](#methods-read-variable-at)
+	- [void connectFunction(String name, Exevalator.FunctionInterface function)](#methods-connect-function)
+- [If You Want More Features: Try to Use Vnano](#vnano)
 
 
 
@@ -158,6 +168,105 @@ You can create functions available in expressions, by implementing Exevalator.Fu
 	(See: java/Example5.java)
 
 
+<a id="methods"></a>
+## List of Methods/Specifications
+
+The list of methods of Exevalator class, and their specifications.
+
+- [Constructor](#methods-constructor)
+- [double eval(String expression)](#methods-eval)
+- [double reeval()](#methods-reeval)
+- [int declareVariable(String name)](#methods-declare-variable)
+- [void writeVariable(String name, double value)](#methods-write-variable)
+- [void writeVariableAt(int address, double value)](#methods-write-variable-at)
+- [double readVariable(String name)](#methods-read-variable)
+- [double readVariableAt(int address)](#methods-read-variable-at)
+- [void connectFunction(String name, Exevalator.FunctionInterface function)](#methods-connect-function)
+
+
+<a id="methods-constructor"></a>
+| Signature | (constructor) Exevalator() |
+|:---|:---|
+| Description | Creates a new interpreter of the Exevalator. |
+| Parameters | None |
+| Return | The created instance. |
+
+
+<a id="methods-eval"></a>
+| Signature | double eval(String expression) |
+|:---|:---|
+| Description | Evaluates (computes) the value of an expression. |
+| Parameters | expression: The expression to be evaluated. |
+| Return | The evaluated value. |
+| Exception | Exevalator.Exception will be thrown if any error occurred when evaluating the expression. |
+
+
+<a id="methods-reeval"></a>
+| Signature | double reeval() |
+|:---|:---|
+| Description | Re-evaluates (re-computes) the value of the expression evaluated by "eval" method last time.<br>This method may (slightly) work faster than calling "eval" method repeatedly for the same expression.<br>Note that, the result value may different with the last evaluated value, if values of variables or behaviour of functions had changed. |
+| Parameters | None |
+| Return | The evaluated value. |
+| Exception | Exevalator.Exception will be thrown if any error occurred when evaluating the expression. |
+
+
+<a id="methods-declare-variable"></a>
+| Signature | int declareVariable(String name) |
+|:---|:---|
+| Description | Declares a new variable, for using the value of it in expressions. |
+| Parameters | name: The name of the variable to be declared. |
+| Return | The virtual address of the declared variable, which is useful for accessing to the variable faster.<br>See "writeVariableAt" and "readVariableAt" method. |
+| Exception | Exevalator.Exception will be thrown if invalid name is specified. |
+
+
+<a id="methods-write-variable"></a>
+| Signature | void writeVariable(String name, double value) |
+|:---|:---|
+| Description | Writes the value to the variable having the specified name. |
+| Parameters | name: The name of the variable to be written.<br>value: The new value of the variable. |
+| Return | None |
+| Exception | Exevalator.Exception will be thrown if the specified variable is not found, or invalid name is specified. |
+
+
+<a id="methods-write-variable-at"></a>
+| Signature | void writeVariableAt(int address, double value) |
+|:---|:---|
+| Description | Writes the value to the variable at the specified virtual address.<br>This method works faster than "writeVariable" method. |
+| Parameters | address: The virtual address of the variable to be written.<br>value: The new value of the variable. |
+| Return | None |
+| Exception | Exevalator.Exception will be thrown if the invalid address is specified. |
+
+
+<a id="methods-read-variable"></a>
+| Signature | double readVariable(String name) |
+|:---|:---|
+| Description | Reads the value of the variable having the specified name. |
+| Parameters | name: The name of the variable to be read. |
+| Return | The current value of the variable. |
+| Exception | Exevalator.Exception will be thrown if the specified variable is not found, or invalid name is specified. |
+
+
+<a id="methods-read-variable-at"></a>
+| Signature | double readVariableAt(int address) |
+|:---|:---|
+| Description | Reads the value of the variable at the specified virtual address.<br>This method works faster than "readVariable" method. |
+| Parameters | address: The virtual address of the variable to be read. |
+| Return | The current value of the variable. |
+| Exception | Exevalator.Exception will be thrown if the invalid address is specified. |
+
+
+<a id="methods-connect-function"></a>
+| Signature | void connectFunction(String name, Exevalator.FunctionInterface function) |
+|:---|:---|
+| Description | Connects a function, for using it in expressions. |
+| Parameters | name: The name of the function used in the expression.<br>function: The function to be connected. It is an instance of the class implementing Exevalator.FunctionInterface (only "double invoke(double[] arguments)" method is defined, to implement the process of a function). |
+| Return | None |
+| Exception | Exevalator.Exception will be thrown if invalid name is specified. |
+
+
+
+
+
 <a id="vnano"></a>
 ## If You Want More Features: Try to Use Vnano
 
@@ -167,6 +276,7 @@ If you want more features, try to use the [Vnano](https://github.com/RINEARN/vna
 Vnano can execute relatively complex expressions/scripts, containing conditional branches, loops, and so on.
 
 
+<hr />
 
 <a id="credits"></a>
 ## Credits

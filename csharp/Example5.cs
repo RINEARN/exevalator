@@ -11,7 +11,7 @@ class MyFunction : IExevalatorFunction
     /// </summary>
     /// <param name="arguments" An array storing values of arguments.</paran>
     /// <returns>The return value of the function.</returns>
-    public double invoke(double[] arguments)
+    public double Invoke(double[] arguments)
     {
         if (arguments.Length != 2)
         {
