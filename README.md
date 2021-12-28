@@ -46,7 +46,7 @@ How to compile/run this code is:
 	cd java
 	javac Exevalator.java
 	javac Example1.java
-	Example1
+	java Example1
 
 The result is:
 
@@ -130,9 +130,7 @@ In "cpp" folder, the C++ implementation version of Exevalator and various exampl
 		std::cerr << e.what() << std::endl;
 	}
 
-How to compile/run this code depends on your environment and compiler. As an example:
-
-	(If you are using clang++ on Linux)
+How to compile/run this code depends on your environment and compiler. As an example, if you are using clang++ on Linux:
 
 	cd cpp
 	clang++ -std=c++17 -Wall -o example1 example1.cpp
@@ -173,7 +171,7 @@ The above code is practically useless, but there are many practical calculation 
 
 The for-loop in the above code runs in the speed of **some tens of millions of cycles per second** (depending on your environment). In the above loop, 10 numerical operations are performed for each cycle, so the operating speed is **some hundreds of MFLOPS**. We think that this speed is enough for converting values of arrays, or sampling coordinates of curves of expressions, and so on.
 
-### How to prevent the performance-down when different expressions are inputted frequently: Use independent instances for each expression
+### How to prevent the performance-down when different expressions are inputted frequently: Use an independent instance for each expression
 
 Exevalator realizes the above processing speed by caching results of parsing and lexical-analysis of the previously-inputted expression. Hence, if an different expressions are inputted into an instance of Exevalator frequently, the cache does not work effective. For example:
 
@@ -196,11 +194,11 @@ You can avoid this kind of performance-down by creating an independent instance 
 		result += exevalatorB.eval("x - 1 + 1 - 1 + 1 - 1"); // Different with the above
 	}
 
-In the above code, caches in each instances of Exevalator work well, so it runs about 100 times faster than the previous code.
+In the above code, caches in each instance of Exevalator work well, so it runs about 100 times faster than the previous code.
 
 ### If you need more speed, consider the use of "reeval( )" method
 
-When you want to re-evaluate (re-compute) the value of the same expression which is evaluated by "eval(expression)" method last time, you can also use "reeval( )" method instead of "eval".
+By the way, as we did here, when you want to re-evaluate (re-compute) the value of the same expression which is evaluated by "eval" method last time, you can also use "reeval( )" method instead of "eval".
 When you use "reeval" method, Exevalator can skip the detection of the change of the inputted expression from the cached expression. So it can work faster than "eval" method, in principle.
 
 For example, on benchmark programs bundled in this repository, "reeval" of C++ version of the Exevalator works about 1.4 times faster than "eval". For rust version, about 1.1 - 1.2 times faster. On the other hand, "reeval" probably gives no significant advantage on Java version and C# version.
