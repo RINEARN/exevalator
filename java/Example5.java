@@ -5,19 +5,19 @@
  */
 class MyFunction implements Exevalator.FunctionInterface {
 
-	/**
-	 * Invoke the function.
-	 * 
-	 * @param arguments An array storing values of arguments.
-	 * @return The return value of the function.
-	 */
-	@Override
-	public double invoke(double[] arguments) {
-		if (arguments.length != 2) {
-			throw new Exevalator.Exception("Incorrected number of args");
-		}
-		return arguments[0] + arguments[1];
-	}
+    /**
+     * Invoke the function.
+     * 
+     * @param arguments An array storing values of arguments.
+     * @return The return value of the function.
+     */
+    @Override
+    public double invoke(double[] arguments) {
+        if (arguments.length != 2) {
+            throw new Exevalator.Exception("Incorrected number of args");
+        }
+        return arguments[0] + arguments[1];
+    }
 }
 
 /**
@@ -25,19 +25,19 @@ class MyFunction implements Exevalator.FunctionInterface {
  */
 public class Example5 {
 
-	public static void main(String[] args) {
+    public static void main(String[] args) {
 
-		// Create an instance of Exevalator Engine
-		Exevalator exevalator = new Exevalator();
+        // Create an instance of Exevalator Engine
+        Exevalator exevalator = new Exevalator();
 
-		// Connects the function available for using it in expressions
-		MyFunction fun = new MyFunction();
-		exevalator.connectFunction("fun", fun);
+        // Connects the function available for using it in expressions
+        MyFunction fun = new MyFunction();
+        exevalator.connectFunction("fun", fun);
 
-		// Evaluate the value of an expression
-		double result = exevalator.eval("fun(1.2, 3.4)");
+        // Evaluate the value of an expression
+        double result = exevalator.eval("fun(1.2, 3.4)");
 
-		// Display the result
-		System.out.println("result: " + result);
-	}
+        // Display the result
+        System.out.println("result: " + result);
+    }
 }

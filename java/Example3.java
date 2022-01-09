@@ -5,19 +5,19 @@
  */
 public class Example3 {
 
-	public static void main(String[] args) {
+    public static void main(String[] args) {
 
-		// Create an instance of Exevalator Engine
-		Exevalator exevalator = new Exevalator();
+        // Create an instance of Exevalator Engine
+        Exevalator exevalator = new Exevalator();
 
-		// Declare a variable and set the value
-		exevalator.declareVariable("x");
-		exevalator.writeVariable("x", 1.25);
+        // Declare a variable and set the value
+        exevalator.declareVariable("x");
+        exevalator.writeVariable("x", 1.25);
 
-		// Evaluate the value of an expression
-		double result = exevalator.eval("x + 1");
+        // Evaluate the value of an expression
+        double result = exevalator.eval("x + 1");
 
-		// Display the result
-		System.out.println("result: " + result);
-	}
+        // Display the result
+        System.out.println("result: " + result);
+    }
 }
