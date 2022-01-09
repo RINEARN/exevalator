@@ -1417,8 +1417,9 @@ final class StaticSettings {
 
     /** The regular expression of number literals. */
     public static final String NUMBER_LITERAL_REGEX =
-        "([0-9]+(\\.[0-9]+)?)" +    // Significand part
-        "((e|E)(\\+|-)?[0-9]+)?";   // Exponent part
+        "(?<=(\\s|\\+|-|\\*|/|\\(|\\)|,|^))" + // Token splitters, or beginning of the expression
+        "([0-9]+(\\.[0-9]+)?)" +               // Significand part
+        "((e|E)(\\+|-)?[0-9]+)?";              // Exponent part
 
     /** The escaped representation of number literals in expressions */
     public static final String ESCAPED_NUMBER_LITERAL = "@NUMBER_LITERAL@";

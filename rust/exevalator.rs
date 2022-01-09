@@ -392,8 +392,12 @@ impl LexicalAnalyzer {
         while ichar < char_count {
             let c: char = chars[ichar];
 
+            let token_begin: bool = ichar == 0
+                || chars[ichar-1] == ' '
+                || settings.token_splitters.contains(&chars[ichar-1]);
+
             // Numbers (0,1,2, ... 9)
-            if c.is_digit(10) {
+            if token_begin && c.is_digit(10) {
                 let literal_end: usize = LexicalAnalyzer::detect_end_of_num_literal(expression, ichar);
                 let literal: String = expression[ichar .. literal_end + 1].to_string();
                 number_literals.push(literal);

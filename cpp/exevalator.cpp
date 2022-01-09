@@ -372,8 +372,12 @@ std::string LexicalAnalyzer::escape_number_literals(
     for (size_t ichar=0; ichar<char_count; ++ichar) {
         char ch = expression.at(ichar);
 
+        bool token_begin = ichar == 0
+            || expression.at(ichar-1) == ' '
+            || settings.token_splitter_character_set.find(expression.at(ichar-1)) != settings.token_splitter_character_set.end();
+
         // Numbers (0,1,2, ... 9)
-        if (std::isdigit(ch)) {
+        if (token_begin && std::isdigit(ch)) {
             size_t literal_end = LexicalAnalyzer::detect_end_of_num_literal(expression, ichar);
             std::string literal = expression.substr(ichar, literal_end + 1);
             literal_store.push_back(literal);
