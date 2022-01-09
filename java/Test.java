@@ -7,11 +7,6 @@ public class Test {
 	private static final double ALLOWABLE_ERROR = 1.0E-12;
 
 
-	/**
-	 * The entry point of testings.
-	 *
-	 * @param args command-line arguments
-	 */
 	public static void main(String[] args) {
 		Test test = new Test();
 		test.testNumberLiterals();
@@ -21,14 +16,13 @@ public class Test {
 		test.testComplicatedCases();
 		test.testSyntaxChecksOfCorresponencesOfParentheses();
 		test.testSyntaxChecksOfLocationsOfOperatorsAndLeafs();
+		test.testVariables();
+		test.testFunctions();
 
 		System.out.println("All tests have completed successfully.");
 	}
 
 
-	/**
-	 * Tests number literals.
-	 */
 	private void testNumberLiterals() {
 		Exevalator exevalator = new Exevalator();
 
@@ -88,9 +82,6 @@ public class Test {
 	}
 
 
-	/**
-	 * Tests each kind of operators.
-	 */
 	private void testOperationsOfOperators() {
 		Exevalator exevalator = new Exevalator();
 
@@ -126,9 +117,6 @@ public class Test {
 	}
 
 
-	/**
-	 * Tests precedences of operators.
-	 */
 	private void testPrecedencesOfOperators() {
 		Exevalator exevalator = new Exevalator();
 
@@ -224,9 +212,6 @@ public class Test {
 	}
 
 
-	/**
-	 * Tests parentheses.
-	 */
 	private void testParentheses() {
 		Exevalator exevalator = new Exevalator();
 
@@ -304,9 +289,6 @@ public class Test {
 	}
 
 
-	/**
-	 * Tests of complicated cases.
-	 */
 	private void testComplicatedCases() {
 		Exevalator exevalator = new Exevalator();
 
@@ -318,9 +300,6 @@ public class Test {
 	}
 
 
-	/**
-	 * Tests syntax checks by the interpreter for expressions.
-	 */
 	private void testSyntaxChecksOfCorresponencesOfParentheses() {
 		Exevalator exevalator = new Exevalator();
 
@@ -440,9 +419,6 @@ public class Test {
 	}
 
 
-	/**
-	 * Tests syntax checks by the interpreter for locations of operators and leaf elements (literals and identifiers).
-	 */
 	private void testSyntaxChecksOfLocationsOfOperatorsAndLeafs() {
 		Exevalator exevalator = new Exevalator();
 
@@ -542,6 +518,202 @@ public class Test {
 			System.out.println("Test of Detection of Lacking Operator: OK.");
 		}
 
+	}
+
+
+	private void testVariables() {
+		Exevalator exevalator = new Exevalator();
+
+		try {
+			exevalator.eval("x");
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (Exevalator.Exception ee) {
+			// Expected to be thrown
+			System.out.println("Test of Variables 1: OK.");
+		}
+
+		int xAddress = exevalator.declareVariable("x");
+
+		check(
+			"Test of Variables 2",
+			exevalator.eval("x"),
+			0.0
+		);
+
+		exevalator.writeVariable("x", 1.25);
+
+		check(
+			"Test of Variables 3",
+			exevalator.eval("x"),
+			1.25
+		);
+
+		exevalator.writeVariableAt(xAddress, 2.5);
+
+		check(
+			"Test of Variables 4",
+			exevalator.eval("x"),
+			2.5
+		);
+
+		try {
+			exevalator.writeVariableAt(100, 5.0);
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (Exevalator.Exception ee) {
+			// Expected to be thrown
+			System.out.println("Test of Variables 5: OK.");
+		}
+
+		try {
+			exevalator.eval("y");
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (Exevalator.Exception ee) {
+			// Expected to be thrown
+			System.out.println("Test of Variables 6: OK.");
+		}
+
+		int yAddress = exevalator.declareVariable("y");
+
+		check(
+			"Test of Variables 7",
+			exevalator.eval("y"),
+			0.0
+		);
+
+		exevalator.writeVariable("y", 0.25);
+
+		check(
+			"Test of Variables 8",
+			exevalator.eval("y"),
+			0.25
+		);
+
+		exevalator.writeVariableAt(yAddress, 0.5);
+
+		check(
+			"Test of Variables 9",
+			exevalator.eval("y"),
+			0.5
+		);
+
+		check(
+			"Test of Variables 10",
+			exevalator.eval("x + y"),
+			2.5 + 0.5
+		);
+
+		// Variables having names containing numbers
+		exevalator.declareVariable("x2");
+		exevalator.declareVariable("y2");
+		exevalator.writeVariable("x2", 22.5);
+		exevalator.writeVariable("y2", 32.5);
+		check(
+			"Test of Variables 11",
+			exevalator.eval("x + y + 2 + x2 + 2 * y2"),
+			2.5 + 0.5 + 2.0 + 22.5 + 2.0 * 32.5
+		);
+	}
+
+
+	class FunctionA implements Exevalator.FunctionInterface {
+		@Override
+		public double invoke(double[] args) {
+			if (args.length != 0) {
+				throw new Exevalator.Exception("Incorrect number of arguments");
+			}
+			return 1.25;
+		}
+	}
+
+	class FunctionB implements Exevalator.FunctionInterface {
+		@Override
+		public double invoke(double[] args) {
+			if (args.length != 1) {
+				throw new Exevalator.Exception("Incorrect number of arguments");
+			}
+			return args[0];
+		}
+	}
+
+	class FunctionC implements Exevalator.FunctionInterface {
+		@Override
+		public double invoke(double[] args) {
+			if (args.length != 2) {
+				throw new Exevalator.Exception("Incorrect number of arguments");
+			}
+			return args[0] + args[1];
+		}
+	}
+
+	private void testFunctions() {
+		Exevalator exevalator = new Exevalator();
+
+		try {
+			exevalator.eval("funA()");
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (Exevalator.Exception ee) {
+			// Expected to be thrown
+			System.out.println("Test of Functions 1: OK.");
+		}
+
+		exevalator.connectFunction("funA", new FunctionA());
+		check(
+			"Test of Functions 2",
+			exevalator.eval("funA()"),
+			1.25
+		);
+
+		try {
+			exevalator.eval("funB(2.5)");
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (Exevalator.Exception ee) {
+			// Expected to be thrown
+			System.out.println("Test of Functions 3: OK.");
+		}
+
+		exevalator.connectFunction("funB", new FunctionB());
+		check(
+			"Test of Functions 4",
+			exevalator.eval("funB(2.5)"),
+			2.5
+		);
+
+		exevalator.connectFunction("funC", new FunctionC());
+		check(
+			"Test of Functions 5",
+			exevalator.eval("funC(1.25, 2.5)"),
+			1.25 + 2.5
+		);
+
+		check(
+			"Test of Functions 6",
+			exevalator.eval("funC(funA(), funB(2.5))"),
+			1.25 + 2.5
+		);
+
+		check(
+			"Test of Functions 7",
+			exevalator.eval("funC(funC(funA(), funB(2.5)), funB(1.0))"),
+			1.25 + 2.5 + 1.0
+		);
+		
+		check(
+			"Test of Function 8",
+			exevalator.eval("funC(1.0, 3.5 * funB(2.5) / 2.0)"),
+			1.0 + 3.5 * 2.5 / 2.0
+		);
+		
+		check(
+			"Test of Functions 9",
+			exevalator.eval("funA() * funC(funC(funA(), 3.5 * funB(2.5) / 2.0), funB(1.0))"),
+			1.25 * (1.25 + 3.5 * 2.5 / 2.0 + 1.0)
+		);
+
+		check(
+			"Test of Functions 10",
+			exevalator.eval("2 + 256 * funA() * funC(funC(funA(), 3.5 * funB(2.5) / 2.0), funB(1.0)) * 128"),
+			2.0 + 256.0 * (1.25 * (1.25 + 3.5 * 2.5 / 2.0 + 1.0)) * 128.0
+		);
 	}
 
 

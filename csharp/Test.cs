@@ -15,6 +15,8 @@ class Test
         TestComplicatedCases();
         TestSyntaxChecksOfCorresponencesOfParentheses();
         TestSyntaxChecksOfLocationsOfOperatorsAndLeafs();
+        TestVariables();
+        TestFunctions();
 
         Console.WriteLine("All tests have completed successfully.");
     }
@@ -523,6 +525,199 @@ class Test
         }
 
     }
+
+
+	private static void TestVariables() {
+		Exevalator exevalator = new Exevalator();
+
+		try {
+			exevalator.Eval("x");
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (ExevalatorException) {
+			// Expected to be thrown
+			Console.WriteLine("Test of Variables 1: OK.");
+		}
+
+		int xAddress = exevalator.DeclareVariable("x");
+
+		Check(
+			"Test of Variables 2",
+			exevalator.Eval("x"),
+			0.0
+		);
+
+		exevalator.WriteVariable("x", 1.25);
+
+		Check(
+			"Test of Variables 3",
+			exevalator.Eval("x"),
+			1.25
+		);
+
+		exevalator.WriteVariableAt(xAddress, 2.5);
+
+		Check(
+			"Test of Variables 4",
+			exevalator.Eval("x"),
+			2.5
+		);
+
+		try {
+			exevalator.WriteVariableAt(100, 5.0);
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (ExevalatorException) {
+			// Expected to be thrown
+			Console.WriteLine("Test of Variables 5: OK.");
+		}
+
+		try {
+			exevalator.Eval("y");
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (ExevalatorException) {
+			// Expected to be thrown
+			Console.WriteLine("Test of Variables 6: OK.");
+		}
+
+		int yAddress = exevalator.DeclareVariable("y");
+
+		Check(
+			"Test of Variables 7",
+			exevalator.Eval("y"),
+			0.0
+		);
+
+		exevalator.WriteVariable("y", 0.25);
+
+		Check(
+			"Test of Variables 8",
+			exevalator.Eval("y"),
+			0.25
+		);
+
+		exevalator.WriteVariableAt(yAddress, 0.5);
+
+		Check(
+			"Test of Variables 9",
+			exevalator.Eval("y"),
+			0.5
+		);
+
+		Check(
+			"Test of Variables 10",
+			exevalator.Eval("x + y"),
+			2.5 + 0.5
+		);
+
+		// Variables having names containing numbers
+		exevalator.DeclareVariable("x2");
+		exevalator.DeclareVariable("y2");
+		exevalator.WriteVariable("x2", 22.5);
+		exevalator.WriteVariable("y2", 32.5);
+		Check(
+			"Test of Variables 11",
+			exevalator.Eval("x + y + 2 + x2 + 2 * y2"),
+			2.5 + 0.5 + 2.0 + 22.5 + 2.0 * 32.5
+		);
+	}
+
+
+	class FunctionA : IExevalatorFunction {
+		public double Invoke(double[] args) {
+			if (args.Length != 0) {
+				throw new ExevalatorException("Incorrect number of arguments");
+			}
+			return 1.25;
+		}
+	}
+
+	class FunctionB : IExevalatorFunction {
+		public double Invoke(double[] args) {
+			if (args.Length != 1) {
+				throw new ExevalatorException("Incorrect number of arguments");
+			}
+			return args[0];
+		}
+	}
+
+	class FunctionC : IExevalatorFunction {
+		public double Invoke(double[] args) {
+			if (args.Length != 2) {
+				throw new ExevalatorException("Incorrect number of arguments");
+			}
+			return args[0] + args[1];
+		}
+	}
+
+	private static void TestFunctions() {
+		Exevalator exevalator = new Exevalator();
+
+		try {
+			exevalator.Eval("funA()");
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (ExevalatorException) {
+			// Expected to be thrown
+			Console.WriteLine("Test of Functions 1: OK.");
+		}
+
+		exevalator.ConnectFunction("funA", new FunctionA());
+		Check(
+			"Test of Functions 2",
+			exevalator.Eval("funA()"),
+			1.25
+		);
+
+		try {
+			exevalator.Eval("funB(2.5)");
+			throw new ExevalatorTestException("Expected exception has not been thrown");
+		} catch (ExevalatorException) {
+			// Expected to be thrown
+			Console.WriteLine("Test of Functions 3: OK.");
+		}
+
+		exevalator.ConnectFunction("funB", new FunctionB());
+		Check(
+			"Test of Functions 4",
+			exevalator.Eval("funB(2.5)"),
+			2.5
+		);
+
+		exevalator.ConnectFunction("funC", new FunctionC());
+		Check(
+			"Test of Functions 5",
+			exevalator.Eval("funC(1.25, 2.5)"),
+			1.25 + 2.5
+		);
+
+		Check(
+			"Test of Functions 6",
+			exevalator.Eval("funC(funA(), funB(2.5))"),
+			1.25 + 2.5
+		);
+
+		Check(
+			"Test of Functions 7",
+			exevalator.Eval("funC(funC(funA(), funB(2.5)), funB(1.0))"),
+			1.25 + 2.5 + 1.0
+		);
+		
+		Check(
+			"Test of Function 8",
+			exevalator.Eval("funC(1.0, 3.5 * funB(2.5) / 2.0)"),
+			1.0 + 3.5 * 2.5 / 2.0
+		);
+		
+		Check(
+			"Test of Functions 9",
+			exevalator.Eval("funA() * funC(funC(funA(), 3.5 * funB(2.5) / 2.0), funB(1.0))"),
+			1.25 * (1.25 + 3.5 * 2.5 / 2.0 + 1.0)
+		);
+
+		Check(
+			"Test of Functions 10",
+			exevalator.Eval("2 + 256 * funA() * funC(funC(funA(), 3.5 * funB(2.5) / 2.0), funB(1.0)) * 128"),
+			2.0 + 256.0 * (1.25 * (1.25 + 3.5 * 2.5 / 2.0 + 1.0)) * 128.0
+		);
+	}
 
 
     // Checks the evaluated (computed) value of the testing expression by the Exevalator.

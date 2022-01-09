@@ -13,6 +13,8 @@ fn main() {
     test_complicated_cases();
     test_syntax_checks_of_corresponences_of_parentheses();
     test_syntax_checks_of_locations_of_operators_and_leafs();
+    test_variables();
+    test_functions();
 
     println!("All tests have completed successfully.");
 }
@@ -406,6 +408,204 @@ fn test_syntax_checks_of_locations_of_operators_and_leafs() {
         Ok(_eval_ok) => panic!("Expected error has not occurred."),
         Err(_eval_error) => println!("Test of Detection of Lacking Operator: OK."),
     }
+}
+
+
+fn test_variables() {
+    let mut exevalator: Exevalator = Exevalator::new();
+
+    match exevalator.eval("x") {
+        Ok(_eval_ok) => panic!("Expected error has not occurred."),
+        Err(_eval_error) => println!("Test of Variables 1: OK."),
+    }
+
+    let x_address = match exevalator.declare_variable("x") {
+        Ok(declared_var_address) => declared_var_address,
+        Err(_declaration_error) => panic!("Variable declaration failed."),
+    };
+    
+    check(
+        "Test of Variables 2",
+        exevalator.eval("x"),
+        0.0
+    );
+
+    exevalator.write_variable("x", 1.25);
+
+    check(
+        "Test of Variables 3",
+        exevalator.eval("x"),
+        1.25
+    );
+
+    exevalator.write_variable_at(x_address, 2.5);
+
+    check(
+        "Test of Variables 4",
+        exevalator.eval("x"),
+        2.5
+    );
+
+    match exevalator.write_variable_at(100, 5.0) {
+        None => panic!("Expected error has not occurred."),
+        Some(_write_error) => println!("Test of Variables 5"),
+    }
+
+    match exevalator.eval("y") {
+        Ok(_eval_ok) => panic!("Expected error has not occurred."),
+        Err(_eval_error) => println!("Test of Variables 6: OK."),
+    }
+
+    let y_address = match exevalator.declare_variable("y") {
+        Ok(declared_var_address) => declared_var_address,
+        Err(_declaration_error) => panic!("Variable declaration failed."),
+    };
+    
+    check(
+        "Test of Variables 7",
+        exevalator.eval("y"),
+        0.0
+    );
+
+    exevalator.write_variable("y", 0.25);
+
+    check(
+        "Test of Variables 8",
+        exevalator.eval("y"),
+        0.25
+    );
+
+    exevalator.write_variable_at(y_address, 0.5);
+
+    check(
+        "Test of Variables 9",
+        exevalator.eval("y"),
+        0.5
+    );
+
+    check(
+        "Test of Variables 10",
+        exevalator.eval("x + y"),
+        2.5 + 0.5
+    );
+
+    // Variables having names containing numbers
+    if exevalator.declare_variable("x2").is_err() {
+        panic!("Variable declaration failed.");
+    }
+    if exevalator.declare_variable("y2").is_err() {
+        panic!("Variable declaration failed.");
+    }
+    if exevalator.write_variable("x2", 22.5).is_some() {
+        panic!("Variable access failed.");
+    } 
+    if exevalator.write_variable("y2", 32.5).is_some() {
+        panic!("Variable access failed.");
+    }
+    check(
+        "Test of Variables 11",
+        exevalator.eval("x + y + 2 + x2 + 2 * y2"),
+        2.5 + 0.5 + 2.0 + 22.5 + 2.0 * 32.5
+    );
+}
+
+
+fn function_a(arguments: Vec<f64>) -> Result<f64, ExevalatorError> {
+    if arguments.len() != 0 {
+        return Err(ExevalatorError::new("Incorrect number of args"));
+    }
+    return Ok(1.25);
+} 
+
+fn function_b(arguments: Vec<f64>) -> Result<f64, ExevalatorError> {
+    if arguments.len() != 1 {
+        return Err(ExevalatorError::new("Incorrect number of args"));
+    }
+    return Ok(arguments[0]);
+} 
+
+fn function_c(arguments: Vec<f64>) -> Result<f64, ExevalatorError> {
+    if arguments.len() != 2 {
+        return Err(ExevalatorError::new("Incorrect number of args"));
+    }
+    return Ok(arguments[0] + arguments[1]);
+} 
+
+fn test_functions() {
+    let mut exevalator: Exevalator = Exevalator::new();
+
+    match exevalator.eval("funA()") {
+        Ok(_eval_ok) => panic!("Expected error has not occurred."),
+        Err(_eval_error) => println!("Test of Functions 1: OK."),
+    }
+
+    match exevalator.connect_function("funA", function_a) {
+        Ok(_) => {},
+        Err(_connection_error) => panic!("Failed to connect function."),
+    };
+
+    check(
+        "Test of Function 2",
+        exevalator.eval("funA()"),
+        1.25
+    );
+
+    match exevalator.eval("funB(2.5)") {
+        Ok(_eval_ok) => panic!("Expected error has not occurred."),
+        Err(_eval_error) => println!("Test of Functions 3: OK."),
+    }
+
+    match exevalator.connect_function("funB", function_b) {
+        Ok(_) => {},
+        Err(_connection_error) => panic!("Failed to connect function."),
+    };
+
+    check(
+        "Test of Function 4",
+        exevalator.eval("funB(2.5)"),
+        2.5
+    );
+
+    match exevalator.connect_function("funC", function_c) {
+        Ok(_) => {},
+        Err(_connection_error) => panic!("Failed to connect function."),
+    };
+
+    check(
+        "Test of Function 5",
+        exevalator.eval("funC(1.25, 2.5)"),
+        1.25 + 2.5
+    );
+
+    check(
+        "Test of Function 6",
+        exevalator.eval("funC(funA(), funB(2.5))"),
+        1.25 + 2.5
+    );
+
+    check(
+        "Test of Function 7",
+        exevalator.eval("funC(funC(funA(), funB(2.5)), funB(1.0))"),
+        1.25 + 2.5 + 1.0
+    );
+
+    check(
+        "Test of Function 8",
+        exevalator.eval("funC(1.0, 3.5 * funB(2.5) / 2.0)"),
+        1.0 + 3.5 * 2.5 / 2.0
+    );
+
+    check(
+        "Test of Function 9",
+        exevalator.eval("funA() * funC(funC(funA(), 3.5 * funB(2.5) / 2.0), funB(1.0))"),
+        1.25 * (1.25 + 3.5 * 2.5 / 2.0 + 1.0)
+    );
+
+    check(
+        "Test of Function 10",
+        exevalator.eval("2 + 256 * funA() * funC(funC(funA(), 3.5 * funB(2.5) / 2.0), funB(1.0)) * 128"),
+        2.0 + 256.0 * (1.25 * (1.25 + 3.5 * 2.5 / 2.0 + 1.0)) * 128.0
+    );
 }
 
 

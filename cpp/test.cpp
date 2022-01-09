@@ -15,6 +15,8 @@ void test_parentheses();
 void test_complicated_cases();
 void test_syntax_checks_of_corresponences_of_parentheses();
 void test_syntax_checks_of_locations_of_operators_and_leafs();
+void test_variables();
+void test_functions();
 
 /// The minimum error between two double-type values to regard them almost equal.
 const double ALLOWABLE_ERROR = 1.0E-12;
@@ -28,6 +30,8 @@ int main() {
         test_complicated_cases();
         test_syntax_checks_of_corresponences_of_parentheses();
         test_syntax_checks_of_locations_of_operators_and_leafs();
+        test_variables();
+        test_functions();
 
         std::cout << "All tests have completed successfully." << std::endl;
         return EXIT_SUCCESS;
@@ -471,6 +475,199 @@ void test_syntax_checks_of_locations_of_operators_and_leafs() {
     } catch (ExevalatorException &error) {
         std::cout << "Test of Detection of Lacking Operator: OK." << std::endl;
     }
+}
+
+
+void test_variables() {
+    Exevalator exevalator;
+
+    try {
+        exevalator.eval("x"),
+        std::cerr << "Expected error has not occurred." << std::endl;
+        exit(EXIT_FAILURE);
+    } catch (ExevalatorException &error) {
+        std::cout << "Test of Variables 1: OK." << std::endl;
+    }
+
+    size_t x_address = exevalator.declare_variable("x");
+
+    check(
+        "Test of Variables 2",
+        exevalator.eval("x"),
+        0.0
+    );
+
+    exevalator.write_variable("x", 1.25);
+
+    check(
+        "Test of Variables 3",
+        exevalator.eval("x"),
+        1.25
+    );
+
+    exevalator.write_variable_at(x_address, 2.5);
+
+    check(
+        "Test of Variables 4",
+        exevalator.eval("x"),
+        2.5
+    );
+
+    try {
+        exevalator.write_variable_at(100, 5.0),
+        std::cerr << "Expected error has not occurred." << std::endl;
+        exit(EXIT_FAILURE);
+    } catch (ExevalatorException &error) {
+        std::cout << "Test of Variables 5: OK." << std::endl;
+    }
+
+    try {
+        exevalator.eval("y"),
+        std::cerr << "Expected error has not occurred." << std::endl;
+        exit(EXIT_FAILURE);
+    } catch (ExevalatorException &error) {
+        std::cout << "Test of Variables 6: OK." << std::endl;
+    }
+
+    size_t y_address = exevalator.declare_variable("y");
+
+    check(
+        "Test of Variables 7",
+        exevalator.eval("y"),
+        0.0
+    );
+
+    exevalator.write_variable("y", 0.25);
+
+    check(
+        "Test of Variables 8",
+        exevalator.eval("y"),
+        0.25
+    );
+
+    exevalator.write_variable_at(y_address, 0.5);
+
+    check(
+        "Test of Variables 9",
+        exevalator.eval("y"),
+        0.5
+    );
+
+    check(
+        "Test of Variables 10",
+        exevalator.eval("x + y"),
+        2.5 + 0.5
+    );
+
+    // Variables having names containing numbers
+    exevalator.declare_variable("x2");
+    exevalator.declare_variable("y2");
+    exevalator.write_variable("x2", 22.5);
+    exevalator.write_variable("y2", 32.5);
+    check(
+        "Test of Variables 11",
+        exevalator.eval("x + y + 2 + x2 + 2 * y2"),
+        2.5 + 0.5 + 2.0 + 22.5 + 2.0 * 32.5
+    );
+}
+
+
+class FunctionA : public exevalator::ExevalatorFunctionInterface {
+    double operator()(const std::vector<double> &arguments) {
+        if (arguments.size() != 0) {
+            throw new exevalator::ExevalatorException("Incorrect number of args");
+        }
+        return 1.25;
+    }
+};
+
+class FunctionB : public exevalator::ExevalatorFunctionInterface {
+    double operator()(const std::vector<double> &arguments) {
+        if (arguments.size() != 1) {
+            throw new exevalator::ExevalatorException("Incorrect number of args");
+        }
+        return arguments[0];
+    }
+};
+
+class FunctionC : public exevalator::ExevalatorFunctionInterface {
+    double operator()(const std::vector<double> &arguments) {
+        if (arguments.size() != 2) {
+            throw new exevalator::ExevalatorException("Incorrect number of args");
+        }
+        return arguments[0] + arguments[1];
+    }
+};
+
+void test_functions() {
+    Exevalator exevalator;
+
+    try {
+        exevalator.eval("funA()");
+        std::cerr << "Expected error has not occurred." << std::endl;
+        exit(EXIT_FAILURE);
+    } catch (ExevalatorException &error) {
+        std::cout << "Test of Functions 1: OK." << std::endl;
+    }
+
+    exevalator.connect_function("funA", std::make_shared<FunctionA>());
+    check(
+        "Test of Functions 2",
+        exevalator.eval("funA()"),
+        1.25
+    );
+
+    try {
+        exevalator.eval("funB(2.5)");
+        std::cerr << "Expected error has not occurred." << std::endl;
+        exit(EXIT_FAILURE);
+    } catch (ExevalatorException &error) {
+        std::cout << "Test of Functions 3: OK." << std::endl;
+    }
+
+    exevalator.connect_function("funB", std::make_shared<FunctionB>());
+    check(
+        "Test of Functions 4",
+        exevalator.eval("funB(2.5)"),
+        2.5
+    );
+
+    exevalator.connect_function("funC", std::make_shared<FunctionC>());
+    check(
+        "Test of Functions 5",
+        exevalator.eval("funC(1.25, 2.5)"),
+        1.25 + 2.5
+    );
+
+    check(
+        "Test of Functions 6",
+        exevalator.eval("funC(funA(), funB(2.5))"),
+        1.25 + 2.5
+    );
+
+    check(
+        "Test of Functions 7",
+        exevalator.eval("funC(funC(funA(), funB(2.5)), funB(1.0))"),
+        1.25 + 2.5 + 1.0
+    );
+
+    check(
+        "Test of Functions 8",
+        exevalator.eval("funC(1.0, 3.5 * funB(2.5) / 2.0)"),
+        1.0 + 3.5 * 2.5 / 2.0
+    );
+
+    check(
+        "Test of Functions 9",
+        exevalator.eval("funA() * funC(funC(funA(), 3.5 * funB(2.5) / 2.0), funB(1.0))"),
+        1.25 * (1.25 + 3.5 * 2.5 / 2.0 + 1.0)
+    );
+
+    check(
+        "Test of Functions 10",
+        exevalator.eval("2 + 256 * funA() * funC(funC(funA(), 3.5 * funB(2.5) / 2.0), funB(1.0)) * 128"),
+        2.0 + 256.0 * (1.25 * (1.25 + 3.5 * 2.5 / 2.0 + 1.0)) * 128.0
+    );
 }
 
 
