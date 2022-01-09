@@ -25,10 +25,6 @@ class MyFunction implements Exevalator.FunctionInterface {
  */
 public class Example5 {
 
-	/**
-	 * The entry point of this example code.
-	 * @param args Command-line arguments (unused)
-	 */
 	public static void main(String[] args) {
 
 		// Create an instance of Exevalator Engine
