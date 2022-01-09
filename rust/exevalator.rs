@@ -1154,7 +1154,7 @@ impl AstNode {
                 let identifier: String = self.child_nodes[0].token.word.clone();
                 if !function_table.contains_key(&identifier) {
                     return Err(ExevalatorError::new(
-                        &format!("Function not found: {}", self.token.word)
+                        &format!("Function not found: {}", identifier)
                     ));
                 }
                 let function_pointer: fn(Vec<f64>) -> Result<f64,ExevalatorError> = *function_table.get(&identifier).unwrap();
