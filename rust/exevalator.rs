@@ -471,7 +471,7 @@ impl LexicalAnalyzer {
                     call_parenthesis_depths.insert(parenthesis_depth);
                     let mut token: Token = Token::new(TokenType::Operator, word.clone());
                     token.operator = Some(settings.call_symbol_operator_map[&'('].clone());
-                    last_operator_type = Some(&OperatorType::UnaryPrefix);
+                    last_operator_type = Some(&OperatorType::Call);
                     tokens.push(token);
                 } else {
                     tokens.push(Token::new(TokenType::Parenthesis, word.clone()));
@@ -483,7 +483,7 @@ impl LexicalAnalyzer {
                     call_parenthesis_depths.remove(&parenthesis_depth);
                     let mut token: Token = Token::new(TokenType::Operator, word.clone());
                     token.operator = Some(settings.call_symbol_operator_map[&')'].clone());
-                    last_operator_type = Some(&OperatorType::UnaryPrefix);
+                    last_operator_type = Some(&OperatorType::Call);
                     tokens.push(token);
                 } else {
                     tokens.push(Token::new(TokenType::Parenthesis, word.clone()));
