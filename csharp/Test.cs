@@ -23,7 +23,8 @@ class Test
 
 
     // Tests number literals.
-    private static void TestNumberLiterals() {
+    private static void TestNumberLiterals()
+    {
         Exevalator exevalator = new Exevalator();
 
         Check(
@@ -83,7 +84,8 @@ class Test
 
 
     // Tests each kind of operators.
-    private static void TestOperationsOfOperators() {
+    private static void TestOperationsOfOperators()
+    {
         Exevalator exevalator = new Exevalator();
 
         Check(
@@ -119,7 +121,8 @@ class Test
 
 
     // Tests precedences of operators.
-    private static void TestPrecedencesOfOperators() {
+    private static void TestPrecedencesOfOperators()
+    {
         Exevalator exevalator = new Exevalator();
 
         Check(
@@ -215,7 +218,8 @@ class Test
 
 
     // Tests parentheses.
-    private static void TestParentheses() {
+    private static void TestParentheses()
+    {
         Exevalator exevalator = new Exevalator();
 
         Check(
@@ -293,7 +297,8 @@ class Test
 
 
     // Tests of complicated cases.
-    private static void TestComplicatedCases() {
+    private static void TestComplicatedCases()
+    {
         Exevalator exevalator = new Exevalator();
 
         Check(
@@ -305,7 +310,8 @@ class Test
 
 
     // Tests syntax checks by the interpreter for expressions.
-    private static void TestSyntaxChecksOfCorresponencesOfParentheses() {
+    private static void TestSyntaxChecksOfCorresponencesOfParentheses()
+    {
         Exevalator exevalator = new Exevalator();
 
         Check(
@@ -314,26 +320,32 @@ class Test
             (1 + 2)
         );
 
-        try {
+        try
+        {
             Check(
                 "Test of Detection of Mismatching of Open/Closed Parentheses 2",
                 exevalator.Eval("((1 + 2)"),
                 (1 + 2)
             );
             throw new ExevalatorTestException("Expected exception has not been thrown");
-        } catch (ExevalatorException) {
+        }
+        catch (ExevalatorException)
+        {
             // Expected to thrown
             Console.WriteLine("Test of Detection of Mismatching of Open/Closed Parentheses 2: OK.");
         }
 
-        try {
+        try
+        {
             Check(
                 "Test of Detection of Mismatching of Open/Closed Parentheses 3",
                 exevalator.Eval("(1 + 2))"),
                 (1 + 2)
             );
             throw new ExevalatorTestException("Expected exception has not been thrown");
-        } catch (ExevalatorException) {
+        }
+        catch (ExevalatorException)
+        {
             // Expected to thrown
             Console.WriteLine("Test of Detection of Mismatching of Open/Closed Parentheses 3: OK.");
         }
@@ -344,14 +356,17 @@ class Test
             (1 + 2) + (3 + 4)
         );
 
-        try {
+        try
+        {
             Check(
                 "Test of Detection of Mismatching of Open/Closed Parentheses 5",
                 exevalator.Eval("1 + 2) + (3 + 4"),
                 (1 + 2) + (3 + 4)
             );
             throw new ExevalatorTestException("Expected exception has not been thrown");
-        } catch (ExevalatorException) {
+        }
+        catch (ExevalatorException)
+        {
             // Expected to thrown
             Console.WriteLine("Test of Detection of Mismatching of Open/Closed Parentheses 5: OK.");
         }
@@ -362,62 +377,77 @@ class Test
             1 + ((2 + (3 + 4) + 5) + 6)
         );
 
-        try {
+        try
+        {
             Check(
                 "Test of Detection of Mismatching of Open/Closed Parentheses 7",
                 exevalator.Eval("1 + ((2 + (3 + 4) + 5) + 6"),
                 1 + ((2 + (3 + 4) + 5) + 6)
             );
             throw new ExevalatorTestException("Expected exception has not been thrown");
-        } catch (ExevalatorException) {
+        }
+        catch (ExevalatorException)
+        {
             // Expected to thrown
             Console.WriteLine("Test of Detection of Mismatching of Open/Closed Parentheses 7: OK.");
         }
 
-        try {
+        try
+        {
             Check(
                 "Test of Detection of Mismatching of Open/Closed Parentheses 8",
                 exevalator.Eval("1 + (2 + (3 + 4) + 5) + 6)"),
                 1 + ((2 + (3 + 4) + 5) + 6)
             );
             throw new ExevalatorTestException("Expected exception has not been thrown");
-        } catch (ExevalatorException) {
+        }
+        catch (ExevalatorException)
+        {
             // Expected to thrown
             Console.WriteLine("Test of Detection of Mismatching of Open/Closed Parentheses 8: OK.");
         }
 
-        try {
+        try
+        {
             Check(
                 "Test of Detection of Empty Parentheses 1",
                 exevalator.Eval("()"),
                 Double.NaN
             );
             throw new ExevalatorTestException("Expected exception has not been thrown");
-        } catch (ExevalatorException) {
+        }
+        catch (ExevalatorException)
+        {
             // Expected to thrown
             Console.WriteLine("Test of Detection of Empty Parentheses 1: OK.");
         }
 
-        try {
+        try
+        {
             Check(
                 "Test of Detection of Empty Parentheses 2",
                 exevalator.Eval("1 + ()"),
                 Double.NaN
             );
             throw new ExevalatorTestException("Expected exception has not been thrown");
-        } catch (ExevalatorException) {
+        }
+        catch (ExevalatorException)
+        {
             // Expected to thrown
             Console.WriteLine("Test of Detection of Empty Parentheses 2: OK.");
         }
 
-        try {
+        try
+        {
             Check(
                 "Test of Detection of Empty Parentheses 3",
                 exevalator.Eval("() + 1"),
                 Double.NaN
             );
             throw new ExevalatorTestException("Expected exception has not been thrown");
-        } catch (ExevalatorException) {
+        }
+        catch (ExevalatorException)
+        {
             // Expected to thrown
             Console.WriteLine("Test of Detection of Empty Parentheses 3: OK.");
         }
@@ -425,7 +455,8 @@ class Test
 
 
     // Tests syntax checks by the interpreter for locations of operators and leaf elements (literals and identifiers).
-    private static void TestSyntaxChecksOfLocationsOfOperatorsAndLeafs() {
+    private static void TestSyntaxChecksOfLocationsOfOperatorsAndLeafs()
+    {
         Exevalator exevalator = new Exevalator();
 
         Check(
@@ -434,26 +465,32 @@ class Test
             1 + -123
         );
 
-        try {
+        try
+        {
             Check(
                 "Test of Detection of Left Operand of Unary-Prefix Operator 2",
                 exevalator.Eval("1 + -"),
                 1 + -123
             );
             throw new ExevalatorTestException("Expected exception has not been thrown");
-        } catch (ExevalatorException) {
+        }
+        catch (ExevalatorException)
+        {
             // Expected to thrown
             Console.WriteLine("Test of Detection of Left Operand of Unary-Prefix Operator 2: OK.");
         }
 
-        try {
+        try
+        {
             Check(
                 "Test of Detection of Left Operand of Unary-Prefix Operator 3",
                 exevalator.Eval("(1 + -)"),
                 1 + -123
             );
             throw new ExevalatorTestException("Expected exception has not been thrown");
-        } catch (ExevalatorException) {
+        }
+        catch (ExevalatorException)
+        {
             // Expected to thrown
             Console.WriteLine("Test of Detection of Left Operand of Unary-Prefix Operator 3: OK.");
         }
@@ -464,62 +501,77 @@ class Test
             123 + 456
         );
 
-        try {
+        try
+        {
             Check(
                 "Test of Detection of Left Operand of Binary Operator 2",
                 exevalator.Eval("123 *"),
                 123 * 456
             );
             throw new ExevalatorTestException("Expected exception has not been thrown");
-        } catch (ExevalatorException) {
+        }
+        catch (ExevalatorException)
+        {
             // Expected to thrown
             Console.WriteLine("Test of Detection of Left Operand of Binary Operator 2: OK.");
         }
 
-        try {
+        try
+        {
             Check(
                 "Test of Detection of Left Operand of Binary Operator 3",
                 exevalator.Eval("* 456"),
                 123 * 456
             );
             throw new ExevalatorTestException("Expected exception has not been thrown");
-        } catch (ExevalatorException) {
+        }
+        catch (ExevalatorException)
+        {
             // Expected to thrown
             Console.WriteLine("Test of Detection of Left Operand of Binary Operator 3: OK.");
         }
 
-        try {
+        try
+        {
             Check(
                 "Test of Detection of Left Operand of Binary Operator 4",
                 exevalator.Eval("123 + ( * 456)"),
                 123 * 456
             );
             throw new ExevalatorTestException("Expected exception has not been thrown");
-        } catch (ExevalatorException) {
+        }
+        catch (ExevalatorException)
+        {
             // Expected to thrown
             Console.WriteLine("Test of Detection of Left Operand of Binary Operator 4: OK.");
         }
 
-        try {
+        try
+        {
             Check(
                 "Test of Detection of Left Operand of Binary Operator 5",
                 exevalator.Eval("(123 *) + 456"),
                 123 * 456
             );
             throw new ExevalatorTestException("Expected exception has not been thrown");
-        } catch (ExevalatorException) {
+        }
+        catch (ExevalatorException)
+        {
             // Expected to thrown
             Console.WriteLine("Test of Detection of Left Operand of Binary Operator 5: OK.");
         }
 
-        try {
+        try
+        {
             Check(
                 "Test of Detection of Lacking Operator",
                 exevalator.Eval("123 456"),
                 123 * 456
             );
             throw new ExevalatorTestException("Expected exception has not been thrown");
-        } catch (ExevalatorException) {
+        }
+        catch (ExevalatorException)
+        {
             // Expected to thrown
             Console.WriteLine("Test of Detection of Lacking Operator: OK.");
         }
@@ -527,205 +579,233 @@ class Test
     }
 
 
-	private static void TestVariables() {
-		Exevalator exevalator = new Exevalator();
+    private static void TestVariables()
+    {
+        Exevalator exevalator = new Exevalator();
 
-		try {
-			exevalator.Eval("x");
-			throw new ExevalatorTestException("Expected exception has not been thrown");
-		} catch (ExevalatorException) {
-			// Expected to be thrown
-			Console.WriteLine("Test of Variables 1: OK.");
-		}
+        try
+        {
+            exevalator.Eval("x");
+            throw new ExevalatorTestException("Expected exception has not been thrown");
+        }
+        catch (ExevalatorException)
+        {
+            // Expected to be thrown
+            Console.WriteLine("Test of Variables 1: OK.");
+        }
 
-		int xAddress = exevalator.DeclareVariable("x");
+        int xAddress = exevalator.DeclareVariable("x");
 
-		Check(
-			"Test of Variables 2",
-			exevalator.Eval("x"),
-			0.0
-		);
+        Check(
+            "Test of Variables 2",
+            exevalator.Eval("x"),
+            0.0
+        );
 
-		exevalator.WriteVariable("x", 1.25);
+        exevalator.WriteVariable("x", 1.25);
 
-		Check(
-			"Test of Variables 3",
-			exevalator.Eval("x"),
-			1.25
-		);
+        Check(
+            "Test of Variables 3",
+            exevalator.Eval("x"),
+            1.25
+        );
 
-		exevalator.WriteVariableAt(xAddress, 2.5);
+        exevalator.WriteVariableAt(xAddress, 2.5);
 
-		Check(
-			"Test of Variables 4",
-			exevalator.Eval("x"),
-			2.5
-		);
+        Check(
+            "Test of Variables 4",
+            exevalator.Eval("x"),
+            2.5
+        );
 
-		try {
-			exevalator.WriteVariableAt(100, 5.0);
-			throw new ExevalatorTestException("Expected exception has not been thrown");
-		} catch (ExevalatorException) {
-			// Expected to be thrown
-			Console.WriteLine("Test of Variables 5: OK.");
-		}
+        try
+        {
+            exevalator.WriteVariableAt(100, 5.0);
+            throw new ExevalatorTestException("Expected exception has not been thrown");
+        }
+        catch (ExevalatorException)
+        {
+            // Expected to be thrown
+            Console.WriteLine("Test of Variables 5: OK.");
+        }
 
-		try {
-			exevalator.Eval("y");
-			throw new ExevalatorTestException("Expected exception has not been thrown");
-		} catch (ExevalatorException) {
-			// Expected to be thrown
-			Console.WriteLine("Test of Variables 6: OK.");
-		}
+        try
+        {
+            exevalator.Eval("y");
+            throw new ExevalatorTestException("Expected exception has not been thrown");
+        }
+        catch (ExevalatorException)
+        {
+            // Expected to be thrown
+            Console.WriteLine("Test of Variables 6: OK.");
+        }
 
-		int yAddress = exevalator.DeclareVariable("y");
+        int yAddress = exevalator.DeclareVariable("y");
 
-		Check(
-			"Test of Variables 7",
-			exevalator.Eval("y"),
-			0.0
-		);
+        Check(
+            "Test of Variables 7",
+            exevalator.Eval("y"),
+            0.0
+        );
 
-		exevalator.WriteVariable("y", 0.25);
+        exevalator.WriteVariable("y", 0.25);
 
-		Check(
-			"Test of Variables 8",
-			exevalator.Eval("y"),
-			0.25
-		);
+        Check(
+            "Test of Variables 8",
+            exevalator.Eval("y"),
+            0.25
+        );
 
-		exevalator.WriteVariableAt(yAddress, 0.5);
+        exevalator.WriteVariableAt(yAddress, 0.5);
 
-		Check(
-			"Test of Variables 9",
-			exevalator.Eval("y"),
-			0.5
-		);
+        Check(
+            "Test of Variables 9",
+            exevalator.Eval("y"),
+            0.5
+        );
 
-		Check(
-			"Test of Variables 10",
-			exevalator.Eval("x + y"),
-			2.5 + 0.5
-		);
+        Check(
+            "Test of Variables 10",
+            exevalator.Eval("x + y"),
+            2.5 + 0.5
+        );
 
-		// Variables having names containing numbers
-		exevalator.DeclareVariable("x2");
-		exevalator.DeclareVariable("y2");
-		exevalator.WriteVariable("x2", 22.5);
-		exevalator.WriteVariable("y2", 32.5);
-		Check(
-			"Test of Variables 11",
-			exevalator.Eval("x + y + 2 + x2 + 2 * y2"),
-			2.5 + 0.5 + 2.0 + 22.5 + 2.0 * 32.5
-		);
-	}
+        // Variables having names containing numbers
+        exevalator.DeclareVariable("x2");
+        exevalator.DeclareVariable("y2");
+        exevalator.WriteVariable("x2", 22.5);
+        exevalator.WriteVariable("y2", 32.5);
+        Check(
+            "Test of Variables 11",
+            exevalator.Eval("x + y + 2 + x2 + 2 * y2"),
+            2.5 + 0.5 + 2.0 + 22.5 + 2.0 * 32.5
+        );
+    }
 
 
-	class FunctionA : IExevalatorFunction {
-		public double Invoke(double[] args) {
-			if (args.Length != 0) {
-				throw new ExevalatorException("Incorrect number of arguments");
-			}
-			return 1.25;
-		}
-	}
+    class FunctionA : IExevalatorFunction
+    {
+        public double Invoke(double[] args)
+        {
+            if (args.Length != 0)
+            {
+                throw new ExevalatorException("Incorrect number of arguments");
+            }
+            return 1.25;
+        }
+    }
 
-	class FunctionB : IExevalatorFunction {
-		public double Invoke(double[] args) {
-			if (args.Length != 1) {
-				throw new ExevalatorException("Incorrect number of arguments");
-			}
-			return args[0];
-		}
-	}
+    class FunctionB : IExevalatorFunction
+    {
+        public double Invoke(double[] args)
+        {
+            if (args.Length != 1)
+            {
+                throw new ExevalatorException("Incorrect number of arguments");
+            }
+            return args[0];
+        }
+    }
 
-	class FunctionC : IExevalatorFunction {
-		public double Invoke(double[] args) {
-			if (args.Length != 2) {
-				throw new ExevalatorException("Incorrect number of arguments");
-			}
-			return args[0] + args[1];
-		}
-	}
+    class FunctionC : IExevalatorFunction
+    {
+        public double Invoke(double[] args)
+        {
+            if (args.Length != 2)
+            {
+                throw new ExevalatorException("Incorrect number of arguments");
+            }
+            return args[0] + args[1];
+        }
+    }
 
-	private static void TestFunctions() {
-		Exevalator exevalator = new Exevalator();
+    private static void TestFunctions()
+    {
+        Exevalator exevalator = new Exevalator();
 
-		try {
-			exevalator.Eval("funA()");
-			throw new ExevalatorTestException("Expected exception has not been thrown");
-		} catch (ExevalatorException) {
-			// Expected to be thrown
-			Console.WriteLine("Test of Functions 1: OK.");
-		}
+        try
+        {
+            exevalator.Eval("funA()");
+            throw new ExevalatorTestException("Expected exception has not been thrown");
+        }
+        catch (ExevalatorException)
+        {
+            // Expected to be thrown
+            Console.WriteLine("Test of Functions 1: OK.");
+        }
 
-		exevalator.ConnectFunction("funA", new FunctionA());
-		Check(
-			"Test of Functions 2",
-			exevalator.Eval("funA()"),
-			1.25
-		);
+        exevalator.ConnectFunction("funA", new FunctionA());
+        Check(
+            "Test of Functions 2",
+            exevalator.Eval("funA()"),
+            1.25
+        );
 
-		try {
-			exevalator.Eval("funB(2.5)");
-			throw new ExevalatorTestException("Expected exception has not been thrown");
-		} catch (ExevalatorException) {
-			// Expected to be thrown
-			Console.WriteLine("Test of Functions 3: OK.");
-		}
+        try
+        {
+            exevalator.Eval("funB(2.5)");
+            throw new ExevalatorTestException("Expected exception has not been thrown");
+        }
+        catch (ExevalatorException)
+        {
+            // Expected to be thrown
+            Console.WriteLine("Test of Functions 3: OK.");
+        }
 
-		exevalator.ConnectFunction("funB", new FunctionB());
-		Check(
-			"Test of Functions 4",
-			exevalator.Eval("funB(2.5)"),
-			2.5
-		);
+        exevalator.ConnectFunction("funB", new FunctionB());
+        Check(
+            "Test of Functions 4",
+            exevalator.Eval("funB(2.5)"),
+            2.5
+        );
 
-		exevalator.ConnectFunction("funC", new FunctionC());
-		Check(
-			"Test of Functions 5",
-			exevalator.Eval("funC(1.25, 2.5)"),
-			1.25 + 2.5
-		);
+        exevalator.ConnectFunction("funC", new FunctionC());
+        Check(
+            "Test of Functions 5",
+            exevalator.Eval("funC(1.25, 2.5)"),
+            1.25 + 2.5
+        );
 
-		Check(
-			"Test of Functions 6",
-			exevalator.Eval("funC(funA(), funB(2.5))"),
-			1.25 + 2.5
-		);
+        Check(
+            "Test of Functions 6",
+            exevalator.Eval("funC(funA(), funB(2.5))"),
+            1.25 + 2.5
+        );
 
-		Check(
-			"Test of Functions 7",
-			exevalator.Eval("funC(funC(funA(), funB(2.5)), funB(1.0))"),
-			1.25 + 2.5 + 1.0
-		);
-		
-		Check(
-			"Test of Function 8",
-			exevalator.Eval("funC(1.0, 3.5 * funB(2.5) / 2.0)"),
-			1.0 + 3.5 * 2.5 / 2.0
-		);
-		
-		Check(
-			"Test of Functions 9",
-			exevalator.Eval("funA() * funC(funC(funA(), 3.5 * funB(2.5) / 2.0), funB(1.0))"),
-			1.25 * (1.25 + 3.5 * 2.5 / 2.0 + 1.0)
-		);
+        Check(
+            "Test of Functions 7",
+            exevalator.Eval("funC(funC(funA(), funB(2.5)), funB(1.0))"),
+            1.25 + 2.5 + 1.0
+        );
 
-		Check(
-			"Test of Functions 10",
-			exevalator.Eval("2 + 256 * funA() * funC(funC(funA(), 3.5 * funB(2.5) / 2.0), funB(1.0)) * 128"),
-			2.0 + 256.0 * (1.25 * (1.25 + 3.5 * 2.5 / 2.0 + 1.0)) * 128.0
-		);
-	}
+        Check(
+            "Test of Function 8",
+            exevalator.Eval("funC(1.0, 3.5 * funB(2.5) / 2.0)"),
+            1.0 + 3.5 * 2.5 / 2.0
+        );
+
+        Check(
+            "Test of Functions 9",
+            exevalator.Eval("funA() * funC(funC(funA(), 3.5 * funB(2.5) / 2.0), funB(1.0))"),
+            1.25 * (1.25 + 3.5 * 2.5 / 2.0 + 1.0)
+        );
+
+        Check(
+            "Test of Functions 10",
+            exevalator.Eval("2 + 256 * funA() * funC(funC(funA(), 3.5 * funB(2.5) / 2.0), funB(1.0)) * 128"),
+            2.0 + 256.0 * (1.25 * (1.25 + 3.5 * 2.5 / 2.0 + 1.0)) * 128.0
+        );
+    }
 
 
     // Checks the evaluated (computed) value of the testing expression by the Exevalator.
     // evaluatedValue: The evaluated (computed) value of the testing expression by Exevalator
     // correctValue: The correct value of the testing expression
     // testName: The name of the testing
-    private static void Check(String testName, double evaluatedValue, double correctValue) {
-        if (Math.Abs(evaluatedValue - correctValue) < AllowableError) {
+    private static void Check(String testName, double evaluatedValue, double correctValue)
+    {
+        if (Math.Abs(evaluatedValue - correctValue) < AllowableError)
+        {
             Console.WriteLine(testName + ": OK.");
             return;
         }
@@ -740,7 +820,7 @@ class Test
     // The Exception class thrown when any test has failed.
     private class ExevalatorTestException : Exception
     {
-        public ExevalatorTestException(string errorMessage) : base (errorMessage)
+        public ExevalatorTestException(string errorMessage) : base(errorMessage)
         {
         }
     }
