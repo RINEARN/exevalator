@@ -202,7 +202,7 @@ eval メソッドの代わりにこれを使うと、いわば明示的に Exeva
 <a id="about-us"></a>
 ## 開発元について
 
-Exevalator は、日本の個人運営の開発スタジオ [RINEARN](https://www.rinearn.com/) が開発しています。著者は [松井文宏](https://fumihiro-matsui.xnea.net/) です。ご質問やフィードバックなどをお持ちの方は、ぜひ御気軽にどうぞ！
+Exevalator は、日本の個人運営の開発スタジオ [RINEARN](https://www.rinearn.com/) が開発しています。著者は松井文宏です。ご質問やフィードバックなどをお持ちの方は、ぜひ御気軽にどうぞ！
 
 
 <a id="credits"></a>

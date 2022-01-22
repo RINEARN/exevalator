@@ -202,7 +202,7 @@ For example, on benchmark programs bundled in this repository, "reeval" of C++ v
 <a id="about-us"></a>
 ## About Us
 
-Exevalator is developed by a Japanese software development studio: [RINEARN](https://www.rinearn.com/). The author is [Fumihiro Matsui](https://fumihiro-matsui.xnea.net/).
+Exevalator is developed by a Japanese software development studio: [RINEARN](https://www.rinearn.com/). The author is Fumihiro Matsui.
 
 Please free to contact us if you have any questions, feedbacks, and so on!
 
