@@ -22,7 +22,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 <a id="license"></a>
 ## ライセンス
 
-このソフトウェアはMITライセンスで公開されています。
+このソフトウェアは、実質的な著作権フリー（パブリックドメイン）である [CC0](https://creativecommons.org/publicdomain/zero/1.0/deed.ja) の宣言下で公開されています。
 
 
 <a id="how-to-use"></a>

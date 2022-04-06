@@ -23,7 +23,7 @@ Exevalator is currently available for programs/apps written in Java&reg;, Rust&r
 <a id="license"></a>
 ## License
 
-This software is released under the MIT License.
+This software is released under the [CC0](https://creativecommons.org/publicdomain/zero/1.0/deed.en), which is almost the same as the so-called "copyright-free" (public domain). 
 
 
 
