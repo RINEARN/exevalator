@@ -1,3 +1,8 @@
+/*
+ * Exevalator - by RINEARN 2021-2022
+ * This software is released under the CC0.
+ */
+
 #ifndef EXEVALATOR_HPP
 #define EXEVALATOR_HPP
 

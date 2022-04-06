@@ -1,6 +1,6 @@
 /*
- * Copyright(C) 2021 RINEARN (Fumihiro Matsui)
- * This software is released under the MIT License.
+ * Exevalator - by RINEARN 2021-2022
+ * This software is released under the CC0.
  */
 
 /*
