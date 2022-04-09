@@ -11,12 +11,12 @@ Exevalator is currently available for programs/apps written in Java&reg;, Rust&r
 
 ## English README Index
 - <a href="#license">License</a>
-- <a href="#how-to-use">How to Use for Each Language</a>
+- <a href="#how-to-use">How to Use in Each Language</a>
 	- <a href="#how-to-use-java">How to Use in Java</a>
 	- <a href="#how-to-use-rust">How to Use in Rust</a>
 	- <a href="#how-to-use-csharp">How to Use in C#</a>
 	- <a href="#how-to-use-cpp">How to Use in C++</a>
-- <a href="#performance">How to Tune Performance</a>
+- <a href="#performance">Performance</a>
 - <a href="#about-us">About Us</a>
 
 
@@ -28,7 +28,7 @@ This software is released under the [CC0](https://creativecommons.org/publicdoma
 
 
 <a id="how-to-use"></a>
-## How to Use for Each Language
+## How to Use in Each Language
 
 <a id="how-to-use-java"></a>
 ### How to Use in Java
@@ -141,9 +141,9 @@ For more details, see [README for using in C++](./cpp/README.md).
 
 
 <a id="performance"></a>
-## How to Tune Performance
+## Performance
 
-### Processing speed of Exevalator
+### Performance (processing speed) of Exevalator
 
 One of the assumed use of Exevalator is calculation/data-analysis software, so when we designed internal architecture of Exevalator, we placed importance on processing speed.
 
@@ -166,7 +166,7 @@ The above code is practically useless, but there are many practical calculation 
 
 The for-loop in the above code runs in the speed of **some tens of millions of cycles per second** (depending on your environment). In the above loop, 10 numerical operations are performed for each cycle, so the operating speed is **some hundreds of MFLOPS**. We think that this speed is enough for converting values of arrays, or sampling coordinates of curves of expressions, and so on.
 
-### How to prevent the performance-down when different expressions are inputted frequently: Use an independent instance for each expression
+### How to tune performance when different expressions are inputted frequently
 
 Exevalator realizes the above processing speed by caching results of parsing and lexical-analysis of the previously-inputted expression. Hence, if an different expressions are inputted into an instance of Exevalator frequently, the cache does not work effective. For example:
 
