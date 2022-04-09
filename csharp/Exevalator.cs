@@ -70,37 +70,50 @@ namespace Rinearn.ExevalatorCS
                 );
             }
 
-            // If the expression changed from the last-evaluated expression, re-parsing is necessary.
-            if (this.EvaluatorUnit == null || expression != this.LastEvaluatedExpression)
+            try
             {
+                // If the expression changed from the last-evaluated expression, re-parsing is necessary.
+                if (this.EvaluatorUnit == null || expression != this.LastEvaluatedExpression)
+                {
 
-                // Perform lexical analysis, and get tokens from the inputted expression.
-                Token[] tokens = LexicalAnalyzer.Analyze(expression);
+                    // Perform lexical analysis, and get tokens from the inputted expression.
+                    Token[] tokens = LexicalAnalyzer.Analyze(expression);
 
-                /*
-                // Temporary, for debugging tokens
-                foreach (Token token in tokens) {
-                    Console.WriteLine(token);
+                    /*
+                    // Temporary, for debugging tokens
+                    foreach (Token token in tokens) {
+                        Console.WriteLine(token);
+                    }
+                    */
+
+                    // Perform parsing, and get AST(Abstract Syntax Tree) from tokens.
+                    AstNode ast = Parser.Parse(tokens);
+
+                    /*
+                    // Temporary, for debugging ast
+                    Console.WriteLine(ast.ToMarkuppedText());
+                    */
+
+                    // Create the tree of evaluator units, and get the the root unit of it.
+                    this.EvaluatorUnit = ast.CreateEvaluatorUnit(this.VariableTable, this.FunctionTable);
+
+                    this.LastEvaluatedExpression = expression;
                 }
-                */
 
-                // Perform parsing, and get AST(Abstract Syntax Tree) from tokens.
-                AstNode ast = Parser.Parse(tokens);
+                // Evaluate the value of the expression, and return it.
+                double evaluatedValue = this.EvaluatorUnit.evaluate(this.Memory);
+                return evaluatedValue;
 
-                /*
-                // Temporary, for debugging ast
-                Console.WriteLine(ast.ToMarkuppedText());
-                */
-
-                // Create the tree of evaluator units, and get the the root unit of it.
-                this.EvaluatorUnit = ast.CreateEvaluatorUnit(this.VariableTable, this.FunctionTable);
-
-                this.LastEvaluatedExpression = expression;
             }
-
-            // Evaluate the value of the expression, and return it.
-            double evaluatedValue = this.EvaluatorUnit.evaluate(this.Memory);
-            return evaluatedValue;
+            catch (ExevalatorException ee)
+            {
+                    throw ee;
+            }
+            // Wrap an unexpected exception by Exevalator.Exception and rethrow it.
+            catch (Exception e)
+            {
+                throw new ExevalatorException("Unexpected exception/error occurred", e);
+            }
         }
 
         /// <summary>
@@ -243,7 +256,9 @@ namespace Rinearn.ExevalatorCS
     {
         public ExevalatorException(string errorMessage) : base(errorMessage)
         {
-
+        }
+        public ExevalatorException(string errorMessage, Exception causeException) : base(errorMessage, causeException)
+        {
         }
     }
 

@@ -74,39 +74,48 @@ public final class Exevalator {
             );
         }
 
-        boolean expressionChanged = expression != this.lastEvaluatedExpression
-        && !expression.equals(this.lastEvaluatedExpression);
+        try {
+            boolean expressionChanged = expression != this.lastEvaluatedExpression
+            && !expression.equals(this.lastEvaluatedExpression);
 
-        // If the expression changed from the last-evaluated expression, re-parsing is necessary.
-        if (this.evaluatorUnit == null || expressionChanged) {
+            // If the expression changed from the last-evaluated expression, re-parsing is necessary.
+            if (this.evaluatorUnit == null || expressionChanged) {
 
-            // Split the expression into tokens, and analyze them.
-            Token[] tokens = LexicalAnalyzer.analyze(expression);
+                // Split the expression into tokens, and analyze them.
+                Token[] tokens = LexicalAnalyzer.analyze(expression);
 
-            /*
-            // Temporary, for debugging tokens
-            for (Token token: tokens) {
-                System.out.println(token.toString());
+                /*
+                // Temporary, for debugging tokens
+                for (Token token: tokens) {
+                    System.out.println(token.toString());
+                }
+                */
+
+                // Construct AST (Abstract Syntax Tree) by parsing tokens.
+                AstNode ast = Parser.parse(tokens);
+
+                /*
+                // Temporary, for debugging AST
+                System.out.println(ast.toMarkuppedText());
+                */
+
+                // Create the tree of evaluator units, and get the the root unit of it.
+                this.evaluatorUnit = ast.createEvaluatorUnit(this.variableTable, this.functionTable);
+
+                this.lastEvaluatedExpression = expression;
             }
-            */
 
-            // Construct AST (Abstract Syntax Tree) by parsing tokens.
-            AstNode ast = Parser.parse(tokens);
+            // Evaluate the value of the expression, and return it.
+            double evaluatedValue = this.evaluatorUnit.evaluate(this.memory);
+            return evaluatedValue;
 
-            /*
-            // Temporary, for debugging AST
-            System.out.println(ast.toMarkuppedText());
-            */
+        } catch (Exevalator.Exception ee) {
+            throw ee;
 
-            // Create the tree of evaluator units, and get the the root unit of it.
-            this.evaluatorUnit = ast.createEvaluatorUnit(this.variableTable, this.functionTable);
-
-            this.lastEvaluatedExpression = expression;
+        // Wrap an unexpected exception by Exevalator.Exception and rethrow it.
+        } catch (java.lang.Exception e) {
+            throw new Exevalator.Exception("Unexpected exception/error occurred", e);
         }
-
-        // Evaluate the value of the expression, and return it.
-        double evaluatedValue = this.evaluatorUnit.evaluate(this.memory);
-        return evaluatedValue;
     }
 
     /**

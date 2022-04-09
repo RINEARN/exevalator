@@ -57,39 +57,48 @@ double Exevalator::eval(const std::string &expression) {
         );
     }
 
-    // If the expression changed from the last-evaluated expression, re-parsing is necessary.
-    if (!(this->evaluator_unit) || !(this->last_evaluated_expression == expression)) {
+    try {
+        // If the expression changed from the last-evaluated expression, re-parsing is necessary.
+        if (!(this->evaluator_unit) || !(this->last_evaluated_expression == expression)) {
 
-        // Perform lexical analysis, and get tokens from the inputted expression.
-        std::vector<Token> tokens = LexicalAnalyzer::analyze(std::string(expression), settings);
+            // Perform lexical analysis, and get tokens from the inputted expression.
+            std::vector<Token> tokens = LexicalAnalyzer::analyze(std::string(expression), settings);
 
-        /*
-        // Temporary, for debugging tokens
-        for (size_t itoken=0; itoken<tokens.size(); ++itoken) {
-            std::cout << "tokens[" << itoken << "]: " << tokens[itoken].word << std::endl;
+            /*
+            // Temporary, for debugging tokens
+            for (size_t itoken=0; itoken<tokens.size(); ++itoken) {
+                std::cout << "tokens[" << itoken << "]: " << tokens[itoken].word << std::endl;
+            }
+            */
+
+            // Perform parsing, and get AST(Abstract Syntax Tree) from tokens.
+            std::unique_ptr<AstNode> ast = Parser::parse(tokens);
+
+            /*
+            // Temporary, for debugging AST
+            std::cout << ast->to_markupped_text(0) << std::endl;
+            */
+
+            // Create the tree of evaluator units, and get the the root unit of it.
+            std::unique_ptr<Evaluator::EvaluatorUnit> evaluator_unit;
+            this->evaluator_unit = ast->create_evaluator_unit(
+                this->settings, this->variable_table, this->function_table
+            );
+
+            this->last_evaluated_expression = expression;
         }
-        */
 
-        // Perform parsing, and get AST(Abstract Syntax Tree) from tokens.
-        std::unique_ptr<AstNode> ast = Parser::parse(tokens);
+        // Evaluate the value of the expression, and return it.
+        double evaluated_value = this->evaluator_unit->evaluate(this->memory);
+        return evaluated_value;
 
-        /*
-        // Temporary, for debugging AST
-        std::cout << ast->to_markupped_text(0) << std::endl;
-        */
+    } catch (ExevalatorException ee) {
+        throw ee;
 
-        // Create the tree of evaluator units, and get the the root unit of it.
-        std::unique_ptr<Evaluator::EvaluatorUnit> evaluator_unit;
-        this->evaluator_unit = ast->create_evaluator_unit(
-            this->settings, this->variable_table, this->function_table
-        );
-
-        this->last_evaluated_expression = expression;
+    // Wrap an unexpected exception by Exevalator.Exception and rethrow it.
+    } catch (...) {
+        throw ExevalatorException { "Unexpected exception/error occurred" };
     }
-
-    // Evaluate the value of the expression, and return it.
-    double evaluated_value = this->evaluator_unit->evaluate(this->memory);
-    return evaluated_value;
 }
 
 /**
