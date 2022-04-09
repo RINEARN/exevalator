@@ -8,7 +8,8 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 
 
 ## 日本語版 README 目次
-- <a href="#license">ライセンス</a>
+- <a href="#what-is">Exevalator とは？</a>
+- <a href="#license">ライセンス（著作権フリー）</a>
 - <a href="#how-to-use">各言語ごとの使用方法</a>
 	- <a href="#how-to-use-java">Java言語での使用方法</a>
 	- <a href="#how-to-use-rust">Rustでの使用方法</a>
@@ -18,11 +19,26 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 - <a href="#about-us">開発元について</a>
 
 
+<a id="what-is"></a>
+## Exevalator とは？
+
+何らかのソフトウェアを開発している際に、「文字列変数などに格納された式の値を計算（評価）したい 」 といった場面に出会った事はありませんか？ 例えば：
+
+	"1 + 2"
+	"(1.2 + 3.4) * 5.6"
+	"x + f(y)"
+
+などです。
+
+大抵のコンパイラ型の（スクリプト言語ではない）言語では、そのような機能は、標準ではサポートされていません。そのため、計算処理を自力で実装するか、そのような機能を提供するライブラリを使用する必要があります。
+
+Exevalator は、 そのような機能を提供する、非常にコンパクトなライブラリです。多言語に対応していて、現在は Java/Rust/C#/C++ 製のソフトウェア開発で使用できます。
+
 
 <a id="license"></a>
-## ライセンス
+## ライセンス（著作権フリー）
 
-このソフトウェアは、実質的な著作権フリー（パブリックドメイン）である [CC0](https://creativecommons.org/publicdomain/zero/1.0/deed.ja) の宣言下で公開されています。
+このライブラリは、実質的な著作権フリー（パブリックドメイン）である [CC0](https://creativecommons.org/publicdomain/zero/1.0/deed.ja) の宣言下で公開されています。
 
 
 <a id="how-to-use"></a>

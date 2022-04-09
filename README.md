@@ -10,7 +10,8 @@ Exevalator is currently available for programs/apps written in Java&reg;, Rust&r
 
 
 ## English README Index
-- <a href="#license">License</a>
+- <a href="#what-is">What is Exevalator ?</a>
+- <a href="#license">License (Copyright-Free)</a>
 - <a href="#how-to-use">How to Use in Each Language</a>
 	- <a href="#how-to-use-java">How to Use in Java</a>
 	- <a href="#how-to-use-rust">How to Use in Rust</a>
@@ -20,10 +21,26 @@ Exevalator is currently available for programs/apps written in Java&reg;, Rust&r
 - <a href="#about-us">About Us</a>
 
 
-<a id="license"></a>
-## License
+<a id="what-is"></a>
+## What is Exevalator ?
 
-This software is released under the [CC0](https://creativecommons.org/publicdomain/zero/1.0/deed.en), which is almost the same as the so-called "copyright-free" (public domain). 
+When you are developing software, don't you want to calculate (evaluate) the value of a numerical expression stored in a string-type variable? For example:
+
+	"1 + 2"
+	"(1.2 + 3.4) * 5.6"
+	"x + f(y)"
+
+and so on.
+
+Most of compiled (not scripting) languages don't support such feature by default, so you are required to implement a calculation routine by yourself, or use a library providing such feature.
+
+Exevalator is a very compact library to provide such feature on Java/Rust/C#/C++ programs.
+
+
+<a id="license"></a>
+## License (Copyright-Free)
+
+This library is released under the [CC0](https://creativecommons.org/publicdomain/zero/1.0/deed.en), which is almost the same as the so-called "copyright-free" (public domain). 
 
 
 
