@@ -17,6 +17,7 @@ class Test
         TestSyntaxChecksOfLocationsOfOperatorsAndLeafs();
         TestVariables();
         TestFunctions();
+        TestEmptyExpressions();
 
         Console.WriteLine("All tests have completed successfully.");
     }
@@ -795,6 +796,55 @@ class Test
             exevalator.Eval("2 + 256 * funA() * funC(funC(funA(), 3.5 * funB(2.5) / 2.0), funB(1.0)) * 128"),
             2.0 + 256.0 * (1.25 * (1.25 + 3.5 * 2.5 / 2.0 + 1.0)) * 128.0
         );
+    }
+
+    private static void TestEmptyExpressions()
+    {
+        Exevalator exevalator = new Exevalator();
+
+        try
+        {
+            exevalator.Eval("");
+            throw new ExevalatorTestException("Expected exception has not been thrown");
+        }
+        catch (ExevalatorException)
+        {
+            // Expected to be thrown
+            Console.WriteLine("Test of Empty Expressions 1: OK.");
+        }
+
+        try
+        {
+            exevalator.Eval(" ");
+            throw new ExevalatorTestException("Expected exception has not been thrown");
+        }
+        catch (ExevalatorException)
+        {
+            // Expected to be thrown
+            Console.WriteLine("Test of Empty Expressions 2: OK.");
+        }
+
+        try
+        {
+            exevalator.Eval("  ");
+            throw new ExevalatorTestException("Expected exception has not been thrown");
+        }
+        catch (ExevalatorException)
+        {
+            // Expected to be thrown
+            Console.WriteLine("Test of Empty Expressions 3: OK.");
+        }
+
+        try
+        {
+            exevalator.Eval("   ");
+            throw new ExevalatorTestException("Expected exception has not been thrown");
+        }
+        catch (ExevalatorException)
+        {
+            // Expected to be thrown
+            Console.WriteLine("Test of Empty Expressions 4: OK.");
+        }
     }
 
 

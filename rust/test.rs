@@ -15,6 +15,7 @@ fn main() {
     test_syntax_checks_of_locations_of_operators_and_leafs();
     test_variables();
     test_functions();
+    test_empty_expressions();
 
     println!("All tests have completed successfully.");
 }
@@ -606,6 +607,30 @@ fn test_functions() {
         exevalator.eval("2 + 256 * funA() * funC(funC(funA(), 3.5 * funB(2.5) / 2.0), funB(1.0)) * 128"),
         2.0 + 256.0 * (1.25 * (1.25 + 3.5 * 2.5 / 2.0 + 1.0)) * 128.0
     );
+}
+
+fn test_empty_expressions() {
+    let mut exevalator: Exevalator = Exevalator::new();
+
+    match exevalator.eval("") {
+        Ok(_eval_ok) => panic!("Expected error has not occurred."),
+        Err(_eval_error) => println!("Test of Empty Expressions 1: OK."),
+    }
+
+    match exevalator.eval(" ") {
+        Ok(_eval_ok) => panic!("Expected error has not occurred."),
+        Err(_eval_error) => println!("Test of Empty Expressions 2: OK."),
+    }
+
+    match exevalator.eval("  ") {
+        Ok(_eval_ok) => panic!("Expected error has not occurred."),
+        Err(_eval_error) => println!("Test of Empty Expressions 3: OK."),
+    }
+
+    match exevalator.eval("   ") {
+        Ok(_eval_ok) => panic!("Expected error has not occurred."),
+        Err(_eval_error) => println!("Test of Empty Expressions 4: OK."),
+    }
 }
 
 

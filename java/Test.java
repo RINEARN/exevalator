@@ -18,6 +18,7 @@ public class Test {
         test.testSyntaxChecksOfLocationsOfOperatorsAndLeafs();
         test.testVariables();
         test.testFunctions();
+        test.testEmptyExpressions();
 
         System.out.println("All tests have completed successfully.");
     }
@@ -714,6 +715,42 @@ public class Test {
             exevalator.eval("2 + 256 * funA() * funC(funC(funA(), 3.5 * funB(2.5) / 2.0), funB(1.0)) * 128"),
             2.0 + 256.0 * (1.25 * (1.25 + 3.5 * 2.5 / 2.0 + 1.0)) * 128.0
         );
+    }
+
+    private void testEmptyExpressions() {
+        Exevalator exevalator = new Exevalator();
+
+        try {
+            exevalator.eval("");
+            throw new ExevalatorTestException("Expected exception has not been thrown");
+        } catch (Exevalator.Exception ee) {
+            // Expected to be thrown
+            System.out.println("Test of Empty Functions 1: OK.");
+        }
+
+        try {
+            exevalator.eval(" ");
+            throw new ExevalatorTestException("Expected exception has not been thrown");
+        } catch (Exevalator.Exception ee) {
+            // Expected to be thrown
+            System.out.println("Test of Empty Functions 2: OK.");
+        }
+
+        try {
+            exevalator.eval("  ");
+            throw new ExevalatorTestException("Expected exception has not been thrown");
+        } catch (Exevalator.Exception ee) {
+            // Expected to be thrown
+            System.out.println("Test of Empty Functions 3: OK.");
+        }
+
+        try {
+            exevalator.eval("   ");
+            throw new ExevalatorTestException("Expected exception has not been thrown");
+        } catch (Exevalator.Exception ee) {
+            // Expected to be thrown
+            System.out.println("Test of Empty Functions 4: OK.");
+        }
     }
 
 

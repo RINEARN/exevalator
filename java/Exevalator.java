@@ -318,17 +318,23 @@ final class LexicalAnalyzer {
         }
         String[] tokenWords = expression.trim().split("\\s+");
 
-        // Create Token instances.
-        // Also, escaped number literals will be recovered.
-        Token[] tokens = createTokensFromTokenWords(tokenWords, numberLiteralList);
+        // For an empty expression (containing no tokens), the above returns { "" }, not { }.
+        // So we should detect/handle it as follows.
+        if (tokenWords.length == 1 && tokenWords[0].length() == 0) {
+            throw new Exevalator.Exception("The inputted expression is empty");
+        }
 
         // Checks the total number of tokens.
-        if (StaticSettings.MAX_TOKEN_COUNT < tokens.length) {
+        if (StaticSettings.MAX_TOKEN_COUNT < tokenWords.length) {
             throw new Exevalator.Exception(
                 "The number of tokens exceeds the limit (StaticSettings.MAX_TOKEN_COUNT: "
                 + StaticSettings.MAX_TOKEN_COUNT + ")"
             );
         }
+
+        // Create Token instances.
+        // Also, escaped number literals will be recovered.
+        Token[] tokens = createTokensFromTokenWords(tokenWords, numberLiteralList);
 
         // Checks syntactic correctness of tokens of inputted expressions.
         checkParenthesisOpeningClosings(tokens);

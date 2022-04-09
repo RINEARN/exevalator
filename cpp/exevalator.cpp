@@ -261,19 +261,22 @@ std::vector<Token> LexicalAnalyzer::analyze(const std::string &expression, const
         literal_escaped_expression, settings
     );
 
-    // Create Token structs.
-    // Also, escaped number literals will be recovered.
-    std::vector<Token> tokens = LexicalAnalyzer::create_tokens_from_token_words(
-        token_words, number_literals, settings
-    );
-
     // Checks the total number of tokens.
-    if (settings.max_token_count < tokens.size()) {
+    if (token_words.size() == 0) {
+        throw ExevalatorException("The inputted expression is empty.");
+    }
+    if (settings.max_token_count < token_words.size()) {
         throw new ExevalatorException(
             std::string { "The number of tokens exceeds the limit: Settings.max_token_count: " }
             + std::to_string(settings.max_token_count)
         );
     }
+
+    // Create Token structs.
+    // Also, escaped number literals will be recovered.
+    std::vector<Token> tokens = LexicalAnalyzer::create_tokens_from_token_words(
+        token_words, number_literals, settings
+    );
 
     // Check syntactic correctness of tokens.
     LexicalAnalyzer::check_parenthesis_opening_closings(tokens);
@@ -292,10 +295,6 @@ std::vector<Token> LexicalAnalyzer::analyze(const std::string &expression, const
  */
 size_t LexicalAnalyzer::detect_end_of_num_literal(const std::string &expression, size_t literal_begin) {
     size_t char_count = expression.length();
-    if (char_count == 0) {
-        throw ExevalatorException("The inputted expression is empty.");
-    }
-
     bool is_integer_part = true;
     bool is_decimal_part = false;
     bool is_exponent_part = false;
@@ -372,10 +371,6 @@ std::string LexicalAnalyzer::escape_number_literals(
         const std::string &expression, std::vector<std::string> &literal_store, const Settings &settings) {
 
     size_t char_count = expression.length();
-    if (char_count == 0) {
-        throw ExevalatorException("The inputted expression is empty.");
-    }
-
     std::string escaped_expression;
 
     for (size_t ichar=0; ichar<char_count; ++ichar) {
@@ -425,11 +420,13 @@ std::vector<std::string> LexicalAnalyzer::split_expression_into_token_words(
         }
     }
 
+    std::vector<std::string> token_words;
     size_t first_non_space = spaced_expression.find_first_not_of(' ');
+    if (first_non_space == std::string::npos) {
+        return token_words;
+    }
     size_t non_space_length = spaced_expression.find_last_not_of(' ') - first_non_space + 1;
     std::string trimmed_expression = spaced_expression.substr(first_non_space, non_space_length);
-
-    std::vector<std::string> token_words;
     std::string token_word;
     size_t trimmed_char_count = trimmed_expression.length();
     char last_char = ' ';

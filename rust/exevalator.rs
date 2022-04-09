@@ -274,6 +274,16 @@ impl LexicalAnalyzer {
             &escaped_expression, settings
         );
 
+        // Checks the total number of tokens.
+        if token_words.len() == 0 {
+            return Err(ExevalatorError::new("The inputted expression is empty"));
+        }
+        if settings.max_token_count < token_words.len() {
+            return Err(ExevalatorError::new(&format!(
+                "The number of tokens exceeds the limit (Settings.max_token_count: {})", settings.max_token_count
+            )));
+        }
+ 
         // Create Token structs.
         // Also, escaped number literals will be recovered.
         let tokens: Vec<Token> = match LexicalAnalyzer::create_tokens_from_token_words(
@@ -283,13 +293,6 @@ impl LexicalAnalyzer {
             Err(tokenization_error) => return Err(tokenization_error),
         };
 
-        // Checks the total number of tokens.
-        if settings.max_token_count < tokens.len() {
-            return Err(ExevalatorError::new(&format!(
-                "The number of tokens exceeds the limit (Settings.max_token_count: {})", settings.max_token_count
-            )));
-        }
- 
         // Check syntactic correctness of tokens.
         if let Some(syntax_error) = LexicalAnalyzer::check_parenthesis_opening_closings(&tokens) {
             return Err(syntax_error);
@@ -312,9 +315,6 @@ impl LexicalAnalyzer {
     fn detect_end_of_num_literal(expression: &str, literal_begin: usize) -> usize {
         let chars: Vec<char> = expression.chars().collect();
         let char_count: usize = chars.len();
-        if char_count == 0 {
-            panic!("Cannot detect ends of literals in the empty expression");
-        }
 
         let mut is_integer_part = true;
         let mut is_decimal_part = false;

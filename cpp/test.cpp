@@ -17,6 +17,7 @@ void test_syntax_checks_of_corresponences_of_parentheses();
 void test_syntax_checks_of_locations_of_operators_and_leafs();
 void test_variables();
 void test_functions();
+void test_empty_expressions();
 
 /// The minimum error between two double-type values to regard them almost equal.
 const double ALLOWABLE_ERROR = 1.0E-12;
@@ -32,6 +33,7 @@ int main() {
         test_syntax_checks_of_locations_of_operators_and_leafs();
         test_variables();
         test_functions();
+        test_empty_expressions();
 
         std::cout << "All tests have completed successfully." << std::endl;
         return EXIT_SUCCESS;
@@ -668,6 +670,46 @@ void test_functions() {
         exevalator.eval("2 + 256 * funA() * funC(funC(funA(), 3.5 * funB(2.5) / 2.0), funB(1.0)) * 128"),
         2.0 + 256.0 * (1.25 * (1.25 + 3.5 * 2.5 / 2.0 + 1.0)) * 128.0
     );
+}
+
+void test_empty_expressions() {
+    Exevalator exevalator;
+
+    try {
+        exevalator.eval("");
+        std::cerr << "Expected error has not occurred." << std::endl;
+        exit(EXIT_FAILURE);
+    } catch (ExevalatorException &error) {
+        std::cout << error.what() << std::endl;
+        std::cout << "Test of Empty Expression 1: OK." << std::endl;
+    }
+
+    try {
+        exevalator.eval(" ");
+        std::cerr << "Expected error has not occurred." << std::endl;
+        exit(EXIT_FAILURE);
+    } catch (ExevalatorException &error) {
+        std::cout << error.what() << std::endl;
+        std::cout << "Test of Empty Expression 2: OK." << std::endl;
+    }
+
+    try {
+        exevalator.eval("  ");
+        std::cerr << "Expected error has not occurred." << std::endl;
+        exit(EXIT_FAILURE);
+    } catch (ExevalatorException &error) {
+        std::cout << error.what() << std::endl;
+        std::cout << "Test of Empty Expression 3: OK." << std::endl;
+    }
+
+    try {
+        exevalator.eval("   ");
+        std::cerr << "Expected error has not occurred." << std::endl;
+        exit(EXIT_FAILURE);
+    } catch (ExevalatorException &error) {
+        std::cout << error.what() << std::endl;
+        std::cout << "Test of Empty Expression 4: OK." << std::endl;
+    }
 }
 
 

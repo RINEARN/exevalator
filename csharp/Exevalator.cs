@@ -296,18 +296,25 @@ namespace Rinearn.ExevalatorCS
             spacedExpression = spacedExpression.Trim();
             string[] tokenWords = Regex.Split(spacedExpression, "\\s+");
 
-            // Create Token-type instances from token word(string)s.
-            // Also, escaped number literals will be recovered.
-            Token[] tokens = LexicalAnalyzer.CreateTokensFromTokenWords(tokenWords, numberLiterals.ToArray());
+            // For an empty expression (containing no tokens), the above returns { "" }, not { }.
+            // So we should detect/handle it as follows.
+            if (tokenWords.Length == 1 && tokenWords[0].Length == 0)
+            {
+                throw new ExevalatorException("The inputted expression is empty");
+            }
 
             // Checks the total number of tokens.
-            if (StaticSettings.MaxTokenCount < tokens.Length)
+            if (StaticSettings.MaxTokenCount < tokenWords.Length)
             {
                 throw new ExevalatorException(
                     "The number of tokens exceeds the limit (StaticSettings.MaxTokenCount: "
                     + StaticSettings.MaxTokenCount + ")"
                 );
             }
+
+            // Create Token-type instances from token word(string)s.
+            // Also, escaped number literals will be recovered.
+            Token[] tokens = LexicalAnalyzer.CreateTokensFromTokenWords(tokenWords, numberLiterals.ToArray());
 
             // Check syntactic correctness of tokens.
             LexicalAnalyzer.CheckParenthesisOpeningClosings(tokens);
@@ -325,10 +332,6 @@ namespace Rinearn.ExevalatorCS
         /// <returns>The expression in which all number literals are escaped</returns>
         private static string EscapeNumberLiterals(string expression, List<string> numberLiterals)
         {
-            if (expression.Length == 0)
-            {
-                throw new ExevalatorException("The inputted expression is empty.");
-            }
             StringBuilder escapedExpressionBuilder = new StringBuilder();
 
             MatchCollection matchedResults = Regex.Matches(expression, StaticSettings.NumberLiteralRegex);
