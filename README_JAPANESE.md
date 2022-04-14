@@ -17,6 +17,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 	- <a href="#how-to-use-cpp">C++での使用方法</a>
 - <a href="#performance">処理速度</a>
 - <a href="#about-us">開発元について</a>
+- <a href="#references">参考情報</a>
 
 
 <a id="what-is"></a>
@@ -219,6 +220,17 @@ eval メソッドの代わりにこれを使うと、いわば明示的に Exeva
 ## 開発元について
 
 Exevalator は、日本の個人運営の開発スタジオ [RINEARN](https://www.rinearn.com/) が開発しています。著者は松井文宏です。ご質問やフィードバックなどをお持ちの方は、ぜひ御気軽にどうぞ！
+
+
+<a id="references"></a>
+## 参考情報
+
+Exevalator についての情報をもっと知りたい場合は、以下のウェブサイトや記事などが参考になるかもしれません。
+
+* 公式サイト (準備中)
+
+* [多言語対応＆著作権フリーの式計算ライブラリ「 Exevalator（エグゼバレータ）」をリリース
+](https://www.rinearn.com/ja-jp/info/news/2022/0416-exevalator) - RINEARN お知らせ 2022/04/16
 
 
 <a id="credits"></a>

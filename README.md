@@ -19,6 +19,7 @@ Exevalator is currently available for programs/apps written in Java&reg;, Rust&r
 	- <a href="#how-to-use-cpp">How to Use in C++</a>
 - <a href="#performance">Performance</a>
 - <a href="#about-us">About Us</a>
+- <a href="#references">References</a>
 
 
 <a id="what-is"></a>
@@ -222,6 +223,17 @@ For example, on benchmark programs bundled in this repository, "reeval" of C++ v
 Exevalator is developed by a Japanese software development studio: [RINEARN](https://www.rinearn.com/). The author is Fumihiro Matsui.
 
 Please free to contact us if you have any questions, feedbacks, and so on!
+
+
+<a id="references"></a>
+## References
+
+Following webpages may be useful if you need more information about Exevalator.
+
+* Official Website (Under Construction)
+
+* [Released "Exevalator": A Multilingual & Copyright-Free Expression Evaluator Library
+](https://www.rinearn.com/en-us/info/news/2022/0416-exevalator) - RINEARN News 2022/04/16
 
 
 <a id="credits"></a>
