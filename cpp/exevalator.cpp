@@ -80,9 +80,8 @@ double Exevalator::eval(const std::string &expression) {
             */
 
             // Create the tree of evaluator units, and get the the root unit of it.
-            std::unique_ptr<Evaluator::EvaluatorUnit> evaluator_unit;
-            this->evaluator_unit = ast->create_evaluator_unit(
-                this->settings, this->variable_table, this->function_table
+            this->evaluator_unit = Evaluator::create_evaluator_unit_tree(
+                this->settings, ast, this->variable_table, this->function_table
             );
 
             this->last_evaluated_expression = expression;
@@ -960,102 +959,6 @@ std::string AstNode::to_markupped_text(uint64_t indent_stage) {
 }
 
 /**
- * Creates the evaluator unit for evaluating the value of this AST node.
- *
- * @param settings The Setting instance storing setting values
- * @param variable_table The Map mapping each variable name to an address of the variable
- * @param function_table The Map mapping each function name to an IExevalatorFunctionInterface instance
- * @return The created evaluator unit
- */
-std::unique_ptr<Evaluator::EvaluatorUnit> AstNode::create_evaluator_unit(const Settings &settings, 
-            const std::map<std::string, size_t> &variable_table,
-            const std::map<std::string, std::shared_ptr<ExevalatorFunctionInterface>> &function_table) {
-
-    // Create an unit for evaluating number literal.
-    if (this->token.type == TokenType::NUMBER_LITERAL) {
-        double literal_value;
-        try {
-            literal_value = stod(token.word);
-        } catch (...) {
-            std::string error_message = std::string { "Invalid number literal: " } + token.word;
-            throw ExevalatorException { error_message.c_str() };
-        }
-        return std::make_unique<Evaluator::NumberLiteralEvaluatorUnit>(literal_value);
-
-    // Create units for evaluating operators.
-    } else if (this->token.type == TokenType::OPERATOR) {
-
-        // Unary operator "-"
-        if (this->token.opinfo.type == OperatorType::UNARY_PREFIX && this->token.word == "-") {
-            return std::make_unique<Evaluator::MinusEvaluatorUnit>(
-                this->child_nodes[0]->create_evaluator_unit(settings, variable_table, function_table)
-            );
-
-        // Binary operator "+"
-        } else if (this->token.opinfo.type == OperatorType::BINARY && this->token.word == "+") {
-            return std::make_unique<Evaluator::AdditionEvaluatorUnit>(
-                this->child_nodes[0]->create_evaluator_unit(settings, variable_table, function_table),
-                this->child_nodes[1]->create_evaluator_unit(settings, variable_table, function_table)
-            );
-
-        // Binary operator "-"
-        } else if (this->token.opinfo.type == OperatorType::BINARY && this->token.word == "-") {
-            return std::make_unique<Evaluator::SubtractionEvaluatorUnit>(
-                this->child_nodes[0]->create_evaluator_unit(settings, variable_table, function_table),
-                this->child_nodes[1]->create_evaluator_unit(settings, variable_table, function_table)
-            );
-
-        // Binary operator "*"
-        } else if (this->token.opinfo.type == OperatorType::BINARY && this->token.word == "*") {
-            return std::make_unique<Evaluator::MultiplicationEvaluatorUnit>(
-                this->child_nodes[0]->create_evaluator_unit(settings, variable_table, function_table),
-                this->child_nodes[1]->create_evaluator_unit(settings, variable_table, function_table)
-            );
-
-        // Binary operator "/"
-        } else if (this->token.opinfo.type == OperatorType::BINARY && this->token.word == "/") {
-            return std::make_unique<Evaluator::DivisionEvaluatorUnit>(
-                this->child_nodes[0]->create_evaluator_unit(settings, variable_table, function_table),
-                this->child_nodes[1]->create_evaluator_unit(settings, variable_table, function_table)
-            );
-
-        // Function call operator "("
-        } else if (this->token.opinfo.type == OperatorType::CALL && this->token.word == "(") {
-            size_t child_count = this->child_nodes.size();
-            std::string identifier = this->child_nodes[0]->token.word;
-            if (function_table.find(identifier) == function_table.end()) {
-                throw ExevalatorException(("Function not found: " + identifier).c_str());
-            }
-            std::shared_ptr<ExevalatorFunctionInterface> function_ptr = function_table.at(identifier);
-            std::vector<std::unique_ptr<Evaluator::EvaluatorUnit>> arguments;
-            for (size_t ichild=1; ichild<child_count; ++ichild) {
-                arguments.push_back(
-                    this->child_nodes[ichild]->create_evaluator_unit(settings, variable_table, function_table)
-                );
-            }
-            return std::make_unique<Evaluator::FunctionEvaluatorUnit>(
-                function_ptr, identifier, arguments
-            );
-        } else {
-            std::string error_message = std::string { "Unexpected operator: " } + this->token.opinfo.symbol;
-            throw ExevalatorException { error_message.c_str() };
-        }
-
-    // Create an unit for evaluating the value of a variable.
-    } else if (this->token.type == TokenType::VARIABLE_IDENTIFIER) {
-        std::string identifier = this->token.word;
-        if (variable_table.find(identifier) == variable_table.end()) {
-            throw ExevalatorException(("Variable not found: " + identifier).c_str());
-        }
-        size_t address = variable_table.at(identifier);
-        return std::make_unique<Evaluator::VariableEvaluatorUnit>(address);
-
-    } else {
-        throw ExevalatorException(std::string("Unexpected token type: ").append(token_type_name(this->token.type)).c_str());
-    }
-}
-
-/**
  * Checks that depths in the AST of all nodes under this node (child nodes, grandchild nodes, and so on)
  * does not exceeds the specified maximum value.
  * An ExevalatorException will be thrown when the depth exceeds the maximum value.
@@ -1077,10 +980,112 @@ void AstNode::check_depth(uint64_t depth_of_this_node, uint64_t max_ast_depth) c
 }
 
 
-// The implementation of the virtual destructor of the super class of evaluator units.
-Evaluator::EvaluatorUnit::~EvaluatorUnit() {
+/**
+ * Creates a tree of evaluator units corresponding with the specified AST.
+ *
+ * @param settings The Setting instance storing setting values
+ * @param ast The root node of the AST
+ * @param variable_table The Map mapping each variable name to an address of the variable
+ * @param function_table The Map mapping each function name to an IExevalatorFunctionInterface instance
+ * @return The root node of the created tree of evaluator units.
+ */
+std::unique_ptr<Evaluator::EvaluatorUnit> Evaluator::create_evaluator_unit_tree(
+            const Settings &settings,
+            const std::unique_ptr<AstNode> &ast,
+            const std::map<std::string, size_t> &variable_table,
+            const std::map<std::string, std::shared_ptr<ExevalatorFunctionInterface>> &function_table) {
+
+    // Note: This method creates a tree of evaluator units by traversing each node in the AST recursively.
+
+    // Create an unit for evaluating number literal.
+    if (ast->token.type == TokenType::NUMBER_LITERAL) {
+        double literal_value;
+        try {
+            literal_value = stod(ast->token.word);
+        } catch (...) {
+            std::string error_message = std::string { "Invalid number literal: " } + ast->token.word;
+            throw ExevalatorException { error_message.c_str() };
+        }
+        return std::make_unique<Evaluator::NumberLiteralEvaluatorUnit>(literal_value);
+
+    // Create units for evaluating operators.
+    } else if (ast->token.type == TokenType::OPERATOR) {
+
+        // Unary operator "-"
+        if (ast->token.opinfo.type == OperatorType::UNARY_PREFIX && ast->token.word == "-") {
+            return std::make_unique<Evaluator::MinusEvaluatorUnit>(
+                create_evaluator_unit_tree(settings, ast->child_nodes[0], variable_table, function_table)
+            );
+
+        // Binary operator "+"
+        } else if (ast->token.opinfo.type == OperatorType::BINARY && ast->token.word == "+") {
+            return std::make_unique<Evaluator::AdditionEvaluatorUnit>(
+                create_evaluator_unit_tree(settings, ast->child_nodes[0], variable_table, function_table),
+                create_evaluator_unit_tree(settings, ast->child_nodes[1], variable_table, function_table)
+            );
+
+        // Binary operator "-"
+        } else if (ast->token.opinfo.type == OperatorType::BINARY && ast->token.word == "-") {
+            return std::make_unique<Evaluator::SubtractionEvaluatorUnit>(
+                create_evaluator_unit_tree(settings, ast->child_nodes[0], variable_table, function_table),
+                create_evaluator_unit_tree(settings, ast->child_nodes[1], variable_table, function_table)
+            );
+
+        // Binary operator "*"
+        } else if (ast->token.opinfo.type == OperatorType::BINARY && ast->token.word == "*") {
+            return std::make_unique<Evaluator::MultiplicationEvaluatorUnit>(
+                create_evaluator_unit_tree(settings, ast->child_nodes[0], variable_table, function_table),
+                create_evaluator_unit_tree(settings, ast->child_nodes[1], variable_table, function_table)
+            );
+
+        // Binary operator "/"
+        } else if (ast->token.opinfo.type == OperatorType::BINARY && ast->token.word == "/") {
+            return std::make_unique<Evaluator::DivisionEvaluatorUnit>(
+                create_evaluator_unit_tree(settings, ast->child_nodes[0], variable_table, function_table),
+                create_evaluator_unit_tree(settings, ast->child_nodes[1], variable_table, function_table)
+            );
+
+        // Function call operator "("
+        } else if (ast->token.opinfo.type == OperatorType::CALL && ast->token.word == "(") {
+            size_t child_count = ast->child_nodes.size();
+            std::string identifier = ast->child_nodes[0]->token.word;
+            if (function_table.find(identifier) == function_table.end()) {
+                throw ExevalatorException(("Function not found: " + identifier).c_str());
+            }
+            std::shared_ptr<ExevalatorFunctionInterface> function_ptr = function_table.at(identifier);
+            std::vector<std::unique_ptr<Evaluator::EvaluatorUnit>> arguments;
+            for (size_t ichild=1; ichild<child_count; ++ichild) {
+                arguments.push_back(
+                    create_evaluator_unit_tree(settings, ast->child_nodes[ichild], variable_table, function_table)
+                );
+            }
+            return std::make_unique<Evaluator::FunctionEvaluatorUnit>(
+                function_ptr, identifier, arguments
+            );
+        } else {
+            std::string error_message = std::string { "Unexpected operator: " } + ast->token.opinfo.symbol;
+            throw ExevalatorException { error_message.c_str() };
+        }
+
+    // Create an unit for evaluating the value of a variable.
+    } else if (ast->token.type == TokenType::VARIABLE_IDENTIFIER) {
+        std::string identifier = ast->token.word;
+        if (variable_table.find(identifier) == variable_table.end()) {
+            throw ExevalatorException(("Variable not found: " + identifier).c_str());
+        }
+        size_t address = variable_table.at(identifier);
+        return std::make_unique<Evaluator::VariableEvaluatorUnit>(address);
+
+    } else {
+        throw ExevalatorException(std::string("Unexpected token type: ").append(token_type_name(ast->token.type)).c_str());
+    }
 }
 
+/**
+ * The implementation of the virtual destructor of the super class of evaluator units.
+ */
+Evaluator::EvaluatorUnit::~EvaluatorUnit() {
+}
 
 /**
  * Creates the evaluator unit for evaluating the value of a number literal.

@@ -279,6 +279,197 @@ struct Settings {
 
 
 /**
+ * The class storing information of an node of an AST.
+ */
+class AstNode {
+public:
+
+    /** The token corresponding with this AST node. */
+    Token token;
+
+    /**  The list of child nodes of this AST node. */
+    std::vector<std::unique_ptr<AstNode>> child_nodes;
+
+    /**
+     * Creates an AST node instance corresponding with the specified token.
+     *
+     * @param token The token corresponding with the AST to be created.
+     */
+    AstNode(Token token) {
+        this->token = token;
+    }
+
+    /**
+     * Expresses the AST under this node in XML-like text format.
+     *
+     * @param indent_stage The stage of indent of this node
+     * @return XML-like text representation of the AST under this node
+     */
+    std::string to_markupped_text(uint64_t indent_stage);
+
+    /**
+     * Checks that depths in the AST of all nodes under this node (child nodes, grandchild nodes, and so on)
+     * does not exceeds the specified maximum value.
+     * An ExevalatorException will be thrown when the depth exceeds the maximum value.
+     * If the depth does not exceeds the maximum value, nothing will occur.
+     *
+     * @param depth_of_this_node The depth of this node in the AST
+     * @param max_ast_depth The maximum value of the depth of the AST
+     */
+    void check_depth(uint64_t depth_of_this_node, uint64_t max_ast_depth) const;
+};
+
+
+/**
+ * The class performing functions of a lexical analyzer.
+ */
+class LexicalAnalyzer {
+
+    /**
+     * Detects the end of the specified number literal in the expression.
+     *
+     * @param expression The expression containing the number literal
+     * @param literal_begin The index of the character at the beginning of the number literal
+     * @return The index of the character at the end of the number literal
+     */
+    static size_t detect_end_of_num_literal(const std::string &expression, size_t literal_begin);
+
+    /**
+     *  Extracts all number literals in the expression, and replaces them to the escaped representation.
+     *
+     * @param expression The expression to be processed
+     * @param literal_store The vector to which extracted number literals will be stored
+     * @param settings The Setting instance storing setting values
+     * @return The expression in which all number literals are escaped
+     */
+    static std::string escape_number_literals(
+        const std::string &expression, std::vector<std::string> &literal_store, const Settings &settings
+    );
+
+    /**
+     * Sprits (tokenizes) the expression into token-words.
+     * The type of each word is "string", not "Token" struct yet, at this stage.
+     *
+     * @param expression The expression to be splitted (tokenized) into token-words
+     * @param settings The Setting instance storing setting values
+     * @return Token-words
+     */
+    static std::vector<std::string> split_expression_into_token_words(const std::string &expression, const Settings &settings);
+
+    /**
+     * Creates "Token" type instances from "string" type token-words.
+     * Also, escaped number literals will be recovered.
+     *
+     * @param token_words Token-words to be converted to `Token` type instances
+     * @param number_literals Values of number literals to be recovered
+     * @param settings settings The Setting instance storing setting values
+     * @return "Token" type instances
+     */
+    static std::vector<Token> create_tokens_from_token_words(
+        const std::vector<std::string> &token_words, const std::vector<std::string> &number_literals, const Settings &settings
+    );
+
+    /**
+     * Checks the number and correspondence of open "(" / closed ")" parentheses.
+     * An ExevalatorException will be thrown when any errors detected.
+     * If no error detected, nothing will occur.
+     *
+     * @param tokens Tokens of the inputted expression.
+     */
+    static void check_parenthesis_opening_closings(const std::vector<Token> &tokens);
+
+    /**
+     * Checks that empty parentheses "()" are not contained in the expression.
+     * An ExevalatorException will be thrown when any errors detected.
+     * If no error detected, nothing will occur.
+     *
+     * @param tokens Tokens of the inputted expression.
+     */
+    static void check_empty_parentheses(const std::vector<Token> &tokens);
+
+    /**
+     * Checks correctness of locations of operators and leaf elements (literals and identifiers).
+     * An ExevalatorException will be thrown when any errors detected.
+     * If no error detected, nothing will occur.
+     *
+     * @param tokens Tokens of the inputted expression.
+     */
+    static void check_locations_of_operators_and_leafs(const std::vector<Token> &tokens);
+
+public:
+
+    /**
+     * Splits (tokenizes) the expression into tokens, and analyze them.
+     *
+     * @param expression The expression to be tokenized/analyzed
+     * @return Analyzed tokens
+     */
+    static std::vector<Token> analyze(const std::string &expression, const Settings &settings);
+};
+
+
+/**
+ * The class performing functions of a parser.
+ */
+class Parser {
+
+    /**
+     * Judges whether the right-side token should be connected directly as an operand, to the target operator.
+     *
+     * @param target_operator_precedence The precedence of the target operator (smaller value gives higher precedence)
+     * @param next_operator_precedence The precedence of the next operator (smaller value gives higher precedence)
+     * @return Returns true if the right-side token (operand) should be connected to the target operator
+     */
+    static constexpr bool should_add_right_operand(uint64_t target_operator_precedence, uint64_t next_operator_precedence);
+
+    /**
+     * Judges whether the right-side token should be connected directly as an operand,
+     * to the operator at the top of the working stack.
+     *
+     * @param stack The working stack used for the parsing
+     * @param next_operator_precedence The precedence of the next operator (smaller value gives higher precedence)
+     * @return Returns true if the right-side token (operand) should be connected to the operator at the top of the stack
+     */
+    static bool should_add_right_operand_to_stacked_operator(
+        const std::vector<std::unique_ptr<AstNode>> &stack, uint64_t next_operator_precedence
+    );
+
+    /**
+     * Pops root nodes of ASTs of partial expressions constructed on the stack.
+     *
+     * @param ret Root nodes of ASTs of partial expressions
+     * @param stack The working stack used for the parsing
+     * @param end_stack_lid_node_token The token of the temporary node pushed in the stack,
+     *                                 at the end of partial expressions to be popped
+     */
+    static void pop_partial_expr_nodes(
+        std::vector<std::unique_ptr<AstNode>> &ret, std::vector<std::unique_ptr<AstNode>> &stack,
+        const Token &end_stack_lid_node_token
+    );
+
+    /**
+     * Returns a vectir storing next operator's precedence for each token.
+     * In the returned array, it will stored at [i] that
+     * precedence of the first operator of which token-index is greater than i.
+     *
+     * @param tokens All tokens to be parsed
+     * @return The vector storing next operator's precedence for each token
+     */
+    static std::vector<uint64_t> get_next_operator_precedences(const std::vector<Token> &tokens);
+
+public:
+
+    /**
+     * Parses tokens and construct Abstract Syntax Tree (AST).
+     *
+     * @param tokens Tokens to be parsed
+     * @return The root node of the constructed AST
+     */
+    static std::unique_ptr<AstNode> parse(const std::vector<Token> &tokens);
+};
+
+
+/**
  * The class providing various types of evaluator units
  * which evaluate values of operators, literals, etc.
  */
@@ -530,209 +721,21 @@ public:
          */
         double evaluate(const std::vector<double> &memory);
     };
-};
-
-
-/**
- * The class storing information of an node of an AST.
- */
-class AstNode {
-public:
-
-    /** The token corresponding with this AST node. */
-    Token token;
-
-    /**  The list of child nodes of this AST node. */
-    std::vector<std::unique_ptr<AstNode>> child_nodes;
-    
-    /**
-     * Creates an AST node instance corresponding with the specified token.
-     * 
-     * @param token The token corresponding with the AST to be created.
-     */
-    AstNode(Token token) {
-        this->token = token;
-    }
 
     /**
-     * Expresses the AST under this node in XML-like text format.
-     *
-     * @param indent_stage The stage of indent of this node
-     * @return XML-like text representation of the AST under this node
-     */
-    std::string to_markupped_text(uint64_t indent_stage);
-
-    /**
-     * Creates the evaluator unit for evaluating the value of this AST node.
+     * Creates a tree of evaluator units corresponding with the specified AST.
      *
      * @param settings The Setting instance storing setting values
+     * @param ast The root node of the AST
      * @param variable_table The Map mapping each variable name to an address of the variable
      * @param function_table The Map mapping each function name to an IExevalatorFunctionInterface instance
-     * @return The created evaluator unit
+     * @return The root node of the created tree of evaluator units.
      */
-    std::unique_ptr<Evaluator::EvaluatorUnit> create_evaluator_unit(const Settings &settings, 
+    static std::unique_ptr<Evaluator::EvaluatorUnit> create_evaluator_unit_tree(
+            const Settings &settings,
+            const std::unique_ptr<AstNode> &ast,
             const std::map<std::string, size_t> &variable_table,
             const std::map<std::string, std::shared_ptr<ExevalatorFunctionInterface>> &function_table);
-
-    /**
-     * Checks that depths in the AST of all nodes under this node (child nodes, grandchild nodes, and so on)
-     * does not exceeds the specified maximum value.
-     * An ExevalatorException will be thrown when the depth exceeds the maximum value.
-     * If the depth does not exceeds the maximum value, nothing will occur.
-     *
-     * @param depth_of_this_node The depth of this node in the AST
-     * @param max_ast_depth The maximum value of the depth of the AST
-     */
-    void check_depth(uint64_t depth_of_this_node, uint64_t max_ast_depth) const;
-};
-
-
-/**
- * The class performing functions of a lexical analyzer.
- */
-class LexicalAnalyzer {
-
-    /**
-     * Detects the end of the specified number literal in the expression.
-     * 
-     * @param expression The expression containing the number literal
-     * @param literal_begin The index of the character at the beginning of the number literal
-     * @return The index of the character at the end of the number literal
-     */
-    static size_t detect_end_of_num_literal(const std::string &expression, size_t literal_begin);
-
-    /**
-     *  Extracts all number literals in the expression, and replaces them to the escaped representation.
-     * 
-     * @param expression The expression to be processed
-     * @param literal_store The vector to which extracted number literals will be stored
-     * @param settings The Setting instance storing setting values
-     * @return The expression in which all number literals are escaped
-     */
-    static std::string escape_number_literals(
-        const std::string &expression, std::vector<std::string> &literal_store, const Settings &settings
-    );
-
-    /**
-     * Sprits (tokenizes) the expression into token-words. 
-     * The type of each word is "string", not "Token" struct yet, at this stage.
-     * 
-     * @param expression The expression to be splitted (tokenized) into token-words
-     * @param settings The Setting instance storing setting values
-     * @return Token-words
-     */
-    static std::vector<std::string> split_expression_into_token_words(const std::string &expression, const Settings &settings);
-
-    /**
-     * Creates "Token" type instances from "string" type token-words.
-     * Also, escaped number literals will be recovered.
-     * 
-     * @param token_words Token-words to be converted to `Token` type instances
-     * @param number_literals Values of number literals to be recovered
-     * @param settings settings The Setting instance storing setting values
-     * @return "Token" type instances
-     */
-    static std::vector<Token> create_tokens_from_token_words(
-        const std::vector<std::string> &token_words, const std::vector<std::string> &number_literals, const Settings &settings
-    );
-
-    /**
-     * Checks the number and correspondence of open "(" / closed ")" parentheses.
-     * An ExevalatorException will be thrown when any errors detected.
-     * If no error detected, nothing will occur.
-     *
-     * @param tokens Tokens of the inputted expression.
-     */
-    static void check_parenthesis_opening_closings(const std::vector<Token> &tokens);
-
-    /**
-     * Checks that empty parentheses "()" are not contained in the expression.
-     * An ExevalatorException will be thrown when any errors detected.
-     * If no error detected, nothing will occur.
-     *
-     * @param tokens Tokens of the inputted expression.
-     */
-    static void check_empty_parentheses(const std::vector<Token> &tokens);
-
-    /**
-     * Checks correctness of locations of operators and leaf elements (literals and identifiers).
-     * An ExevalatorException will be thrown when any errors detected.
-     * If no error detected, nothing will occur.
-     *
-     * @param tokens Tokens of the inputted expression.
-     */
-    static void check_locations_of_operators_and_leafs(const std::vector<Token> &tokens);
-
-public:
-
-    /**
-     * Splits (tokenizes) the expression into tokens, and analyze them.
-     *
-     * @param expression The expression to be tokenized/analyzed
-     * @return Analyzed tokens
-     */
-    static std::vector<Token> analyze(const std::string &expression, const Settings &settings);
-};
-
-
-/**
- * The class performing functions of a parser.
- */
-class Parser {
-    
-    /**
-     * Judges whether the right-side token should be connected directly as an operand, to the target operator.
-     *
-     * @param target_operator_precedence The precedence of the target operator (smaller value gives higher precedence)
-     * @param next_operator_precedence The precedence of the next operator (smaller value gives higher precedence)
-     * @return Returns true if the right-side token (operand) should be connected to the target operator
-     */
-    static constexpr bool should_add_right_operand(uint64_t target_operator_precedence, uint64_t next_operator_precedence);
-
-    /**
-     * Judges whether the right-side token should be connected directly as an operand,
-     * to the operator at the top of the working stack.
-     *
-     * @param stack The working stack used for the parsing
-     * @param next_operator_precedence The precedence of the next operator (smaller value gives higher precedence)
-     * @return Returns true if the right-side token (operand) should be connected to the operator at the top of the stack
-     */
-    static bool should_add_right_operand_to_stacked_operator(
-        const std::vector<std::unique_ptr<AstNode>> &stack, uint64_t next_operator_precedence
-    );
-
-    /**
-     * Pops root nodes of ASTs of partial expressions constructed on the stack.
-     *
-     * @param ret Root nodes of ASTs of partial expressions
-     * @param stack The working stack used for the parsing
-     * @param end_stack_lid_node_token The token of the temporary node pushed in the stack,
-     *                                 at the end of partial expressions to be popped
-     */
-    static void pop_partial_expr_nodes(
-        std::vector<std::unique_ptr<AstNode>> &ret, std::vector<std::unique_ptr<AstNode>> &stack,
-        const Token &end_stack_lid_node_token
-    );
-
-    /**
-     * Returns a vectir storing next operator's precedence for each token.
-     * In the returned array, it will stored at [i] that
-     * precedence of the first operator of which token-index is greater than i.
-     *
-     * @param tokens All tokens to be parsed
-     * @return The vector storing next operator's precedence for each token
-     */
-    static std::vector<uint64_t> get_next_operator_precedences(const std::vector<Token> &tokens);
-
-public:
-
-    /**
-     * Parses tokens and construct Abstract Syntax Tree (AST).
-     *
-     * @param tokens Tokens to be parsed
-     * @return The root node of the constructed AST
-     */
-    static std::unique_ptr<AstNode> parse(const std::vector<Token> &tokens);
 };
 
 

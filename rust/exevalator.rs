@@ -24,8 +24,8 @@ pub struct Exevalator<'exvlife> {
     /// The HashMap mapping each name of a function to a function pointer.
     function_table: HashMap<String, fn(Vec<f64>)->Result<f64,ExevalatorError> >,
 
-    /// The unit for evaluating the value of an expression.
-    evaluator_unit: Option<Box<dyn EvaluatorUnit>>,
+    /// The tree of evaluator units, which evaluates an expression.
+    evaluator_unit_tree: Option<Box<dyn EvaluatorUnit>>,
 
     /// Caches the content of the expression evaluated last time, to skip re-parsing.
     last_evaluated_expression: &'exvlife str,
@@ -44,7 +44,7 @@ impl<'exvlife> Exevalator<'exvlife> {
             memory: Vec::new(),
             variable_table: HashMap::new(),
             function_table: HashMap::new(),
-            evaluator_unit: None,
+            evaluator_unit_tree: None,
             last_evaluated_expression: "",
         }
     }
@@ -64,7 +64,7 @@ impl<'exvlife> Exevalator<'exvlife> {
         }
 
         // If the expression changed from the last-evaluated expression, re-parsing is necessary.
-        if self.evaluator_unit.is_none() || !expression.eq(self.last_evaluated_expression) {
+        if self.evaluator_unit_tree.is_none() || !expression.eq(self.last_evaluated_expression) {
 
             // Perform lexical analysis, and get tokens from the inputted expression.
             let tokens: Vec<Token> = match LexicalAnalyzer::analyze( &(expression.to_string()), &self.settings) {
@@ -79,8 +79,8 @@ impl<'exvlife> Exevalator<'exvlife> {
             };
 
             // Create the tree of evaluator units, and get the the root unit of it.
-            self.evaluator_unit = 
-            match ast.create_evaluator_unit(&self.variable_table, &self.function_table, &self.settings) {
+            self.evaluator_unit_tree = 
+            match Evaluator::create_evaluator_unit_tree(&ast, &self.variable_table, &self.function_table, &self.settings) {
                 Ok(created_unit) => Some(created_unit),
                 Err(unit_creation_error) => return Err(unit_creation_error),
             };
@@ -89,8 +89,8 @@ impl<'exvlife> Exevalator<'exvlife> {
         }
 
         // Evaluate the value of the expression, and return it.
-        if self.evaluator_unit.is_some() {
-            let unit: &Box<dyn EvaluatorUnit> = &(*self.evaluator_unit.as_ref().unwrap());
+        if self.evaluator_unit_tree.is_some() {
+            let unit: &Box<dyn EvaluatorUnit> = &(*self.evaluator_unit_tree.as_ref().unwrap());
             match unit.evaluate(&self.memory) {
                 Ok(evaluated_value) => return Ok(evaluated_value),
                 Err(evaluation_error) => return Err(evaluation_error),
@@ -109,10 +109,10 @@ impl<'exvlife> Exevalator<'exvlife> {
     ///
     #[allow(dead_code)]
     pub fn reeval(&mut self) -> Result<f64,ExevalatorError> {
-        if self.evaluator_unit.is_none() {
+        if self.evaluator_unit_tree.is_none() {
             return Err(ExevalatorError::new("\"reeval\" is not available before using \"eval\""));
         } else {
-            let unit: &Box<dyn EvaluatorUnit> = &(*self.evaluator_unit.as_ref().unwrap());
+            let unit: &Box<dyn EvaluatorUnit> = &(*self.evaluator_unit_tree.as_ref().unwrap());
             match unit.evaluate(&self.memory) {
                 Ok(evaluated_value) => return Ok(evaluated_value),
                 Err(evaluation_error) => return Err(evaluation_error),
@@ -1063,136 +1063,6 @@ impl AstNode {
         }
     }
 
-    /// Creates the evaluator unit for evaluating the value of this AST node.
-    ///
-    /// * `variable_table` - The HashMap mapping variable names to virtual addresses.
-    /// * `function_table` - The HashMap mapping function names to function pointers.
-    /// * `settings` - The struct storing values of setting items.
-    /// * Return value - The Box pointing the created unit, or ExevalatorError if any error detected.
-    ///
-    fn create_evaluator_unit(&self, 
-            variable_table: &HashMap<String, usize>,
-            function_table: &HashMap<String, fn(Vec<f64>)->Result<f64,ExevalatorError> >,
-            settings: &Settings)
-            -> Result<Box<dyn EvaluatorUnit>, ExevalatorError> {
-
-        let token_type: &TokenType = &self.token.token_type;
-        
-        // Create an unit for evaluating number literal.
-        if *token_type == TokenType::NumberLiteral {
-            let literal_value: f64 = match self.token.word.parse() {
-                Ok(parse_result) => parse_result,
-                Err(_parse_error) => return Err(ExevalatorError::new(
-                    &format!("Invalid number literal: {}", self.token.word)
-                )),
-            };
-            return Ok(Box::new(NumberLiteralEvaluatorUnit {
-                literal_value: literal_value,
-            }));
-
-        // Create units for evaluating operators.
-        } else if *token_type == TokenType::Operator {
-            let operator: &Operator = &self.token.operator.as_ref().unwrap();
-            let optype: OperatorType = operator.operator_type;
-            let opsymbol: char = operator.symbol;
-
-            // Unary operator "-"
-            if optype == OperatorType::UnaryPrefix && opsymbol == '-' {
-                return Ok(Box::new(MinusEvaluatorUnit {
-                    operand: match self.child_nodes[0].create_evaluator_unit(variable_table, function_table, settings) {
-                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
-                    },
-                }));
-
-            // Binary operator "+"
-            } else if optype == OperatorType::Binary && opsymbol == '+' {
-                return Ok(Box::new(AdditionEvaluatorUnit {
-                    left_operand:  match self.child_nodes[0].create_evaluator_unit(variable_table, function_table, settings) {
-                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
-                    },
-                    right_operand: match self.child_nodes[1].create_evaluator_unit(variable_table, function_table, settings) {
-                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
-                    },
-                }));
-
-            // Binary operator "-"
-            } else if optype == OperatorType::Binary && opsymbol == '-' {
-                return Ok(Box::new(SubtractionEvaluatorUnit {
-                    left_operand:  match self.child_nodes[0].create_evaluator_unit(variable_table, function_table, settings) {
-                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
-                    },
-                    right_operand: match self.child_nodes[1].create_evaluator_unit(variable_table, function_table, settings) {
-                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
-                    },
-                }));
-
-            // Binary operator "*"
-            } else if optype == OperatorType::Binary && opsymbol == '*' {
-                return Ok(Box::new(MultiplicationEvaluatorUnit {
-                    left_operand:  match self.child_nodes[0].create_evaluator_unit(variable_table, function_table, settings) {
-                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
-                    },
-                    right_operand: match self.child_nodes[1].create_evaluator_unit(variable_table, function_table, settings) {
-                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
-                    },
-                }));
-
-            // Binary operator "/"
-            } else if optype == OperatorType::Binary && opsymbol == '/' {
-                return Ok(Box::new(DivisionEvaluatorUnit {
-                    left_operand:  match self.child_nodes[0].create_evaluator_unit(variable_table, function_table, settings) {
-                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
-                    },
-                    right_operand: match self.child_nodes[1].create_evaluator_unit(variable_table, function_table, settings) {
-                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
-                    },
-                }));
-
-            // Function call operator "("
-            } else if optype == OperatorType::Call && opsymbol == '(' {
-                let child_count = self.child_nodes.len();
-                let identifier: String = self.child_nodes[0].token.word.clone();
-                if !function_table.contains_key(&identifier) {
-                    return Err(ExevalatorError::new(
-                        &format!("Function not found: {}", identifier)
-                    ));
-                }
-                let function_pointer: fn(Vec<f64>) -> Result<f64,ExevalatorError> = *function_table.get(&identifier).unwrap();
-                let mut arguments: Vec<Box<dyn EvaluatorUnit>> = Vec::new();
-                for ichild in 1..child_count {
-                    arguments.push(
-                        match self.child_nodes[ichild].create_evaluator_unit(variable_table, function_table, settings) {
-                            Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
-                        }
-                    );
-                }
-                return Ok(Box::new(FunctionEvaluatorUnit {
-                    function_pointer: function_pointer,
-                    identifier: identifier,
-                    arguments: arguments,
-                }));
-
-            } else {
-                panic!("Unexpected operator: {:?}", operator);
-            }
-
-        // Create an unit for evaluating the value of a variable.
-        } else if *token_type == TokenType::VariableIdentifier {
-            if !variable_table.contains_key(&self.token.word) {
-                return Err(ExevalatorError::new(
-                    &format!("Variable not found: {}", self.token.word)
-                ));
-            }
-            let address: usize = *variable_table.get(&self.token.word).unwrap();
-            return Ok(Box::new(VariableEvaluatorUnit {
-                address: address,
-            }));
-
-        } else {
-            panic!("Unexpected token type: {:?}", token_type);
-        }
-    }
-
     /// Checks that depths in the AST of all nodes under this node (child nodes, grandchild nodes, and so on)
     /// does not exceeds the specified maximum value.
     /// An ExevalatorError will be returned when the depth exceeds the maximum value.
@@ -1262,6 +1132,147 @@ impl AstNode {
     }
 }
 
+
+/// The object to prepare resources for evaluation.
+struct Evaluator {
+}
+
+impl Evaluator {
+
+    /// Creates a tree of evaluator units corresponding with the specified AST.
+    ///
+    /// * `ast` - The root node of the AST.
+    /// * `variable_table` - The HashMap mapping variable names to virtual addresses.
+    /// * `function_table` - The HashMap mapping function names to function pointers.
+    /// * `settings` - The struct storing values of setting items.
+    /// * Return value - The Box pointing the created unit, or ExevalatorError if any error detected.
+    ///
+    fn create_evaluator_unit_tree(
+        ast: &AstNode,
+        variable_table: &HashMap<String, usize>,
+        function_table: &HashMap<String, fn(Vec<f64>)->Result<f64,ExevalatorError> >,
+        settings: &Settings)
+        -> Result<Box<dyn EvaluatorUnit>, ExevalatorError> {
+
+        // Note: This method creates a tree of evaluator units by traversing each node in the AST recursively.
+
+       let token_type: &TokenType = &ast.token.token_type;
+
+       // Create an unit for evaluating number literal.
+        if *token_type == TokenType::NumberLiteral {
+            let literal_value: f64 = match ast.token.word.parse() {
+                Ok(parse_result) => parse_result,
+                Err(_parse_error) => return Err(ExevalatorError::new(
+                    &format!("Invalid number literal: {}", ast.token.word)
+                )),
+            };
+            return Ok(Box::new(NumberLiteralEvaluatorUnit {
+                literal_value: literal_value,
+            }));
+
+        // Create units for evaluating operators.
+        } else if *token_type == TokenType::Operator {
+            let operator: &Operator = &ast.token.operator.as_ref().unwrap();
+            let optype: OperatorType = operator.operator_type;
+            let opsymbol: char = operator.symbol;
+
+            // Unary operator "-"
+            if optype == OperatorType::UnaryPrefix && opsymbol == '-' {
+                return Ok(Box::new(MinusEvaluatorUnit {
+                    operand: match Evaluator::create_evaluator_unit_tree(&ast.child_nodes[0], variable_table, function_table, settings) {
+                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
+                    },
+                }));
+
+            // Binary operator "+"
+            } else if optype == OperatorType::Binary && opsymbol == '+' {
+                return Ok(Box::new(AdditionEvaluatorUnit {
+                    left_operand:  match Evaluator::create_evaluator_unit_tree(&ast.child_nodes[0], variable_table, function_table, settings) {
+                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
+                    },
+                    right_operand: match Evaluator::create_evaluator_unit_tree(&ast.child_nodes[1], variable_table, function_table, settings) {
+                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
+                    },
+                }));
+
+            // Binary operator "-"
+            } else if optype == OperatorType::Binary && opsymbol == '-' {
+                return Ok(Box::new(SubtractionEvaluatorUnit {
+                    left_operand:  match Evaluator::create_evaluator_unit_tree(&ast.child_nodes[0], variable_table, function_table, settings) {
+                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
+                    },
+                    right_operand: match Evaluator::create_evaluator_unit_tree(&ast.child_nodes[1], variable_table, function_table, settings) {
+                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
+                    },
+                }));
+
+            // Binary operator "*"
+            } else if optype == OperatorType::Binary && opsymbol == '*' {
+                return Ok(Box::new(MultiplicationEvaluatorUnit {
+                    left_operand:  match Evaluator::create_evaluator_unit_tree(&ast.child_nodes[0], variable_table, function_table, settings) {
+                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
+                    },
+                    right_operand: match Evaluator::create_evaluator_unit_tree(&ast.child_nodes[1], variable_table, function_table, settings) {
+                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
+                    },
+                }));
+
+            // Binary operator "/"
+            } else if optype == OperatorType::Binary && opsymbol == '/' {
+                return Ok(Box::new(DivisionEvaluatorUnit {
+                    left_operand:  match Evaluator::create_evaluator_unit_tree(&ast.child_nodes[0], variable_table, function_table, settings) {
+                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
+                    },
+                    right_operand: match Evaluator::create_evaluator_unit_tree(&ast.child_nodes[1], variable_table, function_table, settings) {
+                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
+                    },
+                }));
+
+            // Function call operator "("
+            } else if optype == OperatorType::Call && opsymbol == '(' {
+                let child_count = ast.child_nodes.len();
+                let identifier: String = ast.child_nodes[0].token.word.clone();
+                if !function_table.contains_key(&identifier) {
+                    return Err(ExevalatorError::new(
+                        &format!("Function not found: {}", identifier)
+                    ));
+                }
+                let function_pointer: fn(Vec<f64>) -> Result<f64,ExevalatorError> = *function_table.get(&identifier).unwrap();
+                let mut arguments: Vec<Box<dyn EvaluatorUnit>> = Vec::new();
+                for ichild in 1..child_count {
+                    arguments.push(
+                        match Evaluator::create_evaluator_unit_tree(&ast.child_nodes[ichild], variable_table, function_table, settings) {
+                            Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
+                        }
+                    );
+                }
+                return Ok(Box::new(FunctionEvaluatorUnit {
+                    function_pointer: function_pointer,
+                    identifier: identifier,
+                    arguments: arguments,
+                }));
+
+            } else {
+                panic!("Unexpected operator: {:?}", operator);
+            }
+
+        // Create an unit for evaluating the value of a variable.
+        } else if *token_type == TokenType::VariableIdentifier {
+            if !variable_table.contains_key(&ast.token.word) {
+                return Err(ExevalatorError::new(
+                    &format!("Variable not found: {}", ast.token.word)
+                ));
+            }
+            let address: usize = *variable_table.get(&ast.token.word).unwrap();
+            return Ok(Box::new(VariableEvaluatorUnit {
+                address: address,
+            }));
+
+        } else {
+            panic!("Unexpected token type: {:?}", token_type);
+        }
+    }
+}
 
 /// The trait defining the function which is implemented by all kinds of evaluation units. 
 trait EvaluatorUnit {

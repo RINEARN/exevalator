@@ -32,8 +32,8 @@ namespace Rinearn.ExevalatorCS
         /// <summary>The Dictionary mapping each function name to an IExevalatorFunction instance.</summary>
         Dictionary<string, IExevalatorFunction> FunctionTable;
 
-        /// <summary>The unit for evaluating an expression.</summary>
-        Evaluator.EvaluatorUnit? EvaluatorUnit;
+        /// <summary>The tree of evaluator units, which evaluates an expression.</summary>
+        Evaluator.EvaluatorUnit? EvaluatorUnitTree;
 
         /// <summary>Caches the content of the expression evaluated last time, to skip re-parsing.</summary>
         string LastEvaluatedExpression;
@@ -46,7 +46,7 @@ namespace Rinearn.ExevalatorCS
             this.Memory = new List<double>();
             this.VariableTable = new Dictionary<string, int>();
             this.FunctionTable = new Dictionary<string, IExevalatorFunction>();
-            this.EvaluatorUnit = null;
+            this.EvaluatorUnitTree = null;
             this.LastEvaluatedExpression = "";
         }
 
@@ -73,7 +73,7 @@ namespace Rinearn.ExevalatorCS
             try
             {
                 // If the expression changed from the last-evaluated expression, re-parsing is necessary.
-                if (this.EvaluatorUnit == null || expression != this.LastEvaluatedExpression)
+                if (this.EvaluatorUnitTree == null || expression != this.LastEvaluatedExpression)
                 {
 
                     // Perform lexical analysis, and get tokens from the inputted expression.
@@ -95,13 +95,13 @@ namespace Rinearn.ExevalatorCS
                     */
 
                     // Create the tree of evaluator units, and get the the root unit of it.
-                    this.EvaluatorUnit = ast.CreateEvaluatorUnit(this.VariableTable, this.FunctionTable);
+                    this.EvaluatorUnitTree = Evaluator.CreateEvaluatorUnitTree(ast, this.VariableTable, this.FunctionTable);
 
                     this.LastEvaluatedExpression = expression;
                 }
 
                 // Evaluate the value of the expression, and return it.
-                double evaluatedValue = this.EvaluatorUnit.evaluate(this.Memory);
+                double evaluatedValue = this.EvaluatorUnitTree.evaluate(this.Memory);
                 return evaluatedValue;
 
             }
@@ -125,10 +125,10 @@ namespace Rinearn.ExevalatorCS
         /// <returns>The evaluated value</returns>
         public double Reeval()
         {
-            if (this.EvaluatorUnit == null) {
+            if (this.EvaluatorUnitTree == null) {
                 throw new ExevalatorException("\"Reeval\" is not available before using \"Eval\"");
             } else {
-                double evaluatedValue = this.EvaluatorUnit.evaluate(this.Memory);
+                double evaluatedValue = this.EvaluatorUnitTree.evaluate(this.Memory);
                 return evaluatedValue;
             }
         }
@@ -1154,98 +1154,6 @@ namespace Rinearn.ExevalatorCS
         }
 
         /// <summary>
-        /// Creates the evaluator unit for evaluating the value of this AST node.
-        /// </summary>
-        /// <param name="variableTable">The Dictionary mapping each variable name to an address of the variable.
-        /// <param name="functionTable">The Dictionary mapping each function name to an IExevalatorFunction instance.
-        public Evaluator.EvaluatorUnit CreateEvaluatorUnit(
-                Dictionary<string, int> variableTable,
-                Dictionary<string, IExevalatorFunction> functionTable)
-        {
-
-            // Initialize evaluation units of child nodes, and store then into an array.
-            int childCount = this.ChildNodeList.Count;
-            Evaluator.EvaluatorUnit[] childNodeUnits = new Evaluator.EvaluatorUnit[childCount];
-            for (int ichild = 0; ichild < childCount; ichild++)
-            {
-                childNodeUnits[ichild] = this.ChildNodeList[ichild].CreateEvaluatorUnit(variableTable, functionTable);
-            }
-
-            // Initialize evaluation units of this node.
-            if (this.Token.Type == TokenType.NumberLiteral)
-            {
-                double literalValue = System.Double.NaN;
-                if (!System.Double.TryParse(this.Token.Word, out literalValue))
-                {
-                    throw new ExevalatorException("Invalid number literal: " + this.Token.Word);
-                }
-                return new Evaluator.NumberLiteralEvaluatorUnit(literalValue);
-
-            }
-            else if (this.Token.Type == TokenType.VariableIdentifier)
-            {
-                if (!variableTable.ContainsKey(this.Token.Word))
-                {
-                    throw new ExevalatorException("Variable not found: " + this.Token.Word);
-                }
-                int address = variableTable[this.Token.Word];
-                return new Evaluator.VariableEvaluatorUnit(address);
-
-            }
-            else if (this.Token.Type == TokenType.FunctionIdentifier)
-            {
-                return new Evaluator.NopEvaluatorUnit();
-            }
-            else if (this.Token.Type == TokenType.Operator)
-            {
-                Operator op = this.Token.Operator!.Value;
-                if (op.Type == OperatorType.UnaryPrefix && op.Symbol == '-')
-                {
-                    return new Evaluator.MinusEvaluatorUnit(childNodeUnits[0]);
-                }
-                else if (op.Type == OperatorType.Binary && op.Symbol == '+')
-                {
-                    return new Evaluator.AdditionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
-                }
-                else if (op.Type == OperatorType.Binary && op.Symbol == '-')
-                {
-                    return new Evaluator.SubtractionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
-                }
-                else if (op.Type == OperatorType.Binary && op.Symbol == '*')
-                {
-                    return new Evaluator.MultiplicationEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
-                }
-                else if (op.Type == OperatorType.Binary && op.Symbol == '/')
-                {
-                    return new Evaluator.DivisionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
-                }
-                else if (op.Type == OperatorType.Call && op.Symbol == '(')
-                {
-                    String identifier = this.ChildNodeList[0].Token.Word;
-                    if (!functionTable.ContainsKey(identifier))
-                    {
-                        throw new ExevalatorException("Function not found: " + identifier);
-                    }
-                    IExevalatorFunction function = functionTable[identifier];
-                    Evaluator.EvaluatorUnit[] argUnits = new Evaluator.EvaluatorUnit[childCount - 1];
-                    for (int iarg = 0; iarg < childCount - 1; iarg++)
-                    {
-                        argUnits[iarg] = childNodeUnits[iarg + 1];
-                    }
-                    return new Evaluator.FunctionEvaluatorUnit(function, argUnits);
-                }
-                else
-                {
-                    throw new ExevalatorException("Unexpected operator: " + op);
-                }
-            }
-            else
-            {
-                throw new ExevalatorException("Unexpected token type: " + this.Token.Type);
-            }
-        }
-
-        /// <summary>
         /// Checks that depths in the AST of all nodes under this node (child nodes, grandchild nodes, and so on)
         /// does not exceeds the specified maximum value.
         /// An ExevalatorException will be thrown when the depth exceeds the maximum value.
@@ -1329,6 +1237,104 @@ namespace Rinearn.ExevalatorCS
     /// </summary>
     public class Evaluator
     {
+        /// <summary>
+        /// Creates a tree of evaluator units corresponding with the specified AST.
+        /// </summary>
+        /// <param name="ast">The root node of the AST.</param>
+        /// <param name="variableTable">The Dictionary mapping each variable name to an address of the variable.</param>
+        /// <param name="functionTable">The Dictionary mapping each function name to an IExevalatorFunction instance.</param>
+        /// <returns>The root node of the created tree of evaluator units.</returns>
+        public static Evaluator.EvaluatorUnit CreateEvaluatorUnitTree(
+                AstNode ast,
+                Dictionary<string, int> variableTable,
+                Dictionary<string, IExevalatorFunction> functionTable)
+        {
+            // Note: This method creates a tree of evaluator units by traversing each node in the AST recursively.
+
+            List<AstNode> childNodeList = ast.ChildNodeList;
+            int childCount = childNodeList.Count;
+
+            // Creates evaluation units of child nodes, and store then into an array.
+            Evaluator.EvaluatorUnit[] childNodeUnits = new Evaluator.EvaluatorUnit[childCount];
+            for (int ichild = 0; ichild < childCount; ichild++)
+            {
+                childNodeUnits[ichild] = CreateEvaluatorUnitTree(childNodeList[ichild], variableTable, functionTable);
+            }
+
+            // Initialize evaluation units of this node.
+            Token token = ast.Token;
+            if (token.Type == TokenType.NumberLiteral)
+            {
+                double literalValue = System.Double.NaN;
+                if (!System.Double.TryParse(token.Word, out literalValue))
+                {
+                    throw new ExevalatorException("Invalid number literal: " + token.Word);
+                }
+                return new Evaluator.NumberLiteralEvaluatorUnit(literalValue);
+
+            }
+            else if (token.Type == TokenType.VariableIdentifier)
+            {
+                if (!variableTable.ContainsKey(token.Word))
+                {
+                    throw new ExevalatorException("Variable not found: " + token.Word);
+                }
+                int address = variableTable[token.Word];
+                return new Evaluator.VariableEvaluatorUnit(address);
+
+            }
+            else if (token.Type == TokenType.FunctionIdentifier)
+            {
+                return new Evaluator.NopEvaluatorUnit();
+            }
+            else if (token.Type == TokenType.Operator)
+            {
+                Operator op = token.Operator!.Value;
+                if (op.Type == OperatorType.UnaryPrefix && op.Symbol == '-')
+                {
+                    return new Evaluator.MinusEvaluatorUnit(childNodeUnits[0]);
+                }
+                else if (op.Type == OperatorType.Binary && op.Symbol == '+')
+                {
+                    return new Evaluator.AdditionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+                }
+                else if (op.Type == OperatorType.Binary && op.Symbol == '-')
+                {
+                    return new Evaluator.SubtractionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+                }
+                else if (op.Type == OperatorType.Binary && op.Symbol == '*')
+                {
+                    return new Evaluator.MultiplicationEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+                }
+                else if (op.Type == OperatorType.Binary && op.Symbol == '/')
+                {
+                    return new Evaluator.DivisionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+                }
+                else if (op.Type == OperatorType.Call && op.Symbol == '(')
+                {
+                    String identifier = childNodeList[0].Token.Word;
+                    if (!functionTable.ContainsKey(identifier))
+                    {
+                        throw new ExevalatorException("Function not found: " + identifier);
+                    }
+                    IExevalatorFunction function = functionTable[identifier];
+                    Evaluator.EvaluatorUnit[] argUnits = new Evaluator.EvaluatorUnit[childCount - 1];
+                    for (int iarg = 0; iarg < childCount - 1; iarg++)
+                    {
+                        argUnits[iarg] = childNodeUnits[iarg + 1];
+                    }
+                    return new Evaluator.FunctionEvaluatorUnit(function, argUnits);
+                }
+                else
+                {
+                    throw new ExevalatorException("Unexpected operator: " + op);
+                }
+            }
+            else
+            {
+                throw new ExevalatorException("Unexpected token type: " + token.Type);
+            }
+        }
 
         /// <summary>
         /// The super class of evaluator units.

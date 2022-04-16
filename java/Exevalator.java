@@ -41,8 +41,8 @@ public final class Exevalator {
     /** Caches the content of the expression evaluated last time, to skip re-parsing. */
     private volatile String lastEvaluatedExpression;
 
-    /** The unit for evaluating an expression. */
-    private volatile Evaluator.EvaluatorUnit evaluatorUnit;
+    /** The tree of evaluator units, which evaluates an expression. */
+    private volatile Evaluator.EvaluatorUnit evaluatorUnitTree;
 
     /**
      * Creates a new interpreter of the Exevalator.
@@ -53,7 +53,7 @@ public final class Exevalator {
         this.variableTable = new ConcurrentHashMap<String, Integer>();
         this.functionTable = new ConcurrentHashMap<String, FunctionInterface>();
         this.lastEvaluatedExpression = null;
-        this.evaluatorUnit = null;
+        this.evaluatorUnitTree = null;
     }
 
     /**
@@ -79,7 +79,7 @@ public final class Exevalator {
             && !expression.equals(this.lastEvaluatedExpression);
 
             // If the expression changed from the last-evaluated expression, re-parsing is necessary.
-            if (this.evaluatorUnit == null || expressionChanged) {
+            if (this.evaluatorUnitTree == null || expressionChanged) {
 
                 // Split the expression into tokens, and analyze them.
                 Token[] tokens = LexicalAnalyzer.analyze(expression);
@@ -100,13 +100,13 @@ public final class Exevalator {
                 */
 
                 // Create the tree of evaluator units, and get the the root unit of it.
-                this.evaluatorUnit = ast.createEvaluatorUnit(this.variableTable, this.functionTable);
+                this.evaluatorUnitTree = Evaluator.createEvaluatorUnitTree(ast, this.variableTable, this.functionTable);
 
                 this.lastEvaluatedExpression = expression;
             }
 
             // Evaluate the value of the expression, and return it.
-            double evaluatedValue = this.evaluatorUnit.evaluate(this.memory);
+            double evaluatedValue = this.evaluatorUnitTree.evaluate(this.memory);
             return evaluatedValue;
 
         } catch (Exevalator.Exception ee) {
@@ -127,10 +127,10 @@ public final class Exevalator {
      * @return The evaluated value
      */
     public synchronized double reeval() {
-        if (this.evaluatorUnit == null) {
+        if (this.evaluatorUnitTree == null) {
             throw new Exevalator.Exception("\"reeval\" is not available before using \"eval\"");
         } else {
-            double evaluatedValue = this.evaluatorUnit.evaluate(this.memory);
+            double evaluatedValue = this.evaluatorUnitTree.evaluate(this.memory);
             return evaluatedValue;
         }
     }
@@ -970,67 +970,6 @@ final class AstNode {
     }
 
     /**
-     * Creates the evaluator unit for evaluating the value of this AST node.
-     *
-     * @param variableTable The Map mapping each variable name to an address of the variable.
-     * @param functionTable The Map mapping each function name to an IExevalatorFunction instance.
-     * @return The created evaluator unit.
-     */
-    public Evaluator.EvaluatorUnit createEvaluatorUnit(
-            Map<String, Integer> variableTable, Map<String, Exevalator.FunctionInterface> functionTable) {
-
-        // Initialize evaluation units of child nodes, and store then into an array.
-        int childCount = this.childNodeList.size();
-        Evaluator.EvaluatorUnit childNodeUnits[] = new Evaluator.EvaluatorUnit[childCount];
-        for (int ichild=0; ichild<childCount; ichild++) {
-            childNodeUnits[ichild] = this.childNodeList.get(ichild).createEvaluatorUnit(variableTable, functionTable);
-        }
-
-        // Initialize evaluation units of this node.
-        if (this.token.type == TokenType.NUMBER_LITERAL) {
-            return new Evaluator.NumberLiteralEvaluatorUnit(this.token.word);
-        } else if (this.token.type == TokenType.VARIABLE_IDENTIFIER) {
-            if (!variableTable.containsKey(this.token.word)) {
-                throw new Exevalator.Exception("Variable not found: " + this.token.word);
-            }
-            int address = variableTable.get(this.token.word);
-            return new Evaluator.VariableEvaluatorUnit(address);
-        } else if (this.token.type == TokenType.FUNCTION_IDENTIFIER) {
-            return null;
-        } else if (this.token.type == TokenType.OPERATOR) {
-            Operator op = this.token.operator;
-
-            if (op.type == OperatorType.UNARY_PREFIX && op.symbol == '-') {
-                return new Evaluator.MinusEvaluatorUnit(childNodeUnits[0]);
-            } else if (op.type == OperatorType.BINARY && op.symbol == '+') {
-                return new Evaluator.AdditionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
-            } else if (op.type == OperatorType.BINARY && op.symbol == '-') {
-                return new Evaluator.SubtractionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
-            } else if (op.type == OperatorType.BINARY && op.symbol == '*') {
-                return new Evaluator.MultiplicationEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
-            } else if (op.type == OperatorType.BINARY && op.symbol == '/') {
-                return new Evaluator.DivisionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
-            } else if (op.type == OperatorType.CALL && op.symbol == '(') {
-                String identifier = this.childNodeList.get(0).token.word;
-                if (!functionTable.containsKey(identifier)) {
-                    throw new Exevalator.Exception("Function not found: " + identifier);
-                }
-                Exevalator.FunctionInterface function = functionTable.get(identifier);
-                int argCount = this.childNodeList.size() - 1;
-                Evaluator.EvaluatorUnit[] argUnits = new Evaluator.EvaluatorUnit[argCount];
-                for (int iarg=0; iarg<argCount; iarg++) {
-                    argUnits[iarg] = childNodeUnits[iarg + 1];
-                }
-                return new Evaluator.FunctionEvaluatorUnit(function, identifier, argUnits);
-            } else {
-                throw new Exevalator.Exception("Unexpected operator: " + op);
-            }
-        } else {
-            throw new Exevalator.Exception("Unexpected token type: " + this.token.type);
-        }
-    }
-
-    /**
      * Checks that depths in the AST of all nodes under this node (child nodes, grandchild nodes, and so on)
      * does not exceeds the specified maximum value.
      * An ExevalatorException will be thrown when the depth exceeds the maximum value.
@@ -1115,6 +1054,74 @@ final class AstNode {
  * which evaluate values of operators, literals, etc.
  */
 final class Evaluator {
+
+    /**
+     * Creates a tree of evaluator units corresponding with the specified AST.
+     *
+     * @param ast The root node of the AST.
+     * @param variableTable The Map mapping each variable name to an address of the variable.
+     * @param functionTable The Map mapping each function name to an IExevalatorFunction instance.
+     * @return The root node of the created tree of evaluator units.
+     */
+    public static EvaluatorUnit createEvaluatorUnitTree(
+            AstNode ast, Map<String, Integer> variableTable, Map<String, Exevalator.FunctionInterface> functionTable) {
+
+        // Note: This method creates a tree of evaluator units by traversing each node in the AST recursively.
+
+        List<AstNode> childNodeList = ast.childNodeList;
+        int childCount = childNodeList.size();
+
+        // Creates evaluation units of child nodes, and store then into an array.
+        Evaluator.EvaluatorUnit childNodeUnits[] = new Evaluator.EvaluatorUnit[childCount];
+        for (int ichild=0; ichild<childCount; ichild++) {
+            AstNode childAstNode = childNodeList.get(ichild);
+            childNodeUnits[ichild] = createEvaluatorUnitTree(childAstNode, variableTable, functionTable);
+        }
+
+        // Initialize evaluation units of this node.
+        Token token = ast.token;
+        if (token.type == TokenType.NUMBER_LITERAL) {
+            return new Evaluator.NumberLiteralEvaluatorUnit(token.word);
+        } else if (token.type == TokenType.VARIABLE_IDENTIFIER) {
+            if (!variableTable.containsKey(token.word)) {
+                throw new Exevalator.Exception("Variable not found: " + token.word);
+            }
+            int address = variableTable.get(token.word);
+            return new Evaluator.VariableEvaluatorUnit(address);
+        } else if (token.type == TokenType.FUNCTION_IDENTIFIER) {
+            return null;
+        } else if (token.type == TokenType.OPERATOR) {
+            Operator op = token.operator;
+
+            if (op.type == OperatorType.UNARY_PREFIX && op.symbol == '-') {
+                return new Evaluator.MinusEvaluatorUnit(childNodeUnits[0]);
+            } else if (op.type == OperatorType.BINARY && op.symbol == '+') {
+                return new Evaluator.AdditionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+            } else if (op.type == OperatorType.BINARY && op.symbol == '-') {
+                return new Evaluator.SubtractionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+            } else if (op.type == OperatorType.BINARY && op.symbol == '*') {
+                return new Evaluator.MultiplicationEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+            } else if (op.type == OperatorType.BINARY && op.symbol == '/') {
+                return new Evaluator.DivisionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+            } else if (op.type == OperatorType.CALL && op.symbol == '(') {
+                String identifier = childNodeList.get(0).token.word;
+                if (!functionTable.containsKey(identifier)) {
+                    throw new Exevalator.Exception("Function not found: " + identifier);
+                }
+                Exevalator.FunctionInterface function = functionTable.get(identifier);
+                int argCount = childCount - 1;
+                Evaluator.EvaluatorUnit[] argUnits = new Evaluator.EvaluatorUnit[argCount];
+                for (int iarg=0; iarg<argCount; iarg++) {
+                    argUnits[iarg] = childNodeUnits[iarg + 1];
+                }
+                return new Evaluator.FunctionEvaluatorUnit(function, identifier, argUnits);
+            } else {
+                throw new Exevalator.Exception("Unexpected operator: " + op);
+            }
+        } else {
+            throw new Exevalator.Exception("Unexpected token type: " + token.type);
+        }
+    }
 
     /**
      * The super class of evaluator units.
