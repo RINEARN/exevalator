@@ -59,7 +59,7 @@ double Exevalator::eval(const std::string &expression) {
 
     try {
         // If the expression changed from the last-evaluated expression, re-parsing is necessary.
-        if (!(this->evaluator_unit) || !(this->last_evaluated_expression == expression)) {
+        if (!(this->evaluator_node_tree) || !(this->last_evaluated_expression == expression)) {
 
             // Perform lexical analysis, and get tokens from the inputted expression.
             std::vector<Token> tokens = LexicalAnalyzer::analyze(std::string(expression), settings);
@@ -79,8 +79,8 @@ double Exevalator::eval(const std::string &expression) {
             std::cout << ast->to_markupped_text(0) << std::endl;
             */
 
-            // Create the tree of evaluator units, and get the the root unit of it.
-            this->evaluator_unit = Evaluator::create_evaluator_unit_tree(
+            // Create the tree of evaluator nodes, and get the the root node of it.
+            this->evaluator_node_tree = Evaluator::create_evaluator_node_tree(
                 this->settings, ast, this->variable_table, this->function_table
             );
 
@@ -88,7 +88,7 @@ double Exevalator::eval(const std::string &expression) {
         }
 
         // Evaluate the value of the expression, and return it.
-        double evaluated_value = this->evaluator_unit->evaluate(this->memory);
+        double evaluated_value = this->evaluator_node_tree->evaluate(this->memory);
         return evaluated_value;
 
     } catch (ExevalatorException ee) {
@@ -109,8 +109,8 @@ double Exevalator::eval(const std::string &expression) {
  * @return The evaluated value
  */
 double Exevalator::reeval() {
-    if (this->evaluator_unit) {
-        double evaluated_value = this->evaluator_unit->evaluate(this->memory);
+    if (this->evaluator_node_tree) {
+        double evaluated_value = this->evaluator_node_tree->evaluate(this->memory);
         return evaluated_value;
     } else {
         throw new ExevalatorException("\"reeval\" is not available before using \"eval\"");
@@ -981,23 +981,23 @@ void AstNode::check_depth(uint64_t depth_of_this_node, uint64_t max_ast_depth) c
 
 
 /**
- * Creates a tree of evaluator units corresponding with the specified AST.
+ * Creates a tree of evaluator nodes corresponding with the specified AST.
  *
  * @param settings The Setting instance storing setting values
  * @param ast The root node of the AST
  * @param variable_table The Map mapping each variable name to an address of the variable
  * @param function_table The Map mapping each function name to an IExevalatorFunctionInterface instance
- * @return The root node of the created tree of evaluator units.
+ * @return The root node of the created tree of evaluator nodes.
  */
-std::unique_ptr<Evaluator::EvaluatorUnit> Evaluator::create_evaluator_unit_tree(
+std::unique_ptr<Evaluator::EvaluatorNode> Evaluator::create_evaluator_node_tree(
             const Settings &settings,
             const std::unique_ptr<AstNode> &ast,
             const std::map<std::string, size_t> &variable_table,
             const std::map<std::string, std::shared_ptr<ExevalatorFunctionInterface>> &function_table) {
 
-    // Note: This method creates a tree of evaluator units by traversing each node in the AST recursively.
+    // Note: This method creates a tree of evaluator nodes by traversing each node in the AST recursively.
 
-    // Create an unit for evaluating number literal.
+    // Create an node for evaluating number literal.
     if (ast->token.type == TokenType::NUMBER_LITERAL) {
         double literal_value;
         try {
@@ -1006,43 +1006,43 @@ std::unique_ptr<Evaluator::EvaluatorUnit> Evaluator::create_evaluator_unit_tree(
             std::string error_message = std::string { "Invalid number literal: " } + ast->token.word;
             throw ExevalatorException { error_message.c_str() };
         }
-        return std::make_unique<Evaluator::NumberLiteralEvaluatorUnit>(literal_value);
+        return std::make_unique<Evaluator::NumberLiteralEvaluatorNode>(literal_value);
 
-    // Create units for evaluating operators.
+    // Create nodes for evaluating operators.
     } else if (ast->token.type == TokenType::OPERATOR) {
 
         // Unary operator "-"
         if (ast->token.opinfo.type == OperatorType::UNARY_PREFIX && ast->token.word == "-") {
-            return std::make_unique<Evaluator::MinusEvaluatorUnit>(
-                create_evaluator_unit_tree(settings, ast->child_nodes[0], variable_table, function_table)
+            return std::make_unique<Evaluator::MinusEvaluatorNode>(
+                create_evaluator_node_tree(settings, ast->child_nodes[0], variable_table, function_table)
             );
 
         // Binary operator "+"
         } else if (ast->token.opinfo.type == OperatorType::BINARY && ast->token.word == "+") {
-            return std::make_unique<Evaluator::AdditionEvaluatorUnit>(
-                create_evaluator_unit_tree(settings, ast->child_nodes[0], variable_table, function_table),
-                create_evaluator_unit_tree(settings, ast->child_nodes[1], variable_table, function_table)
+            return std::make_unique<Evaluator::AdditionEvaluatorNode>(
+                create_evaluator_node_tree(settings, ast->child_nodes[0], variable_table, function_table),
+                create_evaluator_node_tree(settings, ast->child_nodes[1], variable_table, function_table)
             );
 
         // Binary operator "-"
         } else if (ast->token.opinfo.type == OperatorType::BINARY && ast->token.word == "-") {
-            return std::make_unique<Evaluator::SubtractionEvaluatorUnit>(
-                create_evaluator_unit_tree(settings, ast->child_nodes[0], variable_table, function_table),
-                create_evaluator_unit_tree(settings, ast->child_nodes[1], variable_table, function_table)
+            return std::make_unique<Evaluator::SubtractionEvaluatorNode>(
+                create_evaluator_node_tree(settings, ast->child_nodes[0], variable_table, function_table),
+                create_evaluator_node_tree(settings, ast->child_nodes[1], variable_table, function_table)
             );
 
         // Binary operator "*"
         } else if (ast->token.opinfo.type == OperatorType::BINARY && ast->token.word == "*") {
-            return std::make_unique<Evaluator::MultiplicationEvaluatorUnit>(
-                create_evaluator_unit_tree(settings, ast->child_nodes[0], variable_table, function_table),
-                create_evaluator_unit_tree(settings, ast->child_nodes[1], variable_table, function_table)
+            return std::make_unique<Evaluator::MultiplicationEvaluatorNode>(
+                create_evaluator_node_tree(settings, ast->child_nodes[0], variable_table, function_table),
+                create_evaluator_node_tree(settings, ast->child_nodes[1], variable_table, function_table)
             );
 
         // Binary operator "/"
         } else if (ast->token.opinfo.type == OperatorType::BINARY && ast->token.word == "/") {
-            return std::make_unique<Evaluator::DivisionEvaluatorUnit>(
-                create_evaluator_unit_tree(settings, ast->child_nodes[0], variable_table, function_table),
-                create_evaluator_unit_tree(settings, ast->child_nodes[1], variable_table, function_table)
+            return std::make_unique<Evaluator::DivisionEvaluatorNode>(
+                create_evaluator_node_tree(settings, ast->child_nodes[0], variable_table, function_table),
+                create_evaluator_node_tree(settings, ast->child_nodes[1], variable_table, function_table)
             );
 
         // Function call operator "("
@@ -1053,13 +1053,13 @@ std::unique_ptr<Evaluator::EvaluatorUnit> Evaluator::create_evaluator_unit_tree(
                 throw ExevalatorException(("Function not found: " + identifier).c_str());
             }
             std::shared_ptr<ExevalatorFunctionInterface> function_ptr = function_table.at(identifier);
-            std::vector<std::unique_ptr<Evaluator::EvaluatorUnit>> arguments;
+            std::vector<std::unique_ptr<Evaluator::EvaluatorNode>> arguments;
             for (size_t ichild=1; ichild<child_count; ++ichild) {
                 arguments.push_back(
-                    create_evaluator_unit_tree(settings, ast->child_nodes[ichild], variable_table, function_table)
+                    create_evaluator_node_tree(settings, ast->child_nodes[ichild], variable_table, function_table)
                 );
             }
-            return std::make_unique<Evaluator::FunctionEvaluatorUnit>(
+            return std::make_unique<Evaluator::FunctionEvaluatorNode>(
                 function_ptr, identifier, arguments
             );
         } else {
@@ -1067,14 +1067,14 @@ std::unique_ptr<Evaluator::EvaluatorUnit> Evaluator::create_evaluator_unit_tree(
             throw ExevalatorException { error_message.c_str() };
         }
 
-    // Create an unit for evaluating the value of a variable.
+    // Create an node for evaluating the value of a variable.
     } else if (ast->token.type == TokenType::VARIABLE_IDENTIFIER) {
         std::string identifier = ast->token.word;
         if (variable_table.find(identifier) == variable_table.end()) {
             throw ExevalatorException(("Variable not found: " + identifier).c_str());
         }
         size_t address = variable_table.at(identifier);
-        return std::make_unique<Evaluator::VariableEvaluatorUnit>(address);
+        return std::make_unique<Evaluator::VariableEvaluatorNode>(address);
 
     } else {
         throw ExevalatorException(std::string("Unexpected token type: ").append(token_type_name(ast->token.type)).c_str());
@@ -1082,15 +1082,15 @@ std::unique_ptr<Evaluator::EvaluatorUnit> Evaluator::create_evaluator_unit_tree(
 }
 
 /**
- * The implementation of the virtual destructor of the super class of evaluator units.
+ * The implementation of the virtual destructor of the super class of evaluator nodes.
  */
-Evaluator::EvaluatorUnit::~EvaluatorUnit() {
+Evaluator::EvaluatorNode::~EvaluatorNode() {
 }
 
 /**
- * Creates the evaluator unit for evaluating the value of a number literal.
+ * Creates the evaluator node for evaluating the value of a number literal.
  */
-Evaluator::NumberLiteralEvaluatorUnit::NumberLiteralEvaluatorUnit(double literal_value) {
+Evaluator::NumberLiteralEvaluatorNode::NumberLiteralEvaluatorNode(double literal_value) {
     this->literal_value = literal_value;
 }
 
@@ -1099,16 +1099,16 @@ Evaluator::NumberLiteralEvaluatorUnit::NumberLiteralEvaluatorUnit(double literal
  *
  * @param literal The number literal
  */
-double Evaluator::NumberLiteralEvaluatorUnit::evaluate(const std::vector<double> &memory) {
+double Evaluator::NumberLiteralEvaluatorNode::evaluate(const std::vector<double> &memory) {
     return this->literal_value;
 }
 
 /**
- * Creates the evaluator unit for evaluating the value of a unary-minus operator.
+ * Creates the evaluator node for evaluating the value of a unary-minus operator.
  *
- * @param operand The unit for evaluating the operand
+ * @param operand The node for evaluating the operand
  */
-Evaluator::MinusEvaluatorUnit::MinusEvaluatorUnit(std::unique_ptr<EvaluatorUnit> operand) {
+Evaluator::MinusEvaluatorNode::MinusEvaluatorNode(std::unique_ptr<EvaluatorNode> operand) {
     this->operand = std::move(operand);
 }
 
@@ -1118,17 +1118,17 @@ Evaluator::MinusEvaluatorUnit::MinusEvaluatorUnit(std::unique_ptr<EvaluatorUnit>
  * @param memory The array storing values of variables
  * @return The result value of the unary-minus operation
  */
-double Evaluator::MinusEvaluatorUnit::evaluate(const std::vector<double> &memory) {
+double Evaluator::MinusEvaluatorNode::evaluate(const std::vector<double> &memory) {
     return -this->operand->evaluate(memory);
 }
 
 /**
- * Creates the evaluator unit for evaluating the value of a addition operator.
+ * Creates the evaluator node for evaluating the value of a addition operator.
  *
- * @param left_operand The unit for evaluating the left-side operand
- * @param right_operand The unit for evaluating the right-side operand
+ * @param left_operand The node for evaluating the left-side operand
+ * @param right_operand The node for evaluating the right-side operand
  */
-Evaluator::AdditionEvaluatorUnit::AdditionEvaluatorUnit(std::unique_ptr<EvaluatorUnit> left_operand, std::unique_ptr<EvaluatorUnit> right_operand) {
+Evaluator::AdditionEvaluatorNode::AdditionEvaluatorNode(std::unique_ptr<EvaluatorNode> left_operand, std::unique_ptr<EvaluatorNode> right_operand) {
     this->left_operand = std::move(left_operand);
     this->right_operand = std::move(right_operand);
 }
@@ -1139,17 +1139,17 @@ Evaluator::AdditionEvaluatorUnit::AdditionEvaluatorUnit(std::unique_ptr<Evaluato
  * @param memory The array storing values of variables
  * @return The result value of the addition
  */
-double Evaluator::AdditionEvaluatorUnit::evaluate(const std::vector<double> &memory) {
+double Evaluator::AdditionEvaluatorNode::evaluate(const std::vector<double> &memory) {
     return this->left_operand->evaluate(memory) + this->right_operand->evaluate(memory);
 }
 
 /**
- * Creates the evaluator unit for evaluating the value of a subtraction operator.
+ * Creates the evaluator node for evaluating the value of a subtraction operator.
  *
- * @param left_operand The unit for evaluating the left-side operand
- * @param right_operand The unit for evaluating the right-side operand
+ * @param left_operand The node for evaluating the left-side operand
+ * @param right_operand The node for evaluating the right-side operand
  */
-Evaluator::SubtractionEvaluatorUnit::SubtractionEvaluatorUnit(std::unique_ptr<EvaluatorUnit> left_operand, std::unique_ptr<EvaluatorUnit> right_operand) {
+Evaluator::SubtractionEvaluatorNode::SubtractionEvaluatorNode(std::unique_ptr<EvaluatorNode> left_operand, std::unique_ptr<EvaluatorNode> right_operand) {
     this->left_operand = std::move(left_operand);
     this->right_operand = std::move(right_operand);
 }
@@ -1160,17 +1160,17 @@ Evaluator::SubtractionEvaluatorUnit::SubtractionEvaluatorUnit(std::unique_ptr<Ev
  * @param memory The array storing values of variables
  * @return The result value of the subtraction
  */
-double Evaluator::SubtractionEvaluatorUnit::evaluate(const std::vector<double> &memory) {
+double Evaluator::SubtractionEvaluatorNode::evaluate(const std::vector<double> &memory) {
     return this->left_operand->evaluate(memory) - this->right_operand->evaluate(memory);
 }
 
 /**
- * Creates the evaluator unit for evaluating the value of a multiplication operator.
+ * Creates the evaluator node for evaluating the value of a multiplication operator.
  *
- * @param left_operand The unit for evaluating the left-side operand
- * @param right_operand The unit for evaluating the right-side operand
+ * @param left_operand The node for evaluating the left-side operand
+ * @param right_operand The node for evaluating the right-side operand
  */
-Evaluator::MultiplicationEvaluatorUnit::MultiplicationEvaluatorUnit(std::unique_ptr<EvaluatorUnit> left_operand, std::unique_ptr<EvaluatorUnit> right_operand) {
+Evaluator::MultiplicationEvaluatorNode::MultiplicationEvaluatorNode(std::unique_ptr<EvaluatorNode> left_operand, std::unique_ptr<EvaluatorNode> right_operand) {
     this->left_operand = std::move(left_operand);
     this->right_operand = std::move(right_operand);
 }
@@ -1181,17 +1181,17 @@ Evaluator::MultiplicationEvaluatorUnit::MultiplicationEvaluatorUnit(std::unique_
  * @param memory The array storing values of variables
  * @return The result value of the multiplication
  */
-double Evaluator::MultiplicationEvaluatorUnit::evaluate(const std::vector<double> &memory) {
+double Evaluator::MultiplicationEvaluatorNode::evaluate(const std::vector<double> &memory) {
     return this->left_operand->evaluate(memory) * this->right_operand->evaluate(memory);
 }
 
 /**
- * Creates the evaluator unit for evaluating the value of a division operator.
+ * Creates the evaluator node for evaluating the value of a division operator.
  *
- * @param left_operand The unit for evaluating the left-side operand
- * @param right_operand The unit for evaluating the right-side operand
+ * @param left_operand The node for evaluating the left-side operand
+ * @param right_operand The node for evaluating the right-side operand
  */
-Evaluator::DivisionEvaluatorUnit::DivisionEvaluatorUnit(std::unique_ptr<EvaluatorUnit> left_operand, std::unique_ptr<EvaluatorUnit> right_operand) {
+Evaluator::DivisionEvaluatorNode::DivisionEvaluatorNode(std::unique_ptr<EvaluatorNode> left_operand, std::unique_ptr<EvaluatorNode> right_operand) {
     this->left_operand = std::move(left_operand);
     this->right_operand = std::move(right_operand);
 }
@@ -1202,16 +1202,16 @@ Evaluator::DivisionEvaluatorUnit::DivisionEvaluatorUnit(std::unique_ptr<Evaluato
  * @param memory The array storing values of variables
  * @return The result value of the division
  */
-double Evaluator::DivisionEvaluatorUnit::evaluate(const std::vector<double> &memory) {
+double Evaluator::DivisionEvaluatorNode::evaluate(const std::vector<double> &memory) {
     return this->left_operand->evaluate(memory) / this->right_operand->evaluate(memory);
 }
 
 /**
- * Creates the evaluator unit for evaluating the value of a variable.
+ * Creates the evaluator node for evaluating the value of a variable.
  * 
  * @param address The virtual address of the variable
  */
-Evaluator::VariableEvaluatorUnit::VariableEvaluatorUnit(size_t address) {
+Evaluator::VariableEvaluatorNode::VariableEvaluatorNode(size_t address) {
     this->address = address;
 }
 
@@ -1221,33 +1221,33 @@ Evaluator::VariableEvaluatorUnit::VariableEvaluatorUnit(size_t address) {
  * @param memory The array storing values of variables
  * @return The value of the variable
  */
-double Evaluator::VariableEvaluatorUnit::evaluate(const std::vector<double> &memory) {
+double Evaluator::VariableEvaluatorNode::evaluate(const std::vector<double> &memory) {
     return memory[this->address];
 }
 
 /**
- * Creates the evaluator unit for evaluating a function-call operator.
+ * Creates the evaluator node for evaluating a function-call operator.
  *
  * @param function_ptr The function to be called
  * @param identifier The name of the function
- * @param arguments Evaluator units for evaluating values of arguments
+ * @param arguments Evaluator nodes for evaluating values of arguments
  */
-Evaluator::FunctionEvaluatorUnit::FunctionEvaluatorUnit(
+Evaluator::FunctionEvaluatorNode::FunctionEvaluatorNode(
         std::shared_ptr<ExevalatorFunctionInterface> &function_ptr,
         std::string identifier,
-        std::vector<std::unique_ptr<EvaluatorUnit>> &arguments) {
+        std::vector<std::unique_ptr<EvaluatorNode>> &arguments) {
 
     this->function_ptr = function_ptr;
     this->identifier = identifier;
-    for (std::unique_ptr<EvaluatorUnit> &argument: arguments) {
+    for (std::unique_ptr<EvaluatorNode> &argument: arguments) {
         this->arguments.push_back(std::move(argument));
     }
 }
 
 /**
- * Releases resources of the evaluator unit for evaluating a function-call operator.
+ * Releases resources of the evaluator node for evaluating a function-call operator.
  */
-Evaluator::FunctionEvaluatorUnit::~FunctionEvaluatorUnit() {
+Evaluator::FunctionEvaluatorNode::~FunctionEvaluatorNode() {
     this->identifier.clear();
     this->identifier.shrink_to_fit();
     this->arguments.clear();
@@ -1260,7 +1260,7 @@ Evaluator::FunctionEvaluatorUnit::~FunctionEvaluatorUnit() {
  * @param memory The array storing values of variables
  * @return The returned value of the function
  */
-double Evaluator::FunctionEvaluatorUnit::evaluate(const std::vector<double> &memory) {
+double Evaluator::FunctionEvaluatorNode::evaluate(const std::vector<double> &memory) {
     size_t arg_count = this->arguments.size();
     std::vector<double> arg_evaluated_values;
     arg_evaluated_values.resize(this->arguments.size());

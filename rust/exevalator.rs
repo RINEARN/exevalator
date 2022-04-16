@@ -24,8 +24,8 @@ pub struct Exevalator<'exvlife> {
     /// The HashMap mapping each name of a function to a function pointer.
     function_table: HashMap<String, fn(Vec<f64>)->Result<f64,ExevalatorError> >,
 
-    /// The tree of evaluator units, which evaluates an expression.
-    evaluator_unit_tree: Option<Box<dyn EvaluatorUnit>>,
+    /// The tree of evaluator nodes, which evaluates an expression.
+    evaluator_node_tree: Option<Box<dyn EvaluatorNode>>,
 
     /// Caches the content of the expression evaluated last time, to skip re-parsing.
     last_evaluated_expression: &'exvlife str,
@@ -44,7 +44,7 @@ impl<'exvlife> Exevalator<'exvlife> {
             memory: Vec::new(),
             variable_table: HashMap::new(),
             function_table: HashMap::new(),
-            evaluator_unit_tree: None,
+            evaluator_node_tree: None,
             last_evaluated_expression: "",
         }
     }
@@ -64,7 +64,7 @@ impl<'exvlife> Exevalator<'exvlife> {
         }
 
         // If the expression changed from the last-evaluated expression, re-parsing is necessary.
-        if self.evaluator_unit_tree.is_none() || !expression.eq(self.last_evaluated_expression) {
+        if self.evaluator_node_tree.is_none() || !expression.eq(self.last_evaluated_expression) {
 
             // Perform lexical analysis, and get tokens from the inputted expression.
             let tokens: Vec<Token> = match LexicalAnalyzer::analyze( &(expression.to_string()), &self.settings) {
@@ -78,25 +78,25 @@ impl<'exvlife> Exevalator<'exvlife> {
                 Err(parser_error) => return Err(parser_error),
             };
 
-            // Create the tree of evaluator units, and get the the root unit of it.
-            self.evaluator_unit_tree = 
-            match Evaluator::create_evaluator_unit_tree(&ast, &self.variable_table, &self.function_table, &self.settings) {
-                Ok(created_unit) => Some(created_unit),
-                Err(unit_creation_error) => return Err(unit_creation_error),
+            // Create the tree of evaluator nodes, and get the the root node of it.
+            self.evaluator_node_tree = 
+            match Evaluator::create_evaluator_node_tree(&ast, &self.variable_table, &self.function_table, &self.settings) {
+                Ok(created_node) => Some(created_node),
+                Err(node_creation_error) => return Err(node_creation_error),
             };
 
             self.last_evaluated_expression = expression;
         }
 
         // Evaluate the value of the expression, and return it.
-        if self.evaluator_unit_tree.is_some() {
-            let unit: &Box<dyn EvaluatorUnit> = &(*self.evaluator_unit_tree.as_ref().unwrap());
-            match unit.evaluate(&self.memory) {
+        if self.evaluator_node_tree.is_some() {
+            let node: &Box<dyn EvaluatorNode> = &(*self.evaluator_node_tree.as_ref().unwrap());
+            match node.evaluate(&self.memory) {
                 Ok(evaluated_value) => return Ok(evaluated_value),
                 Err(evaluation_error) => return Err(evaluation_error),
             };
         } else {
-            panic!("Evaluator unit is uninitialized.");
+            panic!("Evaluator node is uninitialized.");
         }
     }
 
@@ -109,11 +109,11 @@ impl<'exvlife> Exevalator<'exvlife> {
     ///
     #[allow(dead_code)]
     pub fn reeval(&mut self) -> Result<f64,ExevalatorError> {
-        if self.evaluator_unit_tree.is_none() {
+        if self.evaluator_node_tree.is_none() {
             return Err(ExevalatorError::new("\"reeval\" is not available before using \"eval\""));
         } else {
-            let unit: &Box<dyn EvaluatorUnit> = &(*self.evaluator_unit_tree.as_ref().unwrap());
-            match unit.evaluate(&self.memory) {
+            let node: &Box<dyn EvaluatorNode> = &(*self.evaluator_node_tree.as_ref().unwrap());
+            match node.evaluate(&self.memory) {
                 Ok(evaluated_value) => return Ok(evaluated_value),
                 Err(evaluation_error) => return Err(evaluation_error),
             };
@@ -1139,26 +1139,26 @@ struct Evaluator {
 
 impl Evaluator {
 
-    /// Creates a tree of evaluator units corresponding with the specified AST.
+    /// Creates a tree of evaluator nodes corresponding with the specified AST.
     ///
     /// * `ast` - The root node of the AST.
     /// * `variable_table` - The HashMap mapping variable names to virtual addresses.
     /// * `function_table` - The HashMap mapping function names to function pointers.
     /// * `settings` - The struct storing values of setting items.
-    /// * Return value - The Box pointing the created unit, or ExevalatorError if any error detected.
+    /// * Return value - The Box pointing the created node, or ExevalatorError if any error detected.
     ///
-    fn create_evaluator_unit_tree(
+    fn create_evaluator_node_tree(
         ast: &AstNode,
         variable_table: &HashMap<String, usize>,
         function_table: &HashMap<String, fn(Vec<f64>)->Result<f64,ExevalatorError> >,
         settings: &Settings)
-        -> Result<Box<dyn EvaluatorUnit>, ExevalatorError> {
+        -> Result<Box<dyn EvaluatorNode>, ExevalatorError> {
 
-        // Note: This method creates a tree of evaluator units by traversing each node in the AST recursively.
+        // Note: This method creates a tree of evaluator nodes by traversing each node in the AST recursively.
 
        let token_type: &TokenType = &ast.token.token_type;
 
-       // Create an unit for evaluating number literal.
+       // Create an node for evaluating number literal.
         if *token_type == TokenType::NumberLiteral {
             let literal_value: f64 = match ast.token.word.parse() {
                 Ok(parse_result) => parse_result,
@@ -1166,11 +1166,11 @@ impl Evaluator {
                     &format!("Invalid number literal: {}", ast.token.word)
                 )),
             };
-            return Ok(Box::new(NumberLiteralEvaluatorUnit {
+            return Ok(Box::new(NumberLiteralEvaluatorNode {
                 literal_value: literal_value,
             }));
 
-        // Create units for evaluating operators.
+        // Create nodes for evaluating operators.
         } else if *token_type == TokenType::Operator {
             let operator: &Operator = &ast.token.operator.as_ref().unwrap();
             let optype: OperatorType = operator.operator_type;
@@ -1178,53 +1178,53 @@ impl Evaluator {
 
             // Unary operator "-"
             if optype == OperatorType::UnaryPrefix && opsymbol == '-' {
-                return Ok(Box::new(MinusEvaluatorUnit {
-                    operand: match Evaluator::create_evaluator_unit_tree(&ast.child_nodes[0], variable_table, function_table, settings) {
-                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
+                return Ok(Box::new(MinusEvaluatorNode {
+                    operand: match Evaluator::create_evaluator_node_tree(&ast.child_nodes[0], variable_table, function_table, settings) {
+                        Ok(created_node) => created_node, Err(creation_error) => return Err(creation_error),
                     },
                 }));
 
             // Binary operator "+"
             } else if optype == OperatorType::Binary && opsymbol == '+' {
-                return Ok(Box::new(AdditionEvaluatorUnit {
-                    left_operand:  match Evaluator::create_evaluator_unit_tree(&ast.child_nodes[0], variable_table, function_table, settings) {
-                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
+                return Ok(Box::new(AdditionEvaluatorNode {
+                    left_operand:  match Evaluator::create_evaluator_node_tree(&ast.child_nodes[0], variable_table, function_table, settings) {
+                        Ok(created_node) => created_node, Err(creation_error) => return Err(creation_error),
                     },
-                    right_operand: match Evaluator::create_evaluator_unit_tree(&ast.child_nodes[1], variable_table, function_table, settings) {
-                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
+                    right_operand: match Evaluator::create_evaluator_node_tree(&ast.child_nodes[1], variable_table, function_table, settings) {
+                        Ok(created_node) => created_node, Err(creation_error) => return Err(creation_error),
                     },
                 }));
 
             // Binary operator "-"
             } else if optype == OperatorType::Binary && opsymbol == '-' {
-                return Ok(Box::new(SubtractionEvaluatorUnit {
-                    left_operand:  match Evaluator::create_evaluator_unit_tree(&ast.child_nodes[0], variable_table, function_table, settings) {
-                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
+                return Ok(Box::new(SubtractionEvaluatorNode {
+                    left_operand:  match Evaluator::create_evaluator_node_tree(&ast.child_nodes[0], variable_table, function_table, settings) {
+                        Ok(created_node) => created_node, Err(creation_error) => return Err(creation_error),
                     },
-                    right_operand: match Evaluator::create_evaluator_unit_tree(&ast.child_nodes[1], variable_table, function_table, settings) {
-                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
+                    right_operand: match Evaluator::create_evaluator_node_tree(&ast.child_nodes[1], variable_table, function_table, settings) {
+                        Ok(created_node) => created_node, Err(creation_error) => return Err(creation_error),
                     },
                 }));
 
             // Binary operator "*"
             } else if optype == OperatorType::Binary && opsymbol == '*' {
-                return Ok(Box::new(MultiplicationEvaluatorUnit {
-                    left_operand:  match Evaluator::create_evaluator_unit_tree(&ast.child_nodes[0], variable_table, function_table, settings) {
-                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
+                return Ok(Box::new(MultiplicationEvaluatorNode {
+                    left_operand:  match Evaluator::create_evaluator_node_tree(&ast.child_nodes[0], variable_table, function_table, settings) {
+                        Ok(created_node) => created_node, Err(creation_error) => return Err(creation_error),
                     },
-                    right_operand: match Evaluator::create_evaluator_unit_tree(&ast.child_nodes[1], variable_table, function_table, settings) {
-                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
+                    right_operand: match Evaluator::create_evaluator_node_tree(&ast.child_nodes[1], variable_table, function_table, settings) {
+                        Ok(created_node) => created_node, Err(creation_error) => return Err(creation_error),
                     },
                 }));
 
             // Binary operator "/"
             } else if optype == OperatorType::Binary && opsymbol == '/' {
-                return Ok(Box::new(DivisionEvaluatorUnit {
-                    left_operand:  match Evaluator::create_evaluator_unit_tree(&ast.child_nodes[0], variable_table, function_table, settings) {
-                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
+                return Ok(Box::new(DivisionEvaluatorNode {
+                    left_operand:  match Evaluator::create_evaluator_node_tree(&ast.child_nodes[0], variable_table, function_table, settings) {
+                        Ok(created_node) => created_node, Err(creation_error) => return Err(creation_error),
                     },
-                    right_operand: match Evaluator::create_evaluator_unit_tree(&ast.child_nodes[1], variable_table, function_table, settings) {
-                        Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
+                    right_operand: match Evaluator::create_evaluator_node_tree(&ast.child_nodes[1], variable_table, function_table, settings) {
+                        Ok(created_node) => created_node, Err(creation_error) => return Err(creation_error),
                     },
                 }));
 
@@ -1238,15 +1238,15 @@ impl Evaluator {
                     ));
                 }
                 let function_pointer: fn(Vec<f64>) -> Result<f64,ExevalatorError> = *function_table.get(&identifier).unwrap();
-                let mut arguments: Vec<Box<dyn EvaluatorUnit>> = Vec::new();
+                let mut arguments: Vec<Box<dyn EvaluatorNode>> = Vec::new();
                 for ichild in 1..child_count {
                     arguments.push(
-                        match Evaluator::create_evaluator_unit_tree(&ast.child_nodes[ichild], variable_table, function_table, settings) {
-                            Ok(created_unit) => created_unit, Err(creation_error) => return Err(creation_error),
+                        match Evaluator::create_evaluator_node_tree(&ast.child_nodes[ichild], variable_table, function_table, settings) {
+                            Ok(created_node) => created_node, Err(creation_error) => return Err(creation_error),
                         }
                     );
                 }
-                return Ok(Box::new(FunctionEvaluatorUnit {
+                return Ok(Box::new(FunctionEvaluatorNode {
                     function_pointer: function_pointer,
                     identifier: identifier,
                     arguments: arguments,
@@ -1256,7 +1256,7 @@ impl Evaluator {
                 panic!("Unexpected operator: {:?}", operator);
             }
 
-        // Create an unit for evaluating the value of a variable.
+        // Create an node for evaluating the value of a variable.
         } else if *token_type == TokenType::VariableIdentifier {
             if !variable_table.contains_key(&ast.token.word) {
                 return Err(ExevalatorError::new(
@@ -1264,7 +1264,7 @@ impl Evaluator {
                 ));
             }
             let address: usize = *variable_table.get(&ast.token.word).unwrap();
-            return Ok(Box::new(VariableEvaluatorUnit {
+            return Ok(Box::new(VariableEvaluatorNode {
                 address: address,
             }));
 
@@ -1274,8 +1274,8 @@ impl Evaluator {
     }
 }
 
-/// The trait defining the function which is implemented by all kinds of evaluation units. 
-trait EvaluatorUnit {
+/// The trait defining the function which is implemented by all kinds of evaluation nodes. 
+trait EvaluatorNode {
 
     /// Evaluates the value.
     ///
@@ -1285,25 +1285,25 @@ trait EvaluatorUnit {
     fn evaluate(&self, memory: &Vec<f64>) -> Result<f64,ExevalatorError>;
 }
 
-/// The evaluator unit evaluating the value of a number literal.
-struct NumberLiteralEvaluatorUnit {
+/// The evaluator node evaluating the value of a number literal.
+struct NumberLiteralEvaluatorNode {
     /// The value of the number literal.
     literal_value: f64,
 }
-impl EvaluatorUnit for NumberLiteralEvaluatorUnit {
-    /// Defined in `EvaluatorUnit` trait.
+impl EvaluatorNode for NumberLiteralEvaluatorNode {
+    /// Defined in `EvaluatorNode` trait.
     fn evaluate(&self, _memory: &Vec<f64>) -> Result<f64,ExevalatorError> {
         return Ok(self.literal_value);
     }
 }
 
-/// The evaluator unit evaluating the value of an unary-minus operator.
-struct MinusEvaluatorUnit {
-    /// The evaluator unit for evaluating the value of the operand.
-    operand: Box<dyn EvaluatorUnit>,
+/// The evaluator node evaluating the value of an unary-minus operator.
+struct MinusEvaluatorNode {
+    /// The evaluator node for evaluating the value of the operand.
+    operand: Box<dyn EvaluatorNode>,
 }
-impl EvaluatorUnit for MinusEvaluatorUnit {
-    /// Defined in `EvaluatorUnit` trait.
+impl EvaluatorNode for MinusEvaluatorNode {
+    /// Defined in `EvaluatorNode` trait.
     fn evaluate(&self, memory: &Vec<f64>) -> Result<f64,ExevalatorError> {
         let operand_value: f64 = match (*self.operand).evaluate(memory) {
             Ok(evaluate_value) => evaluate_value, Err(evaluation_error) => return Err(evaluation_error),
@@ -1312,15 +1312,15 @@ impl EvaluatorUnit for MinusEvaluatorUnit {
     }
 }
 
-/// The evaluator unit evaluating the value of an addition operator.
-struct AdditionEvaluatorUnit {
-    /// The evaluator unit for evaluating the value of the left-operand.
-    left_operand: Box<dyn EvaluatorUnit>,
-    /// The evaluator unit for evaluating the value of the right-operand.
-    right_operand: Box<dyn EvaluatorUnit>,
+/// The evaluator node evaluating the value of an addition operator.
+struct AdditionEvaluatorNode {
+    /// The evaluator node for evaluating the value of the left-operand.
+    left_operand: Box<dyn EvaluatorNode>,
+    /// The evaluator node for evaluating the value of the right-operand.
+    right_operand: Box<dyn EvaluatorNode>,
 }
-impl EvaluatorUnit for AdditionEvaluatorUnit {
-    /// Defined in `EvaluatorUnit` trait.
+impl EvaluatorNode for AdditionEvaluatorNode {
+    /// Defined in `EvaluatorNode` trait.
     fn evaluate(&self, memory: &Vec<f64>) -> Result<f64,ExevalatorError> {
         let left_operand_value: f64 = match (*self.left_operand).evaluate(memory) {
             Ok(evaluate_value) => evaluate_value, Err(evaluation_error) => return Err(evaluation_error),
@@ -1332,15 +1332,15 @@ impl EvaluatorUnit for AdditionEvaluatorUnit {
     }
 }
 
-/// The evaluator unit evaluating the value of a subtraction operator.
-struct SubtractionEvaluatorUnit {
-    /// The evaluator unit for evaluating the value of the left-operand.
-    left_operand: Box<dyn EvaluatorUnit>,
-    /// The evaluator unit for evaluating the value of the right-operand.
-    right_operand: Box<dyn EvaluatorUnit>,
+/// The evaluator node evaluating the value of a subtraction operator.
+struct SubtractionEvaluatorNode {
+    /// The evaluator node for evaluating the value of the left-operand.
+    left_operand: Box<dyn EvaluatorNode>,
+    /// The evaluator node for evaluating the value of the right-operand.
+    right_operand: Box<dyn EvaluatorNode>,
 }
-impl EvaluatorUnit for SubtractionEvaluatorUnit {
-    /// Defined in `EvaluatorUnit` trait.
+impl EvaluatorNode for SubtractionEvaluatorNode {
+    /// Defined in `EvaluatorNode` trait.
     fn evaluate(&self, memory: &Vec<f64>) -> Result<f64,ExevalatorError> {
         let left_operand_value: f64 = match (*self.left_operand).evaluate(memory) {
             Ok(evaluate_value) => evaluate_value, Err(evaluation_error) => return Err(evaluation_error),
@@ -1352,15 +1352,15 @@ impl EvaluatorUnit for SubtractionEvaluatorUnit {
     }
 }
 
-/// The evaluator unit evaluating the value of a multiplication operator.
-struct MultiplicationEvaluatorUnit {
-    /// The evaluator unit for evaluating the value of the left-operand.
-    left_operand: Box<dyn EvaluatorUnit>,
-    /// The evaluator unit for evaluating the value of the right-operand.
-    right_operand: Box<dyn EvaluatorUnit>,
+/// The evaluator node evaluating the value of a multiplication operator.
+struct MultiplicationEvaluatorNode {
+    /// The evaluator node for evaluating the value of the left-operand.
+    left_operand: Box<dyn EvaluatorNode>,
+    /// The evaluator node for evaluating the value of the right-operand.
+    right_operand: Box<dyn EvaluatorNode>,
 }
-impl EvaluatorUnit for MultiplicationEvaluatorUnit {
-    /// Defined in `EvaluatorUnit` trait.
+impl EvaluatorNode for MultiplicationEvaluatorNode {
+    /// Defined in `EvaluatorNode` trait.
     fn evaluate(&self, memory: &Vec<f64>) -> Result<f64,ExevalatorError> {
         let left_operand_value: f64 = match (*self.left_operand).evaluate(memory) {
             Ok(evaluate_value) => evaluate_value, Err(evaluation_error) => return Err(evaluation_error),
@@ -1372,15 +1372,15 @@ impl EvaluatorUnit for MultiplicationEvaluatorUnit {
     }
 }
 
-/// The evaluator unit evaluating the value of a division operator.
-struct DivisionEvaluatorUnit {
-    /// The unit for evaluating the value of the left-operand.
-    left_operand: Box<dyn EvaluatorUnit>,
-    /// The evaluator unit for evaluating the value of the right-operand.
-    right_operand: Box<dyn EvaluatorUnit>,
+/// The evaluator node evaluating the value of a division operator.
+struct DivisionEvaluatorNode {
+    /// The node for evaluating the value of the left-operand.
+    left_operand: Box<dyn EvaluatorNode>,
+    /// The evaluator node for evaluating the value of the right-operand.
+    right_operand: Box<dyn EvaluatorNode>,
 }
-impl EvaluatorUnit for DivisionEvaluatorUnit {
-    /// Defined in `EvaluatorUnit` trait.
+impl EvaluatorNode for DivisionEvaluatorNode {
+    /// Defined in `EvaluatorNode` trait.
     fn evaluate(&self, memory: &Vec<f64>) -> Result<f64,ExevalatorError> {
         let left_operand_value: f64 = match (*self.left_operand).evaluate(memory) {
             Ok(evaluate_value) => evaluate_value, Err(evaluation_error) => return Err(evaluation_error),
@@ -1392,29 +1392,29 @@ impl EvaluatorUnit for DivisionEvaluatorUnit {
     }
 }
 
-/// The evaluator unit evaluating (reading) the value of a variable.
-struct VariableEvaluatorUnit {
+/// The evaluator node evaluating (reading) the value of a variable.
+struct VariableEvaluatorNode {
     /// The address (on the virutal memory) of the variable to be read.
     address: usize,
 }
-impl EvaluatorUnit for VariableEvaluatorUnit {
-    /// Defined in `EvaluatorUnit` trait.
+impl EvaluatorNode for VariableEvaluatorNode {
+    /// Defined in `EvaluatorNode` trait.
     fn evaluate(&self, memory: &Vec<f64>) -> Result<f64,ExevalatorError> {
         return Ok(memory[self.address]);
     }
 }
 
-/// The evaluator unit evaluating (invoking) a function.
-struct FunctionEvaluatorUnit {
+/// The evaluator node evaluating (invoking) a function.
+struct FunctionEvaluatorNode {
     /// The function pointer of the function to be invoked.
     function_pointer: fn(Vec<f64>) -> Result<f64,ExevalatorError>,
     /// The identifier (name) of the function.
     identifier: String,
-    /// Evaluator units for evaluating values of arguments.
-    arguments: Vec<Box<dyn EvaluatorUnit>>,
+    /// Evaluator nodes for evaluating values of arguments.
+    arguments: Vec<Box<dyn EvaluatorNode>>,
 }
-impl EvaluatorUnit for FunctionEvaluatorUnit {
-    /// Defined in `EvaluatorUnit` trait.
+impl EvaluatorNode for FunctionEvaluatorNode {
+    /// Defined in `EvaluatorNode` trait.
     fn evaluate(&self, memory: &Vec<f64>) -> Result<f64,ExevalatorError> {
         let mut arg_evaluated_values: Vec<f64> = Vec::new();
         for arg in &self.arguments {

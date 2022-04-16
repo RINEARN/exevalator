@@ -470,16 +470,16 @@ public:
 
 
 /**
- * The class providing various types of evaluator units
+ * The class providing various types of evaluator nodes
  * which evaluate values of operators, literals, etc.
  */
 class Evaluator {
 public:
 
     /**
-     * The super class of evaluator units.
+     * The super class of evaluator nodes.
      */
-    class EvaluatorUnit {
+    class EvaluatorNode {
     public:
 
         /**
@@ -491,13 +491,13 @@ public:
         virtual double evaluate(const std::vector<double> &memory) = 0;
 
         // The destructor of this class should be virtual.
-        virtual ~EvaluatorUnit() = 0;
+        virtual ~EvaluatorNode() = 0;
     };
 
     /**
-     * The evaluator unit for evaluating the value of a number literal.
+     * The evaluator node for evaluating the value of a number literal.
      */
-    class NumberLiteralEvaluatorUnit: public EvaluatorUnit {
+    class NumberLiteralEvaluatorNode: public EvaluatorNode {
         
         /** The value of the number literal. */
         double literal_value;
@@ -505,9 +505,9 @@ public:
     public:
 
         /**
-         * Creates the evaluator unit for evaluating the value of a number literal.
+         * Creates the evaluator node for evaluating the value of a number literal.
          */
-        NumberLiteralEvaluatorUnit(double literal_value);
+        NumberLiteralEvaluatorNode(double literal_value);
 
         /**
          * Initializes the value of the number literal.
@@ -519,21 +519,21 @@ public:
 
 
     /**
-     * The evaluator unit for evaluating the value of a unary-minus operator.
+     * The evaluator node for evaluating the value of a unary-minus operator.
      */
-    class MinusEvaluatorUnit: public EvaluatorUnit {
+    class MinusEvaluatorNode: public EvaluatorNode {
 
-        /** The unit for evaluating the operand. */
-        std::unique_ptr<EvaluatorUnit> operand;
+        /** The node for evaluating the operand. */
+        std::unique_ptr<EvaluatorNode> operand;
 
     public:
     
         /**
-         * Creates the evaluator unit for evaluating the value of a unary-minus operator.
+         * Creates the evaluator node for evaluating the value of a unary-minus operator.
          *
-         * @param operand The unit for evaluating the operand
+         * @param operand The node for evaluating the operand
          */
-        MinusEvaluatorUnit(std::unique_ptr<EvaluatorUnit> operand);
+        MinusEvaluatorNode(std::unique_ptr<EvaluatorNode> operand);
 
         /**
          * Performs the unary-minus operation.
@@ -545,23 +545,23 @@ public:
     };
 
 
-    class AdditionEvaluatorUnit: public EvaluatorUnit {
+    class AdditionEvaluatorNode: public EvaluatorNode {
 
-        /** The unit for evaluating the left-side operand. */
-        std::unique_ptr<EvaluatorUnit> left_operand;
+        /** The node for evaluating the left-side operand. */
+        std::unique_ptr<EvaluatorNode> left_operand;
 
-        /** The unit for evaluating the right-side operand. */
-        std::unique_ptr<EvaluatorUnit> right_operand;
+        /** The node for evaluating the right-side operand. */
+        std::unique_ptr<EvaluatorNode> right_operand;
 
     public:
     
         /**
-         * Creates the evaluator unit for evaluating the value of a addition operator.
+         * Creates the evaluator node for evaluating the value of a addition operator.
          *
-         * @param left_operand The unit for evaluating the left-side operand
-         * @param right_operand The unit for evaluating the right-side operand
+         * @param left_operand The node for evaluating the left-side operand
+         * @param right_operand The node for evaluating the right-side operand
          */
-        AdditionEvaluatorUnit(std::unique_ptr<EvaluatorUnit> left_operand, std::unique_ptr<EvaluatorUnit> right_operand);
+        AdditionEvaluatorNode(std::unique_ptr<EvaluatorNode> left_operand, std::unique_ptr<EvaluatorNode> right_operand);
 
         /**
          * Performs the addition.
@@ -572,23 +572,23 @@ public:
         double evaluate(const std::vector<double> &memory);
     };
 
-    class SubtractionEvaluatorUnit: public EvaluatorUnit {
+    class SubtractionEvaluatorNode: public EvaluatorNode {
 
-        /** The unit for evaluating the left-side operand. */
-        std::unique_ptr<EvaluatorUnit> left_operand;
+        /** The node for evaluating the left-side operand. */
+        std::unique_ptr<EvaluatorNode> left_operand;
 
-        /** The unit for evaluating the right-side operand. */
-        std::unique_ptr<EvaluatorUnit> right_operand;
+        /** The node for evaluating the right-side operand. */
+        std::unique_ptr<EvaluatorNode> right_operand;
 
     public:
     
         /**
-         * Creates the evaluator unit for evaluating the value of a subtraction operator.
+         * Creates the evaluator node for evaluating the value of a subtraction operator.
          *
-         * @param left_operand The unit for evaluating the left-side operand
-         * @param right_operand The unit for evaluating the right-side operand
+         * @param left_operand The node for evaluating the left-side operand
+         * @param right_operand The node for evaluating the right-side operand
          */
-        SubtractionEvaluatorUnit(std::unique_ptr<EvaluatorUnit> left_operand, std::unique_ptr<EvaluatorUnit> right_operand);
+        SubtractionEvaluatorNode(std::unique_ptr<EvaluatorNode> left_operand, std::unique_ptr<EvaluatorNode> right_operand);
         
         /**
          * Performs the subtraction.
@@ -599,23 +599,23 @@ public:
         double evaluate(const std::vector<double> &memory);
     };
 
-    class MultiplicationEvaluatorUnit: public EvaluatorUnit {
+    class MultiplicationEvaluatorNode: public EvaluatorNode {
 
-        /** The unit for evaluating the left-side operand. */
-        std::unique_ptr<EvaluatorUnit> left_operand;
+        /** The node for evaluating the left-side operand. */
+        std::unique_ptr<EvaluatorNode> left_operand;
 
-        /** The unit for evaluating the right-side operand. */
-        std::unique_ptr<EvaluatorUnit> right_operand;
+        /** The node for evaluating the right-side operand. */
+        std::unique_ptr<EvaluatorNode> right_operand;
 
     public:
     
         /**
-         * Creates the evaluator unit for evaluating the value of a multiplication operator.
+         * Creates the evaluator node for evaluating the value of a multiplication operator.
          *
-         * @param left_operand The unit for evaluating the left-side operand
-         * @param right_operand The unit for evaluating the right-side operand
+         * @param left_operand The node for evaluating the left-side operand
+         * @param right_operand The node for evaluating the right-side operand
          */
-        MultiplicationEvaluatorUnit(std::unique_ptr<EvaluatorUnit> left_operand, std::unique_ptr<EvaluatorUnit> right_operand);
+        MultiplicationEvaluatorNode(std::unique_ptr<EvaluatorNode> left_operand, std::unique_ptr<EvaluatorNode> right_operand);
 
         /**
          * Performs the multiplication.
@@ -626,23 +626,23 @@ public:
         double evaluate(const std::vector<double> &memory);
     };
 
-    class DivisionEvaluatorUnit: public EvaluatorUnit {
+    class DivisionEvaluatorNode: public EvaluatorNode {
 
-        /** The unit for evaluating the left-side operand. */
-        std::unique_ptr<EvaluatorUnit> left_operand;
+        /** The node for evaluating the left-side operand. */
+        std::unique_ptr<EvaluatorNode> left_operand;
 
-        /** The unit for evaluating the right-side operand. */
-        std::unique_ptr<EvaluatorUnit> right_operand;
+        /** The node for evaluating the right-side operand. */
+        std::unique_ptr<EvaluatorNode> right_operand;
 
     public:
     
         /**
-         * Creates the evaluator unit for evaluating the value of a division operator.
+         * Creates the evaluator node for evaluating the value of a division operator.
          *
-         * @param left_operand The unit for evaluating the left-side operand
-         * @param right_operand The unit for evaluating the right-side operand
+         * @param left_operand The node for evaluating the left-side operand
+         * @param right_operand The node for evaluating the right-side operand
          */
-        DivisionEvaluatorUnit(std::unique_ptr<EvaluatorUnit> left_operand, std::unique_ptr<EvaluatorUnit> right_operand);
+        DivisionEvaluatorNode(std::unique_ptr<EvaluatorNode> left_operand, std::unique_ptr<EvaluatorNode> right_operand);
 
         /**
          * Performs the division.
@@ -654,9 +654,9 @@ public:
     };
 
     /**
-     * The evaluator unit for evaluating the value of a variable.
+     * The evaluator node for evaluating the value of a variable.
      */
-    class VariableEvaluatorUnit: public EvaluatorUnit {
+    class VariableEvaluatorNode: public EvaluatorNode {
 
         /** The address of the variable. */
         size_t address;
@@ -664,11 +664,11 @@ public:
     public:
 
         /**
-         * Creates the evaluator unit for evaluating the value of a variable.
+         * Creates the evaluator node for evaluating the value of a variable.
          * 
          * @param address The virtual address of the variable
          */
-        VariableEvaluatorUnit(size_t address);
+        VariableEvaluatorNode(size_t address);
 
         /**
          * Returns the value of the variable.
@@ -680,9 +680,9 @@ public:
     };
 
     /**
-     * The evaluator unit for evaluating a function-call operator.
+     * The evaluator node for evaluating a function-call operator.
      */
-    class FunctionEvaluatorUnit: public EvaluatorUnit {
+    class FunctionEvaluatorNode: public EvaluatorNode {
 
         /** The function to be called. */
         std::shared_ptr<ExevalatorFunctionInterface> function_ptr;
@@ -690,28 +690,28 @@ public:
         /** The name of the function. */
         std::string identifier;
 
-        /** Evaluator units for evaluating values of arguments. */
-        std::vector<std::unique_ptr<EvaluatorUnit>> arguments;
+        /** Evaluator nodes for evaluating values of arguments. */
+        std::vector<std::unique_ptr<EvaluatorNode>> arguments;
 
     public:
 
         /**
-         * Creates the evaluator unit for evaluating a function-call operator.
+         * Creates the evaluator node for evaluating a function-call operator.
          *
          * @param function_ptr The function to be called
          * @param identifier The name of the function
-         * @param arguments Evaluator units for evaluating values of arguments
+         * @param arguments Evaluator nodes for evaluating values of arguments
          */
-        FunctionEvaluatorUnit(
+        FunctionEvaluatorNode(
             std::shared_ptr<ExevalatorFunctionInterface> &function_ptr,
             std::string identifier,
-            std::vector<std::unique_ptr<EvaluatorUnit>> &arguments
+            std::vector<std::unique_ptr<EvaluatorNode>> &arguments
         );
 
         /**
-         * Releases resources of the evaluator unit for evaluating a function-call operator.
+         * Releases resources of the evaluator node for evaluating a function-call operator.
          */
-        ~FunctionEvaluatorUnit();
+        ~FunctionEvaluatorNode();
 
         /**
          * Calls the function and returns the returned value of the function.
@@ -723,15 +723,15 @@ public:
     };
 
     /**
-     * Creates a tree of evaluator units corresponding with the specified AST.
+     * Creates a tree of evaluator nodes corresponding with the specified AST.
      *
      * @param settings The Setting instance storing setting values
      * @param ast The root node of the AST
      * @param variable_table The Map mapping each variable name to an address of the variable
      * @param function_table The Map mapping each function name to an IExevalatorFunctionInterface instance
-     * @return The root node of the created tree of evaluator units.
+     * @return The root node of the created tree of evaluator nodes.
      */
-    static std::unique_ptr<Evaluator::EvaluatorUnit> create_evaluator_unit_tree(
+    static std::unique_ptr<Evaluator::EvaluatorNode> create_evaluator_node_tree(
             const Settings &settings,
             const std::unique_ptr<AstNode> &ast,
             const std::map<std::string, size_t> &variable_table,
@@ -756,8 +756,8 @@ class Exevalator {
     /** The Map mapping each function name to an IExevalatorFunctionInterface instance. */
     std::map<std::string, std::shared_ptr<ExevalatorFunctionInterface>> function_table;
     
-    /** The unit for evaluating an expression. */
-    std::unique_ptr<Evaluator::EvaluatorUnit> evaluator_unit;
+    /** The tree of evaluator nodes, which evaluates an expression. */
+    std::unique_ptr<Evaluator::EvaluatorNode> evaluator_node_tree;
     
     /** Caches the content of the expression evaluated last time, to skip re-parsing. */
     std::string last_evaluated_expression;

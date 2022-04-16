@@ -32,8 +32,8 @@ namespace Rinearn.ExevalatorCS
         /// <summary>The Dictionary mapping each function name to an IExevalatorFunction instance.</summary>
         Dictionary<string, IExevalatorFunction> FunctionTable;
 
-        /// <summary>The tree of evaluator units, which evaluates an expression.</summary>
-        Evaluator.EvaluatorUnit? EvaluatorUnitTree;
+        /// <summary>The tree of evaluator nodes, which evaluates an expression.</summary>
+        Evaluator.EvaluatorNode? EvaluatorNodeTree;
 
         /// <summary>Caches the content of the expression evaluated last time, to skip re-parsing.</summary>
         string LastEvaluatedExpression;
@@ -46,7 +46,7 @@ namespace Rinearn.ExevalatorCS
             this.Memory = new List<double>();
             this.VariableTable = new Dictionary<string, int>();
             this.FunctionTable = new Dictionary<string, IExevalatorFunction>();
-            this.EvaluatorUnitTree = null;
+            this.EvaluatorNodeTree = null;
             this.LastEvaluatedExpression = "";
         }
 
@@ -73,7 +73,7 @@ namespace Rinearn.ExevalatorCS
             try
             {
                 // If the expression changed from the last-evaluated expression, re-parsing is necessary.
-                if (this.EvaluatorUnitTree == null || expression != this.LastEvaluatedExpression)
+                if (this.EvaluatorNodeTree == null || expression != this.LastEvaluatedExpression)
                 {
 
                     // Perform lexical analysis, and get tokens from the inputted expression.
@@ -94,14 +94,14 @@ namespace Rinearn.ExevalatorCS
                     Console.WriteLine(ast.ToMarkuppedText());
                     */
 
-                    // Create the tree of evaluator units, and get the the root unit of it.
-                    this.EvaluatorUnitTree = Evaluator.CreateEvaluatorUnitTree(ast, this.VariableTable, this.FunctionTable);
+                    // Create the tree of evaluator nodes, and get the the root node of it.
+                    this.EvaluatorNodeTree = Evaluator.CreateEvaluatorNodeTree(ast, this.VariableTable, this.FunctionTable);
 
                     this.LastEvaluatedExpression = expression;
                 }
 
                 // Evaluate the value of the expression, and return it.
-                double evaluatedValue = this.EvaluatorUnitTree.evaluate(this.Memory);
+                double evaluatedValue = this.EvaluatorNodeTree.evaluate(this.Memory);
                 return evaluatedValue;
 
             }
@@ -125,10 +125,10 @@ namespace Rinearn.ExevalatorCS
         /// <returns>The evaluated value</returns>
         public double Reeval()
         {
-            if (this.EvaluatorUnitTree == null) {
+            if (this.EvaluatorNodeTree == null) {
                 throw new ExevalatorException("\"Reeval\" is not available before using \"Eval\"");
             } else {
-                double evaluatedValue = this.EvaluatorUnitTree.evaluate(this.Memory);
+                double evaluatedValue = this.EvaluatorNodeTree.evaluate(this.Memory);
                 return evaluatedValue;
             }
         }
@@ -1232,36 +1232,36 @@ namespace Rinearn.ExevalatorCS
     }
 
     /// <summary>
-    /// The class providing various types of evaluator units
+    /// The class providing various types of evaluator nodes
     /// which evaluate values of operators, literals, etc.
     /// </summary>
     public class Evaluator
     {
         /// <summary>
-        /// Creates a tree of evaluator units corresponding with the specified AST.
+        /// Creates a tree of evaluator nodes corresponding with the specified AST.
         /// </summary>
         /// <param name="ast">The root node of the AST.</param>
         /// <param name="variableTable">The Dictionary mapping each variable name to an address of the variable.</param>
         /// <param name="functionTable">The Dictionary mapping each function name to an IExevalatorFunction instance.</param>
-        /// <returns>The root node of the created tree of evaluator units.</returns>
-        public static Evaluator.EvaluatorUnit CreateEvaluatorUnitTree(
+        /// <returns>The root node of the created tree of evaluator nodes.</returns>
+        public static Evaluator.EvaluatorNode CreateEvaluatorNodeTree(
                 AstNode ast,
                 Dictionary<string, int> variableTable,
                 Dictionary<string, IExevalatorFunction> functionTable)
         {
-            // Note: This method creates a tree of evaluator units by traversing each node in the AST recursively.
+            // Note: This method creates a tree of evaluator nodes by traversing each node in the AST recursively.
 
             List<AstNode> childNodeList = ast.ChildNodeList;
             int childCount = childNodeList.Count;
 
-            // Creates evaluation units of child nodes, and store then into an array.
-            Evaluator.EvaluatorUnit[] childNodeUnits = new Evaluator.EvaluatorUnit[childCount];
+            // Creates evaluation nodes of child nodes, and store then into an array.
+            Evaluator.EvaluatorNode[] childNodeNodes = new Evaluator.EvaluatorNode[childCount];
             for (int ichild = 0; ichild < childCount; ichild++)
             {
-                childNodeUnits[ichild] = CreateEvaluatorUnitTree(childNodeList[ichild], variableTable, functionTable);
+                childNodeNodes[ichild] = CreateEvaluatorNodeTree(childNodeList[ichild], variableTable, functionTable);
             }
 
-            // Initialize evaluation units of this node.
+            // Initialize evaluation nodes of this node.
             Token token = ast.Token;
             if (token.Type == TokenType.NumberLiteral)
             {
@@ -1270,7 +1270,7 @@ namespace Rinearn.ExevalatorCS
                 {
                     throw new ExevalatorException("Invalid number literal: " + token.Word);
                 }
-                return new Evaluator.NumberLiteralEvaluatorUnit(literalValue);
+                return new Evaluator.NumberLiteralEvaluatorNode(literalValue);
 
             }
             else if (token.Type == TokenType.VariableIdentifier)
@@ -1280,35 +1280,35 @@ namespace Rinearn.ExevalatorCS
                     throw new ExevalatorException("Variable not found: " + token.Word);
                 }
                 int address = variableTable[token.Word];
-                return new Evaluator.VariableEvaluatorUnit(address);
+                return new Evaluator.VariableEvaluatorNode(address);
 
             }
             else if (token.Type == TokenType.FunctionIdentifier)
             {
-                return new Evaluator.NopEvaluatorUnit();
+                return new Evaluator.NopEvaluatorNode();
             }
             else if (token.Type == TokenType.Operator)
             {
                 Operator op = token.Operator!.Value;
                 if (op.Type == OperatorType.UnaryPrefix && op.Symbol == '-')
                 {
-                    return new Evaluator.MinusEvaluatorUnit(childNodeUnits[0]);
+                    return new Evaluator.MinusEvaluatorNode(childNodeNodes[0]);
                 }
                 else if (op.Type == OperatorType.Binary && op.Symbol == '+')
                 {
-                    return new Evaluator.AdditionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+                    return new Evaluator.AdditionEvaluatorNode(childNodeNodes[0], childNodeNodes[1]);
                 }
                 else if (op.Type == OperatorType.Binary && op.Symbol == '-')
                 {
-                    return new Evaluator.SubtractionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+                    return new Evaluator.SubtractionEvaluatorNode(childNodeNodes[0], childNodeNodes[1]);
                 }
                 else if (op.Type == OperatorType.Binary && op.Symbol == '*')
                 {
-                    return new Evaluator.MultiplicationEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+                    return new Evaluator.MultiplicationEvaluatorNode(childNodeNodes[0], childNodeNodes[1]);
                 }
                 else if (op.Type == OperatorType.Binary && op.Symbol == '/')
                 {
-                    return new Evaluator.DivisionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+                    return new Evaluator.DivisionEvaluatorNode(childNodeNodes[0], childNodeNodes[1]);
                 }
                 else if (op.Type == OperatorType.Call && op.Symbol == '(')
                 {
@@ -1318,12 +1318,12 @@ namespace Rinearn.ExevalatorCS
                         throw new ExevalatorException("Function not found: " + identifier);
                     }
                     IExevalatorFunction function = functionTable[identifier];
-                    Evaluator.EvaluatorUnit[] argUnits = new Evaluator.EvaluatorUnit[childCount - 1];
+                    Evaluator.EvaluatorNode[] argNodes = new Evaluator.EvaluatorNode[childCount - 1];
                     for (int iarg = 0; iarg < childCount - 1; iarg++)
                     {
-                        argUnits[iarg] = childNodeUnits[iarg + 1];
+                        argNodes[iarg] = childNodeNodes[iarg + 1];
                     }
-                    return new Evaluator.FunctionEvaluatorUnit(function, argUnits);
+                    return new Evaluator.FunctionEvaluatorNode(function, argNodes);
                 }
                 else
                 {
@@ -1337,13 +1337,13 @@ namespace Rinearn.ExevalatorCS
         }
 
         /// <summary>
-        /// The super class of evaluator units.
+        /// The super class of evaluator nodes.
         /// </summary>
-        public abstract class EvaluatorUnit
+        public abstract class EvaluatorNode
         {
 
             /// <summary>
-            /// Evaluate the value of this unit.
+            /// Evaluate the value of this node.
             /// </summary>
             /// <param name="memory">The List storing values of variables.</param>
             /// <returns>The result value of the evaluation</returns>
@@ -1351,41 +1351,41 @@ namespace Rinearn.ExevalatorCS
         }
 
         /// <summary>
-        /// The super class of evaluator units of binary operations.
+        /// The super class of evaluator nodes of binary operations.
         /// </summary>
-        public abstract class BinaryOperationEvaluatorUnit : EvaluatorUnit
+        public abstract class BinaryOperationEvaluatorNode : EvaluatorNode
         {
 
-            /// <summary>The unit for evaluating the right-side operand.</summary>
-            protected readonly EvaluatorUnit LeftOperandUnit;
+            /// <summary>The nofr for evaluating the right-side operand.</summary>
+            protected readonly EvaluatorNode LeftOperandNode;
 
-            /// <summary>The unit for evaluating the left-side operand.</summary>
-            protected readonly EvaluatorUnit RightOperandUnit;
+            /// <summary>The node for evaluating the left-side operand.</summary>
+            protected readonly EvaluatorNode RightOperandNode;
 
             /// <summary>
             /// Initializes operands.
             /// </summary>
-            /// <param name="leftOperandUnit">The unit for evaluating the left-side operand</param>
-            /// <param name="rightOperandUnit">The unit for evaluating the right-side operand</param>
-            protected BinaryOperationEvaluatorUnit(EvaluatorUnit leftOperandUnit, EvaluatorUnit rightOperandUnit)
+            /// <param name="leftOperandNode">The node for evaluating the left-side operand</param>
+            /// <param name="rightOperandNode">The node for evaluating the right-side operand</param>
+            protected BinaryOperationEvaluatorNode(EvaluatorNode leftOperandNode, EvaluatorNode rightOperandNode)
             {
-                this.LeftOperandUnit = leftOperandUnit;
-                this.RightOperandUnit = rightOperandUnit;
+                this.LeftOperandNode = leftOperandNode;
+                this.RightOperandNode = rightOperandNode;
             }
         }
 
         /// <summary>
-        /// The evaluator unit for evaluating the value of a addition operator.
+        /// The evaluator node for evaluating the value of a addition operator.
         /// </summary>
-        public class AdditionEvaluatorUnit : BinaryOperationEvaluatorUnit
+        public class AdditionEvaluatorNode : BinaryOperationEvaluatorNode
         {
             /// <summary>
             /// Initializes operands.
             /// </summary>
-            /// <param name="leftOperandUnit">The unit for evaluating the left-side operand</param>
-            /// <param name="rightOperandUnit">The unit for evaluating the right-side operand</param>
-            public AdditionEvaluatorUnit(EvaluatorUnit leftOperandUnit, EvaluatorUnit rightOperandUnit)
-            : base(leftOperandUnit, rightOperandUnit)
+            /// <param name="leftOperandNode">The node for evaluating the left-side operand</param>
+            /// <param name="rightOperandNode">The node for evaluating the right-side operand</param>
+            public AdditionEvaluatorNode(EvaluatorNode leftOperandNode, EvaluatorNode rightOperandNode)
+            : base(leftOperandNode, rightOperandNode)
             {
             }
 
@@ -1396,22 +1396,22 @@ namespace Rinearn.ExevalatorCS
             /// <returns>The result value of the addition</returns>
             public override double evaluate(List<double> memory)
             {
-                return this.LeftOperandUnit.evaluate(memory) + this.RightOperandUnit.evaluate(memory);
+                return this.LeftOperandNode.evaluate(memory) + this.RightOperandNode.evaluate(memory);
             }
         }
 
         /// <summary>
-        /// The evaluator unit for evaluating the value of a subtraction operator.
+        /// The evaluator node for evaluating the value of a subtraction operator.
         /// </summary>
-        public class SubtractionEvaluatorUnit : BinaryOperationEvaluatorUnit
+        public class SubtractionEvaluatorNode : BinaryOperationEvaluatorNode
         {
             /// <summary>
             /// Initializes operands.
             /// </summary>
-            /// <param name="leftOperandUnit">The unit for evaluating the left-side operand</param>
-            /// <param name="rightOperandUnit">The unit for evaluating the right-side operand</param>
-            public SubtractionEvaluatorUnit(EvaluatorUnit leftOperandUnit, EvaluatorUnit rightOperandUnit)
-            : base(leftOperandUnit, rightOperandUnit)
+            /// <param name="leftOperandNode">The node for evaluating the left-side operand</param>
+            /// <param name="rightOperandNode">The node for evaluating the right-side operand</param>
+            public SubtractionEvaluatorNode(EvaluatorNode leftOperandNode, EvaluatorNode rightOperandNode)
+            : base(leftOperandNode, rightOperandNode)
             {
             }
 
@@ -1422,22 +1422,22 @@ namespace Rinearn.ExevalatorCS
             /// <returns>The result value of the subtraction</returns>
             public override double evaluate(List<double> memory)
             {
-                return this.LeftOperandUnit.evaluate(memory) - this.RightOperandUnit.evaluate(memory);
+                return this.LeftOperandNode.evaluate(memory) - this.RightOperandNode.evaluate(memory);
             }
         }
 
         /// <summary>
-        /// The evaluator unit for evaluating the value of a multiplication operator.
+        /// The evaluator node for evaluating the value of a multiplication operator.
         /// </summary>
-        public class MultiplicationEvaluatorUnit : BinaryOperationEvaluatorUnit
+        public class MultiplicationEvaluatorNode : BinaryOperationEvaluatorNode
         {
             /// <summary>
             /// Initializes operands.
             /// </summary>
-            /// <param name="leftOperandUnit">The unit for evaluating the left-side operand</param>
-            /// <param name="rightOperandUnit">The unit for evaluating the right-side operand</param>
-            public MultiplicationEvaluatorUnit(EvaluatorUnit leftOperandUnit, EvaluatorUnit rightOperandUnit)
-            : base(leftOperandUnit, rightOperandUnit)
+            /// <param name="leftOperandNode">The node for evaluating the left-side operand</param>
+            /// <param name="rightOperandNode">The node for evaluating the right-side operand</param>
+            public MultiplicationEvaluatorNode(EvaluatorNode leftOperandNode, EvaluatorNode rightOperandNode)
+            : base(leftOperandNode, rightOperandNode)
             {
             }
 
@@ -1448,22 +1448,22 @@ namespace Rinearn.ExevalatorCS
             /// <returns>The result value of the multiplication</returns>
             public override double evaluate(List<double> memory)
             {
-                return this.LeftOperandUnit.evaluate(memory) * this.RightOperandUnit.evaluate(memory);
+                return this.LeftOperandNode.evaluate(memory) * this.RightOperandNode.evaluate(memory);
             }
         }
 
         /// <summary>
-        /// The evaluator unit for evaluating the value of a division operator.
+        /// The evaluator node for evaluating the value of a division operator.
         /// </summary>
-        public class DivisionEvaluatorUnit : BinaryOperationEvaluatorUnit
+        public class DivisionEvaluatorNode : BinaryOperationEvaluatorNode
         {
             /// <summary>
             /// Initializes operands.
             /// </summary>
-            /// <param name="leftOperandUnit">The unit for evaluating the left-side operand</param>
-            /// <param name="rightOperandUnit">The unit for evaluating the right-side operand</param>
-            public DivisionEvaluatorUnit(EvaluatorUnit leftOperandUnit, EvaluatorUnit rightOperandUnit)
-            : base(leftOperandUnit, rightOperandUnit)
+            /// <param name="leftOperandNode">The node for evaluating the left-side operand</param>
+            /// <param name="rightOperandNode">The node for evaluating the right-side operand</param>
+            public DivisionEvaluatorNode(EvaluatorNode leftOperandNode, EvaluatorNode rightOperandNode)
+            : base(leftOperandNode, rightOperandNode)
             {
             }
 
@@ -1474,25 +1474,25 @@ namespace Rinearn.ExevalatorCS
             /// <returns>The result value of the division</returns>
             public override double evaluate(List<double> memory)
             {
-                return this.LeftOperandUnit.evaluate(memory) / this.RightOperandUnit.evaluate(memory);
+                return this.LeftOperandNode.evaluate(memory) / this.RightOperandNode.evaluate(memory);
             }
         }
 
         /// <summary>
-        /// The evaluator unit for evaluating the value of a unary-minus operator.
+        /// The evaluator node for evaluating the value of a unary-minus operator.
         /// </summary>
-        public class MinusEvaluatorUnit : EvaluatorUnit
+        public class MinusEvaluatorNode : EvaluatorNode
         {
-            /// <summary>The unit for evaluating the operand.</summary>
-            private readonly EvaluatorUnit OperandUnit;
+            /// <summary>The node for evaluating the operand.</summary>
+            private readonly EvaluatorNode OperandNode;
 
             /// <summary>
             /// Initializes the operand.
             /// </summary>
-            /// <param name="operandUnit">The unit for evaluating the operand</param>
-            public MinusEvaluatorUnit(EvaluatorUnit operandUnit)
+            /// <param name="operandNode">The node for evaluating the operand</param>
+            public MinusEvaluatorNode(EvaluatorNode operandNode)
             {
-                this.OperandUnit = operandUnit;
+                this.OperandNode = operandNode;
             }
 
             /// <summary>
@@ -1502,14 +1502,14 @@ namespace Rinearn.ExevalatorCS
             /// <returns>The result value of the unary-minus operation</returns>
             public override double evaluate(List<double> memory)
             {
-                return -this.OperandUnit.evaluate(memory);
+                return -this.OperandNode.evaluate(memory);
             }
         }
 
         /// <summary>
-        /// The evaluator unit for evaluating the value of a number literal.
+        /// The evaluator node for evaluating the value of a number literal.
         /// </summary>
-        public class NumberLiteralEvaluatorUnit : EvaluatorUnit
+        public class NumberLiteralEvaluatorNode : EvaluatorNode
         {
             /// <summary>The value of the number literal.</summary>
             private readonly double LiteralValue;
@@ -1518,7 +1518,7 @@ namespace Rinearn.ExevalatorCS
             /// Initializes the value of the number literal.
             /// </summary>
             /// <param name="literalValue">The value of the number literal</param>
-            public NumberLiteralEvaluatorUnit(double literalValue)
+            public NumberLiteralEvaluatorNode(double literalValue)
             {
                 this.LiteralValue = literalValue;
             }
@@ -1535,9 +1535,9 @@ namespace Rinearn.ExevalatorCS
         }
 
         /// <summary>
-        /// The evaluator unit for evaluating the value of a variable.
+        /// The evaluator node for evaluating the value of a variable.
         /// </summary>
-        public class VariableEvaluatorUnit : EvaluatorUnit
+        public class VariableEvaluatorNode : EvaluatorNode
         {
             /// <summary>The address of the variable.</summary>
             private readonly int Address;
@@ -1546,7 +1546,7 @@ namespace Rinearn.ExevalatorCS
             /// Initializes the address of the variable.
             /// </summary>
             /// <param name="address">The address of the variable</param>
-            public VariableEvaluatorUnit(int address)
+            public VariableEvaluatorNode(int address)
             {
                 this.Address = address;
             }
@@ -1567,15 +1567,15 @@ namespace Rinearn.ExevalatorCS
         }
 
         /// <summary>
-        /// The evaluator unit for evaluating the value of a function-call operator.
+        /// The evaluator node for evaluating the value of a function-call operator.
         /// </summary>
-        public class FunctionEvaluatorUnit : EvaluatorUnit
+        public class FunctionEvaluatorNode : EvaluatorNode
         {
             /// <summary>The address of the variable.</summary>
             private readonly IExevalatorFunction Function;
 
-            /// <summary>Evaluator units for evaluating values of arguments.</summary>
-            private readonly EvaluatorUnit[] ArgumentEvalUnits;
+            /// <summary>Evaluator nodes for evaluating values of arguments.</summary>
+            private readonly EvaluatorNode[] ArgumentEvalNodes;
 
             /// <summary>An array storing evaluated values of arguments.</summary>
             private double[] ArgumentArrayBuffer;
@@ -1584,12 +1584,12 @@ namespace Rinearn.ExevalatorCS
             /// Initializes the function to be called.
             /// </summary>
             /// <param name="function">The function to be called</param>
-            /// <param name="argumentEvalUnits">Evaluator units for evaluating values of arguments</param>
-            public FunctionEvaluatorUnit(IExevalatorFunction function, EvaluatorUnit[] argumentEvalUnits)
+            /// <param name="argumentEvalNodes">Evaluator nodes for evaluating values of arguments</param>
+            public FunctionEvaluatorNode(IExevalatorFunction function, EvaluatorNode[] argumentEvalNodes)
             {
                 this.Function = function;
-                this.ArgumentEvalUnits = argumentEvalUnits;
-                this.ArgumentArrayBuffer = new double[this.ArgumentEvalUnits.Length];
+                this.ArgumentEvalNodes = argumentEvalNodes;
+                this.ArgumentArrayBuffer = new double[this.ArgumentEvalNodes.Length];
             }
 
             /// <summary>
@@ -1599,23 +1599,23 @@ namespace Rinearn.ExevalatorCS
             /// <returns>The returned value of the function</returns>
             public override double evaluate(List<double> memory)
             {
-                for (int iarg = 0; iarg < this.ArgumentEvalUnits.Length; iarg++)
+                for (int iarg = 0; iarg < this.ArgumentEvalNodes.Length; iarg++)
                 {
-                    this.ArgumentArrayBuffer[iarg] = this.ArgumentEvalUnits[iarg].evaluate(memory);
+                    this.ArgumentArrayBuffer[iarg] = this.ArgumentEvalNodes[iarg].evaluate(memory);
                 }
                 return this.Function.Invoke(this.ArgumentArrayBuffer);
             }
         }
 
         /// <summary>
-        /// The evaluator unit for evaluating nothing.
+        /// The evaluator node for evaluating nothing.
         /// </summary>
-        public class NopEvaluatorUnit : EvaluatorUnit
+        public class NopEvaluatorNode : EvaluatorNode
         {
             /// <summary>
             /// Creates an instance.
             /// </summary>
-            public NopEvaluatorUnit()
+            public NopEvaluatorNode()
             {
             }
 

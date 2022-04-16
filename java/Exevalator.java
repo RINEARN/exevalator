@@ -41,8 +41,8 @@ public final class Exevalator {
     /** Caches the content of the expression evaluated last time, to skip re-parsing. */
     private volatile String lastEvaluatedExpression;
 
-    /** The tree of evaluator units, which evaluates an expression. */
-    private volatile Evaluator.EvaluatorUnit evaluatorUnitTree;
+    /** The tree of evaluator nodes, which evaluates an expression. */
+    private volatile Evaluator.EvaluatorNode evaluatorNodeTree;
 
     /**
      * Creates a new interpreter of the Exevalator.
@@ -53,7 +53,7 @@ public final class Exevalator {
         this.variableTable = new ConcurrentHashMap<String, Integer>();
         this.functionTable = new ConcurrentHashMap<String, FunctionInterface>();
         this.lastEvaluatedExpression = null;
-        this.evaluatorUnitTree = null;
+        this.evaluatorNodeTree = null;
     }
 
     /**
@@ -79,7 +79,7 @@ public final class Exevalator {
             && !expression.equals(this.lastEvaluatedExpression);
 
             // If the expression changed from the last-evaluated expression, re-parsing is necessary.
-            if (this.evaluatorUnitTree == null || expressionChanged) {
+            if (this.evaluatorNodeTree == null || expressionChanged) {
 
                 // Split the expression into tokens, and analyze them.
                 Token[] tokens = LexicalAnalyzer.analyze(expression);
@@ -99,14 +99,14 @@ public final class Exevalator {
                 System.out.println(ast.toMarkuppedText());
                 */
 
-                // Create the tree of evaluator units, and get the the root unit of it.
-                this.evaluatorUnitTree = Evaluator.createEvaluatorUnitTree(ast, this.variableTable, this.functionTable);
+                // Create the tree of evaluator nodes, and get the the root node of it.
+                this.evaluatorNodeTree = Evaluator.createEvaluatorNodeTree(ast, this.variableTable, this.functionTable);
 
                 this.lastEvaluatedExpression = expression;
             }
 
             // Evaluate the value of the expression, and return it.
-            double evaluatedValue = this.evaluatorUnitTree.evaluate(this.memory);
+            double evaluatedValue = this.evaluatorNodeTree.evaluate(this.memory);
             return evaluatedValue;
 
         } catch (Exevalator.Exception ee) {
@@ -127,10 +127,10 @@ public final class Exevalator {
      * @return The evaluated value
      */
     public synchronized double reeval() {
-        if (this.evaluatorUnitTree == null) {
+        if (this.evaluatorNodeTree == null) {
             throw new Exevalator.Exception("\"reeval\" is not available before using \"eval\"");
         } else {
-            double evaluatedValue = this.evaluatorUnitTree.evaluate(this.memory);
+            double evaluatedValue = this.evaluatorNodeTree.evaluate(this.memory);
             return evaluatedValue;
         }
     }
@@ -1050,59 +1050,59 @@ final class AstNode {
 
 
 /**
- * The class providing various types of evaluator units
+ * The class providing various types of evaluator nodes
  * which evaluate values of operators, literals, etc.
  */
 final class Evaluator {
 
     /**
-     * Creates a tree of evaluator units corresponding with the specified AST.
+     * Creates a tree of evaluator nodes corresponding with the specified AST.
      *
      * @param ast The root node of the AST.
      * @param variableTable The Map mapping each variable name to an address of the variable.
      * @param functionTable The Map mapping each function name to an IExevalatorFunction instance.
-     * @return The root node of the created tree of evaluator units.
+     * @return The root node of the created tree of evaluator nodes.
      */
-    public static EvaluatorUnit createEvaluatorUnitTree(
+    public static EvaluatorNode createEvaluatorNodeTree(
             AstNode ast, Map<String, Integer> variableTable, Map<String, Exevalator.FunctionInterface> functionTable) {
 
-        // Note: This method creates a tree of evaluator units by traversing each node in the AST recursively.
+        // Note: This method creates a tree of evaluator nodes by traversing each node in the AST recursively.
 
         List<AstNode> childNodeList = ast.childNodeList;
         int childCount = childNodeList.size();
 
-        // Creates evaluation units of child nodes, and store then into an array.
-        Evaluator.EvaluatorUnit childNodeUnits[] = new Evaluator.EvaluatorUnit[childCount];
+        // Creates evaluator nodes of child nodes, and store then into an array.
+        Evaluator.EvaluatorNode childNodeNodes[] = new Evaluator.EvaluatorNode[childCount];
         for (int ichild=0; ichild<childCount; ichild++) {
             AstNode childAstNode = childNodeList.get(ichild);
-            childNodeUnits[ichild] = createEvaluatorUnitTree(childAstNode, variableTable, functionTable);
+            childNodeNodes[ichild] = createEvaluatorNodeTree(childAstNode, variableTable, functionTable);
         }
 
-        // Initialize evaluation units of this node.
+        // Initialize evaluator nodes of this node.
         Token token = ast.token;
         if (token.type == TokenType.NUMBER_LITERAL) {
-            return new Evaluator.NumberLiteralEvaluatorUnit(token.word);
+            return new Evaluator.NumberLiteralEvaluatorNode(token.word);
         } else if (token.type == TokenType.VARIABLE_IDENTIFIER) {
             if (!variableTable.containsKey(token.word)) {
                 throw new Exevalator.Exception("Variable not found: " + token.word);
             }
             int address = variableTable.get(token.word);
-            return new Evaluator.VariableEvaluatorUnit(address);
+            return new Evaluator.VariableEvaluatorNode(address);
         } else if (token.type == TokenType.FUNCTION_IDENTIFIER) {
             return null;
         } else if (token.type == TokenType.OPERATOR) {
             Operator op = token.operator;
 
             if (op.type == OperatorType.UNARY_PREFIX && op.symbol == '-') {
-                return new Evaluator.MinusEvaluatorUnit(childNodeUnits[0]);
+                return new Evaluator.MinusEvaluatorNode(childNodeNodes[0]);
             } else if (op.type == OperatorType.BINARY && op.symbol == '+') {
-                return new Evaluator.AdditionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+                return new Evaluator.AdditionEvaluatorNode(childNodeNodes[0], childNodeNodes[1]);
             } else if (op.type == OperatorType.BINARY && op.symbol == '-') {
-                return new Evaluator.SubtractionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+                return new Evaluator.SubtractionEvaluatorNode(childNodeNodes[0], childNodeNodes[1]);
             } else if (op.type == OperatorType.BINARY && op.symbol == '*') {
-                return new Evaluator.MultiplicationEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+                return new Evaluator.MultiplicationEvaluatorNode(childNodeNodes[0], childNodeNodes[1]);
             } else if (op.type == OperatorType.BINARY && op.symbol == '/') {
-                return new Evaluator.DivisionEvaluatorUnit(childNodeUnits[0], childNodeUnits[1]);
+                return new Evaluator.DivisionEvaluatorNode(childNodeNodes[0], childNodeNodes[1]);
             } else if (op.type == OperatorType.CALL && op.symbol == '(') {
                 String identifier = childNodeList.get(0).token.word;
                 if (!functionTable.containsKey(identifier)) {
@@ -1110,11 +1110,11 @@ final class Evaluator {
                 }
                 Exevalator.FunctionInterface function = functionTable.get(identifier);
                 int argCount = childCount - 1;
-                Evaluator.EvaluatorUnit[] argUnits = new Evaluator.EvaluatorUnit[argCount];
+                Evaluator.EvaluatorNode[] argNodes = new Evaluator.EvaluatorNode[argCount];
                 for (int iarg=0; iarg<argCount; iarg++) {
-                    argUnits[iarg] = childNodeUnits[iarg + 1];
+                    argNodes[iarg] = childNodeNodes[iarg + 1];
                 }
-                return new Evaluator.FunctionEvaluatorUnit(function, identifier, argUnits);
+                return new Evaluator.FunctionEvaluatorNode(function, identifier, argNodes);
             } else {
                 throw new Exevalator.Exception("Unexpected operator: " + op);
             }
@@ -1124,9 +1124,9 @@ final class Evaluator {
     }
 
     /**
-     * The super class of evaluator units.
+     * The super class of evaluator nodes.
      */
-    public static abstract class EvaluatorUnit {
+    public static abstract class EvaluatorNode {
 
         /**
          * Performs the evaluation.
@@ -1138,41 +1138,41 @@ final class Evaluator {
     }
 
     /**
-     * The super class of evaluator units of binary operations.
+     * The super class of evaluator nodes of binary operations.
      */
-    public static abstract class BinaryOperationEvaluatorUnit extends EvaluatorUnit {
+    public static abstract class BinaryOperationEvaluatorNode extends EvaluatorNode {
 
-        /** The unit for evaluating the right-side operand. */
-        protected final EvaluatorUnit leftOperandUnit;
+        /** The node for evaluating the right-side operand. */
+        protected final EvaluatorNode leftOperandNode;
 
-        /** The unit for evaluating the left-side operand. */
-        protected final EvaluatorUnit rightOperandUnit;
+        /** The node for evaluating the left-side operand. */
+        protected final EvaluatorNode rightOperandNode;
 
         /**
          * Initializes operands.
          *
-         * @param leftOperandUnit The unit for evaluating the left-side operand
-         * @param rightOperandUnit The unit for evaluating the right-side operand
+         * @param leftOperandNode The node for evaluating the left-side operand
+         * @param rightOperandNode The node for evaluating the right-side operand
          */
-        protected BinaryOperationEvaluatorUnit(EvaluatorUnit leftOperandUnit, EvaluatorUnit rightOperandUnit) {
-            this.leftOperandUnit = leftOperandUnit;
-            this.rightOperandUnit = rightOperandUnit;
+        protected BinaryOperationEvaluatorNode(EvaluatorNode leftOperandNode, EvaluatorNode rightOperandNode) {
+            this.leftOperandNode = leftOperandNode;
+            this.rightOperandNode = rightOperandNode;
         }
     }
 
     /**
-     * The evaluator unit for evaluating the value of a addition operator.
+     * The evaluator node for evaluating the value of a addition operator.
      */
-    public static final class AdditionEvaluatorUnit extends BinaryOperationEvaluatorUnit {
+    public static final class AdditionEvaluatorNode extends BinaryOperationEvaluatorNode {
 
         /**
          * Initializes operands.
          *
-         * @param leftOperandUnit The unit for evaluating the left-side operand.
-         * @param rightOperandUnit The unit for evaluating the right-side operand.
+         * @param leftOperandNode The node for evaluating the left-side operand.
+         * @param rightOperandNode The node for evaluating the right-side operand.
          */
-        public AdditionEvaluatorUnit(EvaluatorUnit leftOperandUnit, EvaluatorUnit rightOperandUnit) {
-            super(leftOperandUnit, rightOperandUnit);
+        public AdditionEvaluatorNode(EvaluatorNode leftOperandNode, EvaluatorNode rightOperandNode) {
+            super(leftOperandNode, rightOperandNode);
         }
 
         /**
@@ -1183,23 +1183,23 @@ final class Evaluator {
          */
         @Override
         public double evaluate(double[] memory) {
-            return this.leftOperandUnit.evaluate(memory) + this.rightOperandUnit.evaluate(memory);
+            return this.leftOperandNode.evaluate(memory) + this.rightOperandNode.evaluate(memory);
         }
     }
 
     /**
-     * The evaluator unit for evaluating the value of a subtraction operator.
+     * The evaluator node for evaluating the value of a subtraction operator.
      */
-    public static final class SubtractionEvaluatorUnit extends BinaryOperationEvaluatorUnit {
+    public static final class SubtractionEvaluatorNode extends BinaryOperationEvaluatorNode {
 
         /**
          * Initializes operands.
          *
-         * @param leftOperandUnit The unit for evaluating the left-side operand.
-         * @param rightOperandUnit The unit for evaluating the right-side operand.
+         * @param leftOperandNode The node for evaluating the left-side operand.
+         * @param rightOperandNode The node for evaluating the right-side operand.
          */
-        public SubtractionEvaluatorUnit(EvaluatorUnit leftOperandUnit, EvaluatorUnit rightOperandUnit) {
-            super(leftOperandUnit, rightOperandUnit);
+        public SubtractionEvaluatorNode(EvaluatorNode leftOperandNode, EvaluatorNode rightOperandNode) {
+            super(leftOperandNode, rightOperandNode);
         }
 
         /**
@@ -1210,23 +1210,23 @@ final class Evaluator {
          */
         @Override
         public double evaluate(double[] memory) {
-            return this.leftOperandUnit.evaluate(memory) - this.rightOperandUnit.evaluate(memory);
+            return this.leftOperandNode.evaluate(memory) - this.rightOperandNode.evaluate(memory);
         }
     }
 
     /**
-     * The evaluator unit for evaluating the value of a multiplication operator.
+     * The evaluator node for evaluating the value of a multiplication operator.
      */
-    public static final class MultiplicationEvaluatorUnit extends BinaryOperationEvaluatorUnit {
+    public static final class MultiplicationEvaluatorNode extends BinaryOperationEvaluatorNode {
 
         /**
          * Initializes operands.
          *
-         * @param leftOperandUnit The unit for evaluating the left-side operand.
-         * @param rightOperandUnit The unit for evaluating the right-side operand.
+         * @param leftOperandNode The node for evaluating the left-side operand.
+         * @param rightOperandNode The node for evaluating the right-side operand.
          */
-        public MultiplicationEvaluatorUnit(EvaluatorUnit leftOperandUnit, EvaluatorUnit rightOperandUnit) {
-            super(leftOperandUnit, rightOperandUnit);
+        public MultiplicationEvaluatorNode(EvaluatorNode leftOperandNode, EvaluatorNode rightOperandNode) {
+            super(leftOperandNode, rightOperandNode);
         }
 
         /**
@@ -1237,23 +1237,23 @@ final class Evaluator {
          */
         @Override
         public double evaluate(double[] memory) {
-            return this.leftOperandUnit.evaluate(memory) * this.rightOperandUnit.evaluate(memory);
+            return this.leftOperandNode.evaluate(memory) * this.rightOperandNode.evaluate(memory);
         }
     }
 
     /**
-     * The evaluator unit for evaluating the value of a division operator.
+     * The evaluator node for evaluating the value of a division operator.
      */
-    public static final class DivisionEvaluatorUnit extends BinaryOperationEvaluatorUnit {
+    public static final class DivisionEvaluatorNode extends BinaryOperationEvaluatorNode {
 
         /**
          * Initializes operands.
          *
-         * @param leftOperandUnit The unit for evaluating the left-side operand.
-         * @param rightOperandUnit The unit for evaluating the right-side operand.
+         * @param leftOperandNode The node for evaluating the left-side operand.
+         * @param rightOperandNode The node for evaluating the right-side operand.
          */
-        public DivisionEvaluatorUnit(EvaluatorUnit leftOperandUnit, EvaluatorUnit rightOperandUnit) {
-            super(leftOperandUnit, rightOperandUnit);
+        public DivisionEvaluatorNode(EvaluatorNode leftOperandNode, EvaluatorNode rightOperandNode) {
+            super(leftOperandNode, rightOperandNode);
         }
 
         /**
@@ -1264,25 +1264,25 @@ final class Evaluator {
          */
         @Override
         public double evaluate(double[] memory) {
-            return this.leftOperandUnit.evaluate(memory) / this.rightOperandUnit.evaluate(memory);
+            return this.leftOperandNode.evaluate(memory) / this.rightOperandNode.evaluate(memory);
         }
     }
 
     /**
-     * The evaluator unit for evaluating the value of a unary-minus operator.
+     * The evaluator node for evaluating the value of a unary-minus operator.
      */
-    public static final class MinusEvaluatorUnit extends EvaluatorUnit {
+    public static final class MinusEvaluatorNode extends EvaluatorNode {
 
-        /** The unit for evaluating the operand. */
-        private final EvaluatorUnit operandUnit;
+        /** The node for evaluating the operand. */
+        private final EvaluatorNode operandNode;
 
         /**
          * Initializes the operand.
          *
-         * @param operandUnit The unit for evaluating the operand
+         * @param operandNode The node for evaluating the operand
          */
-        public MinusEvaluatorUnit(EvaluatorUnit operandUnit) {
-            this.operandUnit = operandUnit;
+        public MinusEvaluatorNode(EvaluatorNode operandNode) {
+            this.operandNode = operandNode;
         }
 
         /**
@@ -1293,14 +1293,14 @@ final class Evaluator {
          */
         @Override
         public double evaluate(double[] memory) {
-            return -this.operandUnit.evaluate(memory);
+            return -this.operandNode.evaluate(memory);
         }
     }
 
     /**
-     * The evaluator unit for evaluating the value of a number literal.
+     * The evaluator node for evaluating the value of a number literal.
      */
-    public static final class NumberLiteralEvaluatorUnit extends EvaluatorUnit {
+    public static final class NumberLiteralEvaluatorNode extends EvaluatorNode {
 
         /** The value of the number literal. */
         private final double value;
@@ -1310,7 +1310,7 @@ final class Evaluator {
          *
          * @param literal The number literal.
          */
-        public NumberLiteralEvaluatorUnit(String literal) {
+        public NumberLiteralEvaluatorNode(String literal) {
             try {
                 this.value = Double.parseDouble(literal);
             } catch (NumberFormatException nfe) {
@@ -1331,9 +1331,9 @@ final class Evaluator {
     }
 
     /**
-     * The evaluator unit for evaluating the value of a variable.
+     * The evaluator node for evaluating the value of a variable.
      */
-    public static final class VariableEvaluatorUnit extends EvaluatorUnit {
+    public static final class VariableEvaluatorNode extends EvaluatorNode {
 
         /** The address of the variable. */
         private volatile int address;
@@ -1343,7 +1343,7 @@ final class Evaluator {
          *
          * @param address The address of the variable.
          */
-        public VariableEvaluatorUnit(int address) {
+        public VariableEvaluatorNode(int address) {
             this.address = address;
         }
 
@@ -1363,10 +1363,10 @@ final class Evaluator {
     }
 
     /**
-     * The evaluator unit for evaluating a function-call operator.
+     * The evaluator node for evaluating a function-call operator.
      *
      */
-    public static final class FunctionEvaluatorUnit extends EvaluatorUnit {
+    public static final class FunctionEvaluatorNode extends EvaluatorNode {
 
         /** The function to be called. */
         private volatile Exevalator.FunctionInterface function;
@@ -1374,8 +1374,8 @@ final class Evaluator {
         /** The name of the function. */
         private volatile String functionName;
 
-        /** Evaluator units for evaluating values of arguments. */
-        private volatile EvaluatorUnit[] argumentEvalUnits;
+        /** Evaluator nodes for evaluating values of arguments. */
+        private volatile EvaluatorNode[] argumentEvalNodes;
 
         /** An array storing evaluated values of arguments. */
         private volatile double[] argumentArrayBuffer;
@@ -1385,14 +1385,14 @@ final class Evaluator {
          *
          * @param function The function to be called.
          * @param functionName The name of the function.
-         * @param argumentEvalUnits Evaluator units for evaluating values of arguments.
+         * @param argumentEvalNodes Evaluator nodes for evaluating values of arguments.
          */
-        public FunctionEvaluatorUnit(
-                Exevalator.FunctionInterface function, String functionName, EvaluatorUnit[] argumentEvalUnits) {
+        public FunctionEvaluatorNode(
+                Exevalator.FunctionInterface function, String functionName, EvaluatorNode[] argumentEvalNodes) {
             this.function = function;
             this.functionName = functionName;
-            this.argumentEvalUnits = argumentEvalUnits;
-            this.argumentArrayBuffer = new double[this.argumentEvalUnits.length];
+            this.argumentEvalNodes = argumentEvalNodes;
+            this.argumentArrayBuffer = new double[this.argumentEvalNodes.length];
         }
 
         /**
@@ -1403,9 +1403,9 @@ final class Evaluator {
          */
         @Override
         public double evaluate(double[] memory) {
-            int argCount = this.argumentEvalUnits.length;
+            int argCount = this.argumentEvalNodes.length;
             for (int iarg=0; iarg<argCount; iarg++) {
-                this.argumentArrayBuffer[iarg] = this.argumentEvalUnits[iarg].evaluate(memory);
+                this.argumentArrayBuffer[iarg] = this.argumentEvalNodes[iarg].evaluate(memory);
             }
             try {
                 return this.function.invoke(this.argumentArrayBuffer);
