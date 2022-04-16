@@ -431,7 +431,9 @@ fn test_variables() {
         0.0
     );
 
-    exevalator.write_variable("x", 1.25);
+    if exevalator.write_variable("x", 1.25).is_err() {
+        panic!("Unexpected error occurred.")
+    }
 
     check(
         "Test of Variables 3",
@@ -439,7 +441,9 @@ fn test_variables() {
         1.25
     );
 
-    exevalator.write_variable_at(x_address, 2.5);
+    if exevalator.write_variable_at(x_address, 2.5).is_err() {
+        panic!("Unexpected error occurred.")
+    }
 
     check(
         "Test of Variables 4",
@@ -448,8 +452,8 @@ fn test_variables() {
     );
 
     match exevalator.write_variable_at(100, 5.0) {
-        None => panic!("Expected error has not occurred."),
-        Some(_write_error) => println!("Test of Variables 5"),
+        Ok(_) => panic!("Expected error has not occurred."),
+        Err(_write_error) => println!("Test of Variables 5"),
     }
 
     match exevalator.eval("y") {
@@ -468,7 +472,9 @@ fn test_variables() {
         0.0
     );
 
-    exevalator.write_variable("y", 0.25);
+    if exevalator.write_variable("y", 0.25).is_err() {
+        panic!("Unexpected error occurred.")
+    }
 
     check(
         "Test of Variables 8",
@@ -476,7 +482,9 @@ fn test_variables() {
         0.25
     );
 
-    exevalator.write_variable_at(y_address, 0.5);
+    if exevalator.write_variable_at(y_address, 0.5).is_err() {
+        panic!("Unexpected error occurred.")
+    }
 
     check(
         "Test of Variables 9",
@@ -497,10 +505,10 @@ fn test_variables() {
     if exevalator.declare_variable("y2").is_err() {
         panic!("Variable declaration failed.");
     }
-    if exevalator.write_variable("x2", 22.5).is_some() {
+    if exevalator.write_variable("x2", 22.5).is_err() {
         panic!("Variable access failed.");
     } 
-    if exevalator.write_variable("y2", 32.5).is_some() {
+    if exevalator.write_variable("y2", 32.5).is_err() {
         panic!("Variable access failed.");
     }
     check(

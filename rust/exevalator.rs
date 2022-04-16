@@ -138,15 +138,15 @@ impl<'exvlife> Exevalator<'exvlife> {
     ///
     /// * 'name' - The name of the variable to be written.
     /// * `value` - The new value of the variable.
+    /// * Return value - Nothing, or ExevalatorError if any error detected.
     /// 
     #[allow(dead_code)]
-    pub fn write_variable(&mut self, name: &str, value: f64) -> Option<ExevalatorError> {
+    pub fn write_variable(&mut self, name: &str, value: f64) -> Result<(), ExevalatorError> {
         if self.settings.max_name_char_count < name.len() || !self.variable_table.contains_key(name) {
-            return Some(ExevalatorError::new(&format!("Variable not found: {}", name)));
+            return Err(ExevalatorError::new(&format!("Variable not found: {}", name)));
         }
         let address: usize = *self.variable_table.get(name).unwrap();
-        self.write_variable_at(address, value);
-        return None;
+        return self.write_variable_at(address, value);
     }
 
     /// Writes the value to the variable at the specified virtual address.
@@ -154,14 +154,15 @@ impl<'exvlife> Exevalator<'exvlife> {
     ///
     /// * 'address' - The virtual address of the variable to be written.
     /// * `value` - The new value of the variable.
+    /// * Return value - Nothing, or ExevalatorError if any error detected.
     /// 
     #[allow(dead_code)]
-    pub fn write_variable_at(&mut self, address: usize, value: f64) -> Option<ExevalatorError> {
+    pub fn write_variable_at(&mut self, address: usize, value: f64) -> Result<(), ExevalatorError> {
         if self.memory.len() <= address  {
-            return Some(ExevalatorError::new(&format!("Invalid variable address: {}", address)));
+            return Err(ExevalatorError::new(&format!("Invalid variable address: {}", address)));
         }
         self.memory[address] = value;
-        return None;
+        return Ok(());
     }
 
     /// Reads the value of the variable having the specified name.
@@ -287,13 +288,13 @@ impl LexicalAnalyzer {
         };
 
         // Check syntactic correctness of tokens.
-        if let Some(syntax_error) = LexicalAnalyzer::check_parenthesis_opening_closings(&tokens) {
+        if let Err(syntax_error) = LexicalAnalyzer::check_parenthesis_opening_closings(&tokens) {
             return Err(syntax_error);
         }
-        if let Some(syntax_error) = LexicalAnalyzer::check_empty_parentheses(&tokens) {
+        if let Err(syntax_error) = LexicalAnalyzer::check_empty_parentheses(&tokens) {
             return Err(syntax_error);
         }
-        if let Some(syntax_error) = LexicalAnalyzer::check_locations_of_operators_and_leafs(&tokens) {
+        if let Err(syntax_error) = LexicalAnalyzer::check_locations_of_operators_and_leafs(&tokens) {
             return Err(syntax_error);
         }
         return Ok(tokens);
@@ -535,9 +536,9 @@ impl LexicalAnalyzer {
     /// Checks syntactic correctness of tokens of inputted expressions.
     ///
     /// * `tokens` - Tokens to be checked.
-    /// * Return value - The error if detected.
+    /// * Return value - Nothing, or ExevalatorError if any error detected.
     ///
-    fn check_parenthesis_opening_closings(tokens: &Vec<Token>) -> Option<ExevalatorError> {
+    fn check_parenthesis_opening_closings(tokens: &Vec<Token>) -> Result<(), ExevalatorError> {
         let token_count: usize = tokens.len();
         let mut hierarchy: i64 = 0; // Increases at "(" and decreases at ")".
 
@@ -551,7 +552,7 @@ impl LexicalAnalyzer {
 
             // If the value of hierarchy is negative, the open parenthesis is deficient.
             if hierarchy < 0 {
-                return Some(ExevalatorError::new(
+                return Err(ExevalatorError::new(
                     "The number of open parenthesis \"(\" is deficient."
                 ));
             }
@@ -560,19 +561,19 @@ impl LexicalAnalyzer {
         // If the value of hierarchy is not zero at the end of the expression,
         // the closed parentheses ")" is deficient.
         if hierarchy > 0 {
-            return Some(ExevalatorError::new(
+            return Err(ExevalatorError::new(
                 "The number of closed parenthesis \")\" is deficient."
             ));
         }
-        return None;
+        return Ok(());
     }
 
     /// Checks that empty parentheses "()" are not contained in the expression.
     ///
     /// * `tokens` - Tokens to be checked.
-    /// * Return value - The error if detected.
+    /// * Return value - Nothing, or ExevalatorError if any error detected.
     ///
-    fn check_empty_parentheses(tokens: &Vec<Token>) -> Option<ExevalatorError> {
+    fn check_empty_parentheses(tokens: &Vec<Token>) -> Result<(), ExevalatorError> {
         let token_count: usize = tokens.len();
         let mut content_counter: usize = 0;
 
@@ -583,7 +584,7 @@ impl LexicalAnalyzer {
                     content_counter = 0;
                 } else if token.word.eq(")") {
                     if content_counter == 0 {
-                        return Some(ExevalatorError::new(
+                        return Err(ExevalatorError::new(
                             "The content parentheses \"()\" should not be empty (excluding function calls)."
                         ));
                     }
@@ -592,15 +593,15 @@ impl LexicalAnalyzer {
                 content_counter += 1;
             }
         }
-        return None;
+        return Ok(());
     }
 
     /// Checks correctness of locations of operators and leaf elements (literals and identifiers).
     ///
     /// * `tokens` - Tokens to be checked.
-    /// * Return value - The error if detected.
+    /// * Return value - Nothing, or ExevalatorError if any error detected.
     ///
-    fn check_locations_of_operators_and_leafs(tokens: &Vec<Token>) -> Option<ExevalatorError> {
+    fn check_locations_of_operators_and_leafs(tokens: &Vec<Token>) -> Result<(), ExevalatorError> {
         let token_count: usize = tokens.len();
         let mut leaf_type_set: HashSet<TokenType> = HashSet::new();
         leaf_type_set.insert(TokenType::NumberLiteral);
@@ -633,7 +634,7 @@ impl LexicalAnalyzer {
 
                     // Only leafs, open parentheses, and unary-prefix operators can be operands.
                     if !(next_is_leaf || next_is_open_parenthesis || next_is_prefix_operator) {
-                        return Some(ExevalatorError::new(
+                        return Err(ExevalatorError::new(
                             &format!("An operand is required at the right of: \"{}\"", token.word)
                         ));
                     }
@@ -644,13 +645,13 @@ impl LexicalAnalyzer {
 
                     // Only leaf elements, open parenthesis, and unary-prefix operator can be a right-operand.
                     if !(next_is_leaf || next_is_open_parenthesis || next_is_prefix_operator || next_is_function_identifier) {
-                        return Some(ExevalatorError::new(
+                        return Err(ExevalatorError::new(
                             &format!("An operand is required at the right of: \"{}\"", token.word)
                         ));
                     }
                     // Only leaf elements and closed parenthesis can be a right-operand.
                     if !(prev_is_leaf || prev_is_close_parenthesis) {
-                        return Some(ExevalatorError::new(
+                        return Err(ExevalatorError::new(
                             &format!("An operand is required at the left of: \"{}\"", token.word)
                         ));
                     }
@@ -663,21 +664,21 @@ impl LexicalAnalyzer {
 
                 // An other leaf element or an open parenthesis can not be at the right of an leaf element.
                 if !next_is_function_call_begin && (next_is_open_parenthesis || next_is_leaf) {
-                    return Some(ExevalatorError::new(
+                    return Err(ExevalatorError::new(
                         &format!("An operator is required at the right of: \"{}\"", token.word)
                     ));
                 }
 
                 // An other leaf element or a closed parenthesis can not be at the left of an leaf element.
                 if prev_is_close_parenthesis || prev_is_leaf {
-                    return Some(ExevalatorError::new(
+                    return Err(ExevalatorError::new(
                         &format!("An operator is required at the left of: \"{}\"", token.word)
                     ));
                 }
             } // Case of leaf elements
         } // Loops for each token
 
-        return None;
+        return Ok(());
     }
 }
 
@@ -811,8 +812,8 @@ impl Parser {
         // Check that the depth of the constructed AST does not exceeds the limit,
         // and return the AST if its depth does not exceed the limti. 
         match root_node_of_expression_ast.check_depth(1, settings.max_ast_depth) {
-            Some(ast_depth_error) => return Err(ast_depth_error),
-            None => return Ok(root_node_of_expression_ast),
+            Err(ast_depth_error) => return Err(ast_depth_error),
+            Ok(()) => return Ok(root_node_of_expression_ast),
         }
     }
 
@@ -1062,19 +1063,22 @@ impl AstNode {
     /// If the depth does not exceeds the maximum value, nothing will be returned.
     ///
     /// * `depthOfThisNode` The depth of this node in the AST.
-    /// `maxAstDepth` The maximum value of the depth of the AST.
+    /// * `maxAstDepth` The maximum value of the depth of the AST.
+    /// * Return value - Nothing, or ExevalatorError if any error detected.
     ///
-    fn check_depth(&self, depth_of_this_node: u64, max_ast_depth: u64) -> Option<ExevalatorError> {
+    fn check_depth(&self, depth_of_this_node: u64, max_ast_depth: u64) -> Result<(), ExevalatorError> {
         if max_ast_depth < depth_of_this_node {
-            return Some(ExevalatorError::new(&format!(
+            return Err(ExevalatorError::new(&format!(
                 "The depth of the AST exceeds the limit (Settings.max_ast_depth: {})",
                 max_ast_depth
             )));
         }
         for child_node in &self.child_nodes {
-            child_node.check_depth(depth_of_this_node + 1, max_ast_depth);
+            if let Err(depth_error) = child_node.check_depth(depth_of_this_node + 1, max_ast_depth) {
+                return Err(depth_error)
+            }
         }
-        return None;
+        return Ok(());
     }
 
     /// Expresses the AST under this node in XML-like text format.

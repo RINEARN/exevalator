@@ -246,19 +246,19 @@ Exevalator 構造体で提供されている各メソッドの一覧と詳細仕
 
 
 <a id="methods-write-variable"></a>
-| 形式 | fn write_variable(&amp;mut self, name: &amp;str, value: f64) -&gt; Option&lt;ExevalatorError&gt; |
+| 形式 | fn write_variable(&amp;mut self, name: &amp;str, value: f64) -&gt; Result&lt;(), ExevalatorError&gt; |
 |:---|:---|
 | 説明 | 指定された名前の変数に、値を書き込みます。 |
 | 引数 | name: 書き込み対象の変数の名前<br>value: 書き込む値 |
-| 戻り値 | None: 通常の場合<br>Some: 指定された名前の変数が存在しない場合や、無効な変数名が指定された場合 |
+| 戻り値 | Ok: 通常の場合<br>Err: 指定された名前の変数が存在しない場合や、無効な変数名が指定された場合 |
 
 
 <a id="methods-write-variable-at"></a>
-| 形式 | fn write_variable_at(&amp;mut self, address: usize, value: f64) -&gt; Option&lt;ExevalatorError&gt; |
+| 形式 | fn write_variable_at(&amp;mut self, address: usize, value: f64) -&gt; Result&lt;(), ExevalatorError&gt; |
 |:---|:---|
 | 説明 | 指定された仮想アドレスの位置にある変数に、値を書き込みます。<br>なお、このメソッドは "write_variable" メソッドよりも高速です。 |
 | 引数 | address: 書き込み対象の変数の仮想アドレス<br>value: 書き込む値 |
-| 戻り値 | None: 通常の場合<br>Some: 無効なアドレスが指定された場合 |
+| 戻り値 | Ok: 通常の場合<br>Err: 無効なアドレスが指定された場合 |
 
 
 <a id="methods-read-variable"></a>

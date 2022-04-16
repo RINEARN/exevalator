@@ -13,8 +13,8 @@ fn main() {
         Err(declaration_error) => panic!("{}", declaration_error)
     };
     match exevalator.write_variable("x", 1.25) {
-        Some(access_error) => panic!("{}", access_error),
-        None => {},
+        Ok(_) => {},
+        Err(access_error) => panic!("{}", access_error),
     };
 
     // Evaluate the value of an expression

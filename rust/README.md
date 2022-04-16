@@ -233,19 +233,19 @@ The list of methods of Exevalator struct, and their specifications.
 
 
 <a id="methods-write-variable"></a>
-| Signature | fn write_variable(&amp;mut self, name: &amp;str, value: f64) -&gt; Option&lt;ExevalatorError&gt; |
+| Signature | fn write_variable(&amp;mut self, name: &amp;str, value: f64) -&gt; Result&lt;(), ExevalatorError&gt; |
 |:---|:---|
 | Description | Writes the value to the variable having the specified name. |
 | Parameters | name: The name of the variable to be written.<br>value: The new value of the variable. |
-| Return | None: Normal result.<br>Some: If the specified variable is not found, or if invalid variable name is specified. |
+| Return | Ok: Normal result.<br>Err: If the specified variable is not found, or if invalid variable name is specified. |
 
 
 <a id="methods-write-variable-at"></a>
-| Signature | fn write_variable_at(&amp;mut self, address: usize, value: f64) -&gt; Option&lt;ExevalatorError&gt; |
+| Signature | fn write_variable_at(&amp;mut self, address: usize, value: f64) -&gt; Result&lt;(), ExevalatorError&gt; |
 |:---|:---|
 | Description | Writes the value to the variable at the specified virtual address.<br>This method works faster than "write_variable" method. |
 | Parameters | address: The virtual address of the variable to be written.<br>value: The new value of the variable. |
-| Return | None: Normal result.<br>Some: If invalid address is specified. |
+| Return | Ok: Normal result.<br>Err: If invalid address is specified. |
 
 
 <a id="methods-read-variable"></a>

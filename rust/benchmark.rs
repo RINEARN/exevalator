@@ -23,7 +23,11 @@ fn main() {
     // where each 10 numerical operations are required for each evaluation.
     let begin_time: Instant = Instant::now();
     for i in 1u64..(loops + 1u64) {
-        exevalator.write_variable_at(address, i as f64);
+
+        if let Err(variable_access_err) = exevalator.write_variable_at(address, i as f64) {
+            panic!("{}", variable_access_err);
+        }
+
         sum += match exevalator.eval("x + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1") {
             Ok(eval_value) => eval_value,
             Err(eval_error) => panic!("{}", eval_error),

@@ -12,9 +12,12 @@ fn main() {
         Ok(declared_var_address) => declared_var_address,
         Err(declaration_error) => panic!("{}", declaration_error),
     };
-    exevalator.write_variable_at(address, 1.25);
+    match exevalator.write_variable_at(address, 1.25) {
+        Ok(_) => {},
+        Err(access_error) => panic!("{}", access_error),
+    };
     // The above works faster than:
-    //     exevalator.write_variable("x", 1.25);
+    // ... exevalator.write_variable("x", 1.25) ...
 
     // Evaluate the value of an expression
     let result: f64 = match exevalator.eval("x + 1") {
