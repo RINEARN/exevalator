@@ -1,5 +1,5 @@
 /*
- * Exevalator Ver.1.0.1 - by RINEARN 2021-2022
+ * Exevalator Ver.1.0.2 - by RINEARN 2021-2022
  * This software is released under the CC0.
  */
 
