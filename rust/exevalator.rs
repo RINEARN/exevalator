@@ -18,14 +18,14 @@ pub struct Exevalator<'exvlife> {
     /// The Vec used as as a virtual memory storing values of variables.
     memory: Vec<f64>,
 
+    /// The object evaluating the value of the expression.
+    evaluator: Evaluator,
+
     /// The HashMap mapping each name of a variable to an addresses on the virtual memory.
     variable_table: HashMap<String, usize>,
 
     /// The HashMap mapping each name of a function to a function pointer.
     function_table: HashMap<String, fn(Vec<f64>)->Result<f64,ExevalatorError> >,
-
-    /// The tree of evaluator nodes, which evaluates an expression.
-    evaluator_node_tree: Option<Box<dyn EvaluatorNode>>,
 
     /// Caches the content of the expression evaluated last time, to skip re-parsing.
     last_evaluated_expression: &'exvlife str,
@@ -44,7 +44,7 @@ impl<'exvlife> Exevalator<'exvlife> {
             memory: Vec::new(),
             variable_table: HashMap::new(),
             function_table: HashMap::new(),
-            evaluator_node_tree: None,
+            evaluator: Evaluator::new(),
             last_evaluated_expression: "",
         }
     }
@@ -64,7 +64,7 @@ impl<'exvlife> Exevalator<'exvlife> {
         }
 
         // If the expression changed from the last-evaluated expression, re-parsing is necessary.
-        if self.evaluator_node_tree.is_none() || !expression.eq(self.last_evaluated_expression) {
+        if !expression.eq(self.last_evaluated_expression) || !self.evaluator.is_evaluatable() {
 
             // Perform lexical analysis, and get tokens from the inputted expression.
             let tokens: Vec<Token> = match LexicalAnalyzer::analyze( &(expression.to_string()), &self.settings) {
@@ -78,9 +78,8 @@ impl<'exvlife> Exevalator<'exvlife> {
                 Err(parser_error) => return Err(parser_error),
             };
 
-            // Create the tree of evaluator nodes, and get the the root node of it.
-            self.evaluator_node_tree = 
-            match Evaluator::create_evaluator_node_tree(&ast, &self.variable_table, &self.function_table, &self.settings) {
+            // Update the evaluator, to evaluate the parsed AST.
+            match self.evaluator.update(&ast, &self.variable_table, &self.function_table, &self.settings) {
                 Ok(created_node) => Some(created_node),
                 Err(node_creation_error) => return Err(node_creation_error),
             };
@@ -89,15 +88,10 @@ impl<'exvlife> Exevalator<'exvlife> {
         }
 
         // Evaluate the value of the expression, and return it.
-        if self.evaluator_node_tree.is_some() {
-            let node: &Box<dyn EvaluatorNode> = &(*self.evaluator_node_tree.as_ref().unwrap());
-            match node.evaluate(&self.memory) {
-                Ok(evaluated_value) => return Ok(evaluated_value),
-                Err(evaluation_error) => return Err(evaluation_error),
-            };
-        } else {
-            panic!("Evaluator node is uninitialized.");
-        }
+        match self.evaluator.evaluate(&self.memory) {
+            Ok(evaluated_value) => return Ok(evaluated_value),
+            Err(evaluation_error) => return Err(evaluation_error),
+        };
     }
 
     /// Re-evaluates (re-computes) the value of the expression evaluated by "eval" method last time.
@@ -109,11 +103,10 @@ impl<'exvlife> Exevalator<'exvlife> {
     ///
     #[allow(dead_code)]
     pub fn reeval(&mut self) -> Result<f64,ExevalatorError> {
-        if self.evaluator_node_tree.is_none() {
+        if self.evaluator.is_evaluatable() {
             return Err(ExevalatorError::new("\"reeval\" is not available before using \"eval\""));
         } else {
-            let node: &Box<dyn EvaluatorNode> = &(*self.evaluator_node_tree.as_ref().unwrap());
-            match node.evaluate(&self.memory) {
+            match self.evaluator.evaluate(&self.memory) {
                 Ok(evaluated_value) => return Ok(evaluated_value),
                 Err(evaluation_error) => return Err(evaluation_error),
             };
@@ -1133,11 +1126,67 @@ impl AstNode {
 }
 
 
-/// The object to prepare resources for evaluation.
+/// The object for evaluating the value of an AST.
 struct Evaluator {
+    
+    /// The tree of evaluator nodes, which evaluates the value of AST.
+    evaluator_node_tree: Option<Box<dyn EvaluatorNode>>,
+
 }
 
 impl Evaluator {
+
+    /// Creates a new evaluator.
+    ///
+    /// * Return value - The created instance.
+    ///
+    #[allow(dead_code)]
+    pub fn new() -> Self {
+        Self {
+            evaluator_node_tree: None,
+        }
+    }
+
+    /// Updates the state to evaluate the value of the AST.
+    ///
+    /// * `ast` - The root node of the AST to be evaluated.
+    /// * `variable_table` - The HashMap mapping variable names to virtual addresses.
+    /// * `function_table` - The HashMap mapping function names to function pointers.
+    /// * `settings` - The struct storing values of setting items.
+    /// * Return value - The ExevalatorError if any error detected.
+    /// 
+    fn update(
+        &mut self,
+        ast: &AstNode,
+        variable_table: &HashMap<String, usize>,
+        function_table: &HashMap<String, fn(Vec<f64>)->Result<f64,ExevalatorError> >,
+        settings: &Settings) -> Result<(),ExevalatorError> {
+
+        self.evaluator_node_tree = 
+        match Evaluator::create_evaluator_node_tree(&ast, &variable_table, &function_table, &settings) {
+            Ok(created_node) => Some(created_node),
+            Err(node_creation_error) => return Err(node_creation_error),
+        };
+        return Ok(());
+    }
+
+    /// Returns whether "evaluate" method is available on the current state.
+    ///
+    /// * Return value - True if "evaluate" method is available.
+    ///
+    fn is_evaluatable(&self) -> bool {
+        return !self.evaluator_node_tree.is_none();
+    }
+
+    /// Evaluates the value of the AST set by "update" method.
+    ///
+    /// * `memory` - The Vec used as as a virtual memory storing values of variables.
+    /// * Return value - The evaluated value.
+    ///
+    fn evaluate(&self, memory: &Vec<f64>) -> Result<f64, ExevalatorError> {
+        let node: &Box<dyn EvaluatorNode> = &(*self.evaluator_node_tree.as_ref().unwrap());
+        return node.evaluate(&memory);
+    }
 
     /// Creates a tree of evaluator nodes corresponding with the specified AST.
     ///

@@ -32,6 +32,9 @@ public final class Exevalator {
     /** The current usage (max used index + 1) of the memory. */
     private volatile int memoryUsage;
 
+    /** The object evaluating the value of the expression. */
+    private volatile Evaluator evaluator;
+
     /** The Map mapping each variable name to an address of the variable. */
     private volatile Map<String, Integer> variableTable;
 
@@ -41,19 +44,16 @@ public final class Exevalator {
     /** Caches the content of the expression evaluated last time, to skip re-parsing. */
     private volatile String lastEvaluatedExpression;
 
-    /** The tree of evaluator nodes, which evaluates an expression. */
-    private volatile Evaluator.EvaluatorNode evaluatorNodeTree;
-
     /**
      * Creates a new interpreter of the Exevalator.
      */
     public Exevalator() {
         this.memory = new double[64];
         this.memoryUsage = 0;
+        this.evaluator = new Evaluator();
         this.variableTable = new ConcurrentHashMap<String, Integer>();
         this.functionTable = new ConcurrentHashMap<String, FunctionInterface>();
         this.lastEvaluatedExpression = null;
-        this.evaluatorNodeTree = null;
     }
 
     /**
@@ -79,7 +79,7 @@ public final class Exevalator {
             && !expression.equals(this.lastEvaluatedExpression);
 
             // If the expression changed from the last-evaluated expression, re-parsing is necessary.
-            if (this.evaluatorNodeTree == null || expressionChanged) {
+            if (expressionChanged || !this.evaluator.isEvaluatable()) {
 
                 // Split the expression into tokens, and analyze them.
                 Token[] tokens = LexicalAnalyzer.analyze(expression);
@@ -99,14 +99,14 @@ public final class Exevalator {
                 System.out.println(ast.toMarkuppedText());
                 */
 
-                // Create the tree of evaluator nodes, and get the the root node of it.
-                this.evaluatorNodeTree = Evaluator.createEvaluatorNodeTree(ast, this.variableTable, this.functionTable);
+                // Update the evaluator, to evaluate the parsed AST.
+                this.evaluator.update(ast, this.variableTable, this.functionTable);
 
                 this.lastEvaluatedExpression = expression;
             }
 
             // Evaluate the value of the expression, and return it.
-            double evaluatedValue = this.evaluatorNodeTree.evaluate(this.memory);
+            double evaluatedValue = this.evaluator.evaluate(this.memory);
             return evaluatedValue;
 
         } catch (Exevalator.Exception ee) {
@@ -127,10 +127,10 @@ public final class Exevalator {
      * @return The evaluated value
      */
     public synchronized double reeval() {
-        if (this.evaluatorNodeTree == null) {
+        if (!this.evaluator.isEvaluatable()) {
             throw new Exevalator.Exception("\"reeval\" is not available before using \"eval\"");
         } else {
-            double evaluatedValue = this.evaluatorNodeTree.evaluate(this.memory);
+            double evaluatedValue = this.evaluator.evaluate(this.memory);
             return evaluatedValue;
         }
     }
@@ -1050,10 +1050,42 @@ final class AstNode {
 
 
 /**
- * The class providing various types of evaluator nodes
- * which evaluate values of operators, literals, etc.
+ * The class for evaluating the value of an AST.
  */
 final class Evaluator {
+
+    /** The tree of evaluator nodes, which evaluates an expression. */
+    private volatile EvaluatorNode evaluatorNodeTree = null;
+
+    /**
+     * Updates the state to evaluate the value of the AST.
+     *
+     * @param ast The root node of the AST.
+     * @param variableTable The Map mapping each variable name to an address of the variable.
+     * @param functionTable The Map mapping each function name to an IExevalatorFunction instance.
+     */
+    public void update(AstNode ast, Map<String, Integer> variableTable, Map<String, Exevalator.FunctionInterface> functionTable) {
+        this.evaluatorNodeTree = Evaluator.createEvaluatorNodeTree(ast, variableTable, functionTable);
+    }
+
+    /**
+     * Returns whether "evaluate" method is available on the current state.
+     *
+     * @return Return value - True if "evaluate" method is available.
+     */
+    public boolean isEvaluatable() {
+        return this.evaluatorNodeTree != null;
+    }
+
+    /**
+     * Evaluates the value of the AST set by "update" method.
+     *
+     * @param memory The Vec used as as a virtual memory storing values of variables.
+     * @return The evaluated value.
+     */
+    public double evaluate(double[] memory) {
+        return this.evaluatorNodeTree.evaluate(memory);
+    }
 
     /**
      * Creates a tree of evaluator nodes corresponding with the specified AST.

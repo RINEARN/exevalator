@@ -26,14 +26,14 @@ namespace Rinearn.ExevalatorCS
         /// <summary>The List used as as a virtual memory storing values of variables.</summary>
         List<double> Memory;
 
+        /// <summary>The object evaluating the value of the expression.</summary>
+        Evaluator Evaluator;
+
         /// <summary>The Dictionary mapping each variable name to an address of the variable.</summary>
         Dictionary<string, int> VariableTable;
 
         /// <summary>The Dictionary mapping each function name to an IExevalatorFunction instance.</summary>
         Dictionary<string, IExevalatorFunction> FunctionTable;
-
-        /// <summary>The tree of evaluator nodes, which evaluates an expression.</summary>
-        Evaluator.EvaluatorNode? EvaluatorNodeTree;
 
         /// <summary>Caches the content of the expression evaluated last time, to skip re-parsing.</summary>
         string LastEvaluatedExpression;
@@ -44,9 +44,9 @@ namespace Rinearn.ExevalatorCS
         public Exevalator()
         {
             this.Memory = new List<double>();
+            this.Evaluator = new Evaluator();
             this.VariableTable = new Dictionary<string, int>();
             this.FunctionTable = new Dictionary<string, IExevalatorFunction>();
-            this.EvaluatorNodeTree = null;
             this.LastEvaluatedExpression = "";
         }
 
@@ -73,7 +73,7 @@ namespace Rinearn.ExevalatorCS
             try
             {
                 // If the expression changed from the last-evaluated expression, re-parsing is necessary.
-                if (this.EvaluatorNodeTree == null || expression != this.LastEvaluatedExpression)
+                if (expression != this.LastEvaluatedExpression || !this.Evaluator.IsEvaluatable())
                 {
 
                     // Perform lexical analysis, and get tokens from the inputted expression.
@@ -94,14 +94,14 @@ namespace Rinearn.ExevalatorCS
                     Console.WriteLine(ast.ToMarkuppedText());
                     */
 
-                    // Create the tree of evaluator nodes, and get the the root node of it.
-                    this.EvaluatorNodeTree = Evaluator.CreateEvaluatorNodeTree(ast, this.VariableTable, this.FunctionTable);
+                    // Update the evaluator, to evaluate the parsed AST.
+                    this.Evaluator.Update(ast, this.VariableTable, this.FunctionTable);
 
                     this.LastEvaluatedExpression = expression;
                 }
 
                 // Evaluate the value of the expression, and return it.
-                double evaluatedValue = this.EvaluatorNodeTree.evaluate(this.Memory);
+                double evaluatedValue = this.Evaluator.Evaluate(this.Memory);
                 return evaluatedValue;
 
             }
@@ -125,10 +125,10 @@ namespace Rinearn.ExevalatorCS
         /// <returns>The evaluated value</returns>
         public double Reeval()
         {
-            if (this.EvaluatorNodeTree == null) {
+            if (this.Evaluator.IsEvaluatable()) {
                 throw new ExevalatorException("\"Reeval\" is not available before using \"Eval\"");
             } else {
-                double evaluatedValue = this.EvaluatorNodeTree.evaluate(this.Memory);
+                double evaluatedValue = this.Evaluator.Evaluate(this.Memory);
                 return evaluatedValue;
             }
         }
@@ -1232,11 +1232,53 @@ namespace Rinearn.ExevalatorCS
     }
 
     /// <summary>
-    /// The class providing various types of evaluator nodes
-    /// which evaluate values of operators, literals, etc.
+    /// The class for evaluating the value of an AST.
     /// </summary>
     public class Evaluator
     {
+        /// <summary>The tree of evaluator nodes, which evaluates an expression.</summary>
+        private EvaluatorNode? evaluatorNodeTree = null;
+
+        /// <summary>
+        /// Updates the state to evaluate the value of the AST.
+        /// </summary>
+        /// <param name="ast">The root node of the AST.</param>
+        /// <param name="variableTable"> The Map mapping each variable name to an address of the variable.</param>
+        /// <param name="functionTable"> The Map mapping each function name to an IExevalatorFunction instance.</param>
+        public void Update(
+                AstNode ast,
+                Dictionary<String, int> variableTable,
+                Dictionary<String, IExevalatorFunction> functionTable)
+        {
+            this.evaluatorNodeTree = Evaluator.CreateEvaluatorNodeTree(ast, variableTable, functionTable);
+        }
+
+        /// <summary>
+        /// Returns whether "evaluate" method is available on the current state.
+        /// </summary>
+        /// <returns>Return value - True if "evaluate" method is available.</returns>
+        public bool IsEvaluatable()
+        {
+            return this.evaluatorNodeTree != null;
+        }
+
+        /// <summary>
+        /// Evaluates the value of the AST set by "update" method.
+        /// </summary>
+        /// <param name="memory">The Vec used as as a virtual memory storing values of variables.</param>
+        /// <returns>The evaluated value.</returns>
+        public double Evaluate(List<double> memory)
+        {
+            if (this.evaluatorNodeTree == null)
+            {
+                throw new ExevalatorException("The Evaluator is not initialized but \"evaluate\" method is called.");
+            }
+            else
+            {
+                return this.evaluatorNodeTree.Evaluate(memory);
+            }
+        }
+
         /// <summary>
         /// Creates a tree of evaluator nodes corresponding with the specified AST.
         /// </summary>
@@ -1347,7 +1389,7 @@ namespace Rinearn.ExevalatorCS
             /// </summary>
             /// <param name="memory">The List storing values of variables.</param>
             /// <returns>The result value of the evaluation</returns>
-            public abstract double evaluate(List<double> memory);
+            public abstract double Evaluate(List<double> memory);
         }
 
         /// <summary>
@@ -1394,9 +1436,9 @@ namespace Rinearn.ExevalatorCS
             /// </summary>
             /// <param name="memory">The List storing values of variables.</param>
             /// <returns>The result value of the addition</returns>
-            public override double evaluate(List<double> memory)
+            public override double Evaluate(List<double> memory)
             {
-                return this.LeftOperandNode.evaluate(memory) + this.RightOperandNode.evaluate(memory);
+                return this.LeftOperandNode.Evaluate(memory) + this.RightOperandNode.Evaluate(memory);
             }
         }
 
@@ -1420,9 +1462,9 @@ namespace Rinearn.ExevalatorCS
             /// </summary>
             /// <param name="memory">The List storing values of variables.</param>
             /// <returns>The result value of the subtraction</returns>
-            public override double evaluate(List<double> memory)
+            public override double Evaluate(List<double> memory)
             {
-                return this.LeftOperandNode.evaluate(memory) - this.RightOperandNode.evaluate(memory);
+                return this.LeftOperandNode.Evaluate(memory) - this.RightOperandNode.Evaluate(memory);
             }
         }
 
@@ -1446,9 +1488,9 @@ namespace Rinearn.ExevalatorCS
             /// </summary>
             /// <param name="memory">The List storing values of variables.</param>
             /// <returns>The result value of the multiplication</returns>
-            public override double evaluate(List<double> memory)
+            public override double Evaluate(List<double> memory)
             {
-                return this.LeftOperandNode.evaluate(memory) * this.RightOperandNode.evaluate(memory);
+                return this.LeftOperandNode.Evaluate(memory) * this.RightOperandNode.Evaluate(memory);
             }
         }
 
@@ -1472,9 +1514,9 @@ namespace Rinearn.ExevalatorCS
             /// </summary>
             /// <param name="memory">The List storing values of variables.</param>
             /// <returns>The result value of the division</returns>
-            public override double evaluate(List<double> memory)
+            public override double Evaluate(List<double> memory)
             {
-                return this.LeftOperandNode.evaluate(memory) / this.RightOperandNode.evaluate(memory);
+                return this.LeftOperandNode.Evaluate(memory) / this.RightOperandNode.Evaluate(memory);
             }
         }
 
@@ -1500,9 +1542,9 @@ namespace Rinearn.ExevalatorCS
             /// </summary>
             /// <param name="memory">The List storing values of variables.</param>
             /// <returns>The result value of the unary-minus operation</returns>
-            public override double evaluate(List<double> memory)
+            public override double Evaluate(List<double> memory)
             {
-                return -this.OperandNode.evaluate(memory);
+                return -this.OperandNode.Evaluate(memory);
             }
         }
 
@@ -1528,7 +1570,7 @@ namespace Rinearn.ExevalatorCS
             /// </summary>
             /// <param name="memory">The List storing values of variables.</param>
             /// <returns>The value of the number literal</returns>
-            public override double evaluate(List<double> memory)
+            public override double Evaluate(List<double> memory)
             {
                 return this.LiteralValue;
             }
@@ -1556,7 +1598,7 @@ namespace Rinearn.ExevalatorCS
             /// </summary>
             /// <param name="memory">The List storing values of variables.</param>
             /// <returns>The value of the variable</returns>
-            public override double evaluate(List<double> memory)
+            public override double Evaluate(List<double> memory)
             {
                 if (this.Address < 0 || memory.Count <= this.Address)
                 {
@@ -1597,11 +1639,11 @@ namespace Rinearn.ExevalatorCS
             /// </summary>
             /// <param name="memory">The List storing values of variables.</param>
             /// <returns>The returned value of the function</returns>
-            public override double evaluate(List<double> memory)
+            public override double Evaluate(List<double> memory)
             {
                 for (int iarg = 0; iarg < this.ArgumentEvalNodes.Length; iarg++)
                 {
-                    this.ArgumentArrayBuffer[iarg] = this.ArgumentEvalNodes[iarg].evaluate(memory);
+                    this.ArgumentArrayBuffer[iarg] = this.ArgumentEvalNodes[iarg].Evaluate(memory);
                 }
                 return this.Function.Invoke(this.ArgumentArrayBuffer);
             }
@@ -1623,7 +1665,7 @@ namespace Rinearn.ExevalatorCS
             /// Performs nothing.
             /// </summary>
             /// <returns>The value of NaN.</returns>
-            public override double evaluate(List<double> memory)
+            public override double Evaluate(List<double> memory)
             {
                 return System.Double.NaN;
             }

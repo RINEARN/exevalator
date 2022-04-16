@@ -59,7 +59,7 @@ double Exevalator::eval(const std::string &expression) {
 
     try {
         // If the expression changed from the last-evaluated expression, re-parsing is necessary.
-        if (!(this->evaluator_node_tree) || !(this->last_evaluated_expression == expression)) {
+        if (!(this->last_evaluated_expression == expression) || !(this->evaluator.is_evaluatable())) {
 
             // Perform lexical analysis, and get tokens from the inputted expression.
             std::vector<Token> tokens = LexicalAnalyzer::analyze(std::string(expression), settings);
@@ -79,8 +79,8 @@ double Exevalator::eval(const std::string &expression) {
             std::cout << ast->to_markupped_text(0) << std::endl;
             */
 
-            // Create the tree of evaluator nodes, and get the the root node of it.
-            this->evaluator_node_tree = Evaluator::create_evaluator_node_tree(
+            // Update the evaluator, to evaluate the parsed AST.
+            this->evaluator.update(
                 this->settings, ast, this->variable_table, this->function_table
             );
 
@@ -88,7 +88,7 @@ double Exevalator::eval(const std::string &expression) {
         }
 
         // Evaluate the value of the expression, and return it.
-        double evaluated_value = this->evaluator_node_tree->evaluate(this->memory);
+        double evaluated_value = this->evaluator.evaluate(this->memory);
         return evaluated_value;
 
     } catch (ExevalatorException ee) {
@@ -109,8 +109,8 @@ double Exevalator::eval(const std::string &expression) {
  * @return The evaluated value
  */
 double Exevalator::reeval() {
-    if (this->evaluator_node_tree) {
-        double evaluated_value = this->evaluator_node_tree->evaluate(this->memory);
+    if (this->evaluator.is_evaluatable()) {
+        double evaluated_value = this->evaluator.evaluate(this->memory);
         return evaluated_value;
     } else {
         throw new ExevalatorException("\"reeval\" is not available before using \"eval\"");
@@ -979,6 +979,44 @@ void AstNode::check_depth(uint64_t depth_of_this_node, uint64_t max_ast_depth) c
     }
 }
 
+
+/*
+ * Updates the state to evaluate the value of the AST.
+ *
+ * @param settings The Setting instance storing setting values
+ * @param ast The root node of the AST
+ * @param variable_table The Map mapping each variable name to an address of the variable
+ * @param function_table The Map mapping each function name to an IExevalatorFunctionInterface instance
+ */
+void Evaluator::update(
+            const Settings &settings,
+            const std::unique_ptr<AstNode> &ast,
+            const std::map<std::string, size_t> &variable_table,
+            const std::map<std::string, std::shared_ptr<ExevalatorFunctionInterface>> &function_table) {
+
+    this->evaluator_node_tree = Evaluator::create_evaluator_node_tree(
+        settings, ast, variable_table, function_table
+    );
+}
+
+/**
+ * Returns whether "evaluate" method is available on the current state.
+ *
+ * @return true if "evaluate" method is available.
+ */
+bool Evaluator::is_evaluatable() {
+    return (bool)this->evaluator_node_tree; // if evaluator_node_tree is a null pointer, returns false
+}
+
+/**
+ * Evaluates the value of the AST set by "update" method.
+ *
+ * @param memory The Vec used as as a virtual memory storing values of variables.
+ * @return The evaluated value.
+ */
+double Evaluator::evaluate(const std::vector<double> &memory) {
+    return this->evaluator_node_tree->evaluate(memory);
+}
 
 /**
  * Creates a tree of evaluator nodes corresponding with the specified AST.

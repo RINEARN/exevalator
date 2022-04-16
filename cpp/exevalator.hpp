@@ -470,8 +470,7 @@ public:
 
 
 /**
- * The class providing various types of evaluator nodes
- * which evaluate values of operators, literals, etc.
+ * The class for evaluating the value of an AST.
  */
 class Evaluator {
 public:
@@ -722,6 +721,38 @@ public:
         double evaluate(const std::vector<double> &memory);
     };
 
+    /** The tree of evaluator nodes, which evaluates an expression. */
+    std::unique_ptr<Evaluator::EvaluatorNode> evaluator_node_tree;
+
+    /*
+     * Updates the state to evaluate the value of the AST.
+     *
+     * @param settings The Setting instance storing setting values
+     * @param ast The root node of the AST
+     * @param variable_table The Map mapping each variable name to an address of the variable
+     * @param function_table The Map mapping each function name to an IExevalatorFunctionInterface instance
+     */
+    void update(
+            const Settings &settings,
+            const std::unique_ptr<AstNode> &ast,
+            const std::map<std::string, size_t> &variable_table,
+            const std::map<std::string, std::shared_ptr<ExevalatorFunctionInterface>> &function_table);
+
+    /**
+     * Returns whether "evaluate" method is available on the current state.
+     *
+     * @return true if "evaluate" method is available.
+     */
+    bool is_evaluatable();
+
+    /**
+     * Evaluates the value of the AST set by "update" method.
+     *
+     * @param memory The Vec used as as a virtual memory storing values of variables.
+     * @return The evaluated value.
+     */
+    double evaluate(const std::vector<double> &memory);
+
     /**
      * Creates a tree of evaluator nodes corresponding with the specified AST.
      *
@@ -750,15 +781,15 @@ class Exevalator {
     /** The vector used as as a virtual memory storing values of variables. */
     std::vector<double> memory;
     
+    /** The object evaluating the value of the expression. */
+    Evaluator evaluator;
+
     /** The Map mapping each variable name to an address of the variable. */
     std::map<std::string, size_t> variable_table;
     
     /** The Map mapping each function name to an IExevalatorFunctionInterface instance. */
     std::map<std::string, std::shared_ptr<ExevalatorFunctionInterface>> function_table;
-    
-    /** The tree of evaluator nodes, which evaluates an expression. */
-    std::unique_ptr<Evaluator::EvaluatorNode> evaluator_node_tree;
-    
+        
     /** Caches the content of the expression evaluated last time, to skip re-parsing. */
     std::string last_evaluated_expression;
 
