@@ -10,7 +10,7 @@ jobs:
     - name: Set-up Environment
       uses: actions/setup-java@v1
       with:
-        java-version: 17
+        java-version: 18
 
     - name: Compile Exevalator
       run: javac Exevalator.java
@@ -56,11 +56,11 @@ jobs:
 
     - name: Compile Example Code
       run: |
-        clang++ -std=c++17 -Wall -o example1 example1.cpp
-        clang++ -std=c++17 -Wall -o example2 example2.cpp
-        clang++ -std=c++17 -Wall -o example3 example3.cpp
-        clang++ -std=c++17 -Wall -o example4 example4.cpp
-        clang++ -std=c++17 -Wall -o example5 example5.cpp
+        clang++ -std=c++20 -Wall -o example1 example1.cpp
+        clang++ -std=c++20 -Wall -o example2 example2.cpp
+        clang++ -std=c++20 -Wall -o example3 example3.cpp
+        clang++ -std=c++20 -Wall -o example4 example4.cpp
+        clang++ -std=c++20 -Wall -o example5 example5.cpp
       working-directory: ./cpp
 
     - name: Run Example Code
@@ -73,7 +73,7 @@ jobs:
       working-directory: ./cpp
 
     - name: Compile Test Code
-      run: clang++ -std=c++17 -Wall -o test test.cpp
+      run: clang++ -std=c++20 -Wall -o test test.cpp
       working-directory: ./cpp
 
     - name: Run Test Code
