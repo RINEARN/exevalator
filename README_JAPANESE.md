@@ -39,7 +39,9 @@ Exevalator は、 そのような機能を提供する、非常にコンパク�
 <a id="license"></a>
 ## ライセンス（著作権フリー）
 
-このライブラリは、実質的な著作権フリー（パブリックドメイン）である [CC0](https://creativecommons.org/publicdomain/zero/1.0/deed.ja) の宣言下で公開されています。
+このライブラリは、実質的な著作権フリー（パブリックドメイン）宣言である「 Unlicense 」ライセンスの下で公開されています。
+
+なお、ユーザーの希望に応じて、代わりに [CC0](https://creativecommons.org/publicdomain/zero/1.0/deed.ja) ライセンスを選択も選択できます。CC0もパブリックドメイン宣言を行うためのものですが、Unlicense と微妙な差異があります。好きな方を選んでください。
 
 
 <a id="how-to-use"></a>

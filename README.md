@@ -41,8 +41,9 @@ Exevalator is a very compact library to provide such feature on Java/Rust/C#/C++
 <a id="license"></a>
 ## License (Copyright-Free)
 
-This library is released under the [CC0](https://creativecommons.org/publicdomain/zero/1.0/deed.en), which is almost the same as the so-called "copyright-free" (public domain). 
+This library is released under the "Unlicense" license, which is almost the same as the so-called "copyright-free" (public domain). 
 
+Also, you can choose the [CC0](https://creativecommons.org/publicdomain/zero/1.0/deed.en) license instead, if you want. The Unlicense and the CC0 is similar in that they are licenses to release something into the public domain, but their details are little different. Choose the one you want.
 
 
 <a id="how-to-use"></a>

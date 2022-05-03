@@ -1,6 +1,7 @@
 /*
  * Exevalator Ver.1.0.3 - by RINEARN 2021-2022
- * This software is released under the CC0.
+ * This software is released under the "Unlicense" license.
+ * You can choose the "CC0" license instead, if you want.
  */
 
 #ifndef EXEVALATOR_CPP
