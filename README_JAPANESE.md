@@ -231,8 +231,9 @@ Exevalator についての情報をもっと知りたい場合は、以下のウ
 
 * 公式サイト (準備中)
 
-* [多言語対応＆著作権フリーの式計算ライブラリ「 Exevalator（エグゼバレータ）」をリリース
-](https://www.rinearn.com/ja-jp/info/news/2022/0416-exevalator) - RINEARN お知らせ 2022/04/16
+* [多言語対応＆著作権フリーの式計算ライブラリ「 Exevalator（エグゼバレータ）」をリリース](https://www.rinearn.com/ja-jp/info/news/2022/0416-exevalator) - RINEARN お知らせ 2022/04/16
+
+* [Exevalator の内部アーキテクチャ解説](https://www.rinearn.com/ja-jp/info/news/2022/0504-exevalator-architecture) - RINEARN お知らせ 2022/05/04
 
 
 <a id="credits"></a>
