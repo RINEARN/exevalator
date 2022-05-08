@@ -236,6 +236,8 @@ Following webpages may be useful if you need more information about Exevalator.
 * [Released "Exevalator": A Multilingual & Copyright-Free Expression Evaluator Library
 ](https://www.rinearn.com/en-us/info/news/2022/0416-exevalator) - RINEARN News 2022/04/16
 
+* [The Internal Architecture of Exevalator](https://www.rinearn.com/en-us/info/news/2022/0504-exevalator-architecture) - RINEARN News 2022/05/04
+
 
 <a id="credits"></a>
 ## Credits
