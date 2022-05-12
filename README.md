@@ -168,7 +168,7 @@ One of the assumed use of Exevalator is calculation/data-analysis software, so w
 
 Especially, Exevalator works in high speed when evaluating (computing) the same expression repeatedly. For example:
 
-	// Declate an variable "x" and get the address
+	// Declare an variable "x" and get the address
 	int varAddress = exevalator.declareVariable("x");
 
 	// Loop taking sum of values of an expression, with changing the value of "x"
