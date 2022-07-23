@@ -229,7 +229,7 @@ Exevalator は、日本の個人運営の開発スタジオ [RINEARN](https://ww
 
 Exevalator についての情報をもっと知りたい場合は、以下のウェブサイトや記事などが参考になるかもしれません。
 
-* 公式サイト (準備中)
+* [公式サイト](https://www.rinearn.com/ja-jp/exevalator/)
 
 * [多言語対応＆著作権フリーの式計算ライブラリ「 Exevalator（エグゼバレータ）」をリリース](https://www.rinearn.com/ja-jp/info/news/2022/0416-exevalator) - RINEARN お知らせ 2022/04/16
 
