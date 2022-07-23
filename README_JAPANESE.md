@@ -6,6 +6,9 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 
 &raquo; [English README](./README.md)
 
+&raquo; [公式サイト](https://www.rinearn.com/ja-jp/exevalator/)
+
+<hr />
 
 ## 日本語版 README 目次
 - <a href="#what-is">Exevalator とは？</a>
