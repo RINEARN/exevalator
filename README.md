@@ -231,7 +231,7 @@ Please free to contact us if you have any questions, feedbacks, and so on!
 
 Following webpages may be useful if you need more information about Exevalator.
 
-* [Official Websit](https://www.rinearn.com/en-us/exevalator/)
+* [Official Website](https://www.rinearn.com/en-us/exevalator/)
 
 * [Released "Exevalator": A Multilingual & Copyright-Free Expression Evaluator Library
 ](https://www.rinearn.com/en-us/info/news/2022/0416-exevalator) - RINEARN News 2022/04/16
