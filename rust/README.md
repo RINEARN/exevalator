@@ -163,6 +163,8 @@ You can define functions available in expressions. Functions having the signatur
 		return Ok(arguments[0] + arguments[1]);
 	} 
 
+**CAUTION: In Ver.1.0, values of arguments passed from expressions had been stored in the above "arguments: Vec\<f64\>" array in reversed order. This behavior has been fixed in Ver.2.0. For details, please see the issue #2.**
+
 You can connect the above function to Exevalator, and use it in expressions:
 
 	// Connect the above function to use it in expressions

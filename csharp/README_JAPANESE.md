@@ -170,6 +170,8 @@ Exevalator のインタープリタは、単一のファイル「 csharp/Exevala
 
 	(参照: csharp/Example5.cs)
 
+**注意: Ver.1.0までは、式から渡された引数が、上記の "double[] arguments" 配列内に逆順で格納されていました。Ver.2.0以降では、式で渡したままの順序となるように修正されました。詳細は Issue #2 をご参照ください。**
+
 
 
 

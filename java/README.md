@@ -167,6 +167,8 @@ You can create functions available in expressions, by implementing Exevalator.Fu
 
 	(See: java/Example5.java)
 
+**CAUTION: In Ver.1.0, values of arguments passed from expressions had been stored in the above "double[] arguments" array in reversed order. This behavior has been fixed in Ver.2.0. For details, please see the issue #2.**
+
 
 <a id="methods"></a>
 ## List of Methods/Specifications

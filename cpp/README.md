@@ -229,7 +229,9 @@ You can create functions available in expressions, by inheriting the abstract cl
 
 	(See: cpp/example5.cpp)
 
-Please note that, as variable-related functions, above function-related methods can throw ExevalatorException.
+**CAUTION: In Ver.1.0, values of arguments passed from expressions had been stored in the above "const std::vector\<double\> &arguments" array in reversed order. This behavior has been fixed in Ver.2.0. For details, please see the issue #2.**
+
+Please note that, as variable-related methods, above function-related methods can throw ExevalatorException.
 In addition, exception may occur in process of a functions called in an expression evaluated by "eval" method.
 (For example, in the above example, the function implemented in MyFun class throws an exception when too many/few arguments are passed.)
 In such case, "eval" method re-throws the exception by wrapping ExevalatorException.
