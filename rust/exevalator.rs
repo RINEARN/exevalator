@@ -783,12 +783,13 @@ impl Parser {
                         itoken += 1;
                         continue;
                     } else { // Case of ")"
-                        let arg_nodes: Vec<AstNode> = match Parser::pop_partial_expr_nodes(&mut stack, &call_begin_lid_token) {
+                        let mut arg_nodes: Vec<AstNode> = match Parser::pop_partial_expr_nodes(&mut stack, &call_begin_lid_token) {
                             Ok(popped_nodes) => popped_nodes,
                             Err(popping_error) => return Err(popping_error),
                         };
                         operator_node = Some(stack.pop_back().unwrap());
                         opnode_mut_ref = operator_node.as_mut().unwrap();
+                        arg_nodes.reverse();
                         for arg_node in arg_nodes {
                             opnode_mut_ref.child_nodes.push(arg_node);
                         }

@@ -700,9 +700,10 @@ final class Parser {
                         continue;
                     } else { // Case of ")"
                         AstNode[] argNodes = popPartialExprNodes(stack, callBeginStackLid);
+                        int argCount = argNodes.length;
                         operatorNode = stack.pop();
-                        for (AstNode argNode: argNodes) {
-                            operatorNode.childNodeList.add(argNode);
+                        for (int iarg=0; iarg<argCount; iarg++) {
+                            operatorNode.childNodeList.add(argNodes[argCount - iarg - 1]); // Adding and reversing the order.
                         }
                     }
                 }

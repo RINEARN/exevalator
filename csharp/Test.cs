@@ -720,6 +720,30 @@ class Test
         }
     }
 
+    class FunctionD : IExevalatorFunction
+    {
+        public double Invoke(double[] args)
+        {
+            if (args.Length != 3)
+            {
+                throw new ExevalatorException("Incorrect number of arguments");
+            }
+            if (args[0] != 1.25)
+            {
+                throw new ExevalatorException("The value of args[0] is incorrect");
+            }
+            if (args[1] != 2.5)
+            {
+                throw new ExevalatorException("The value of args[1] is incorrect");
+            }
+            if (args[2] != 5.0)
+            {
+                throw new ExevalatorException("The value of args[2] is incorrect");
+            }
+            return 0.0;
+        }
+    }
+
     private static void TestFunctions()
     {
         Exevalator exevalator = new Exevalator();
@@ -795,6 +819,13 @@ class Test
             "Test of Functions 10",
             exevalator.Eval("2 + 256 * funA() * funC(funC(funA(), 3.5 * funB(2.5) / 2.0), funB(1.0)) * 128"),
             2.0 + 256.0 * (1.25 * (1.25 + 3.5 * 2.5 / 2.0 + 1.0)) * 128.0
+        );
+
+        exevalator.ConnectFunction("funD", new FunctionD());
+        Check(
+            "Test of Functions 11",
+            exevalator.Eval("funD(1.25, 2.5, 5.0)"),
+            0.0
         );
     }
 

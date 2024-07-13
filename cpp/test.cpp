@@ -601,6 +601,24 @@ class FunctionC : public exevalator::ExevalatorFunctionInterface {
     }
 };
 
+class FunctionD : public exevalator::ExevalatorFunctionInterface {
+    double operator()(const std::vector<double> &arguments) {
+        if (arguments.size() != 3) {
+            throw new exevalator::ExevalatorException("Incorrect number of args");
+        }
+        if (arguments[0] != 1.25) {
+            throw new exevalator::ExevalatorException("The value of arguments[0] is incorrect");
+        }
+        if (arguments[1] != 2.5) {
+            throw new exevalator::ExevalatorException("The value of arguments[1] is incorrect");
+        }
+        if (arguments[2] != 5.0) {
+            throw new exevalator::ExevalatorException("The value of arguments[2] is incorrect");
+        }
+        return 0.0;
+    }
+};
+
 void test_functions() {
     Exevalator exevalator;
 
@@ -669,6 +687,13 @@ void test_functions() {
         "Test of Functions 10",
         exevalator.eval("2 + 256 * funA() * funC(funC(funA(), 3.5 * funB(2.5) / 2.0), funB(1.0)) * 128"),
         2.0 + 256.0 * (1.25 * (1.25 + 3.5 * 2.5 / 2.0 + 1.0)) * 128.0
+    );
+
+    exevalator.connect_function("funD", std::make_shared<FunctionD>());
+    check(
+        "Test of Functions 11",
+        exevalator.eval("funD(1.25, 2.5, 5.0)"),
+        0.0
     );
 }
 

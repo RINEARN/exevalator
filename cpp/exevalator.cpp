@@ -785,10 +785,11 @@ std::unique_ptr<AstNode> Parser::parse(const std::vector<Token> &tokens) {
                 } else { // Case of ")"
                     std::vector<std::unique_ptr<AstNode>> arg_nodes;
                     Parser::pop_partial_expr_nodes(arg_nodes, stack, call_begin_lid_token);
+                    size_t arg_count = arg_nodes.size();
                     operator_node = std::move(stack.back());
                     stack.pop_back();
-                    for (std::unique_ptr<AstNode> &arg_node: arg_nodes) {
-                        operator_node->child_nodes.push_back(std::move(arg_node));
+                    for (size_t iarg=0; iarg<arg_count; ++iarg) {
+                        operator_node->child_nodes.push_back(std::move(arg_nodes[arg_count - iarg - 1])); // Adding and reversing the order.
                     }
                 }
             }

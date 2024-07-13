@@ -762,10 +762,11 @@ namespace Rinearn.ExevalatorCS
                         else
                         { // Case of ")"
                             AstNode[] argNodes = Parser.PopPartialExprNodes(stack, callBeginStackLidToken);
+                            int argCount = argNodes.Length;
                             operatorNode = stack.Pop();
-                            foreach (AstNode argNode in argNodes)
+                            for (int iarg=0; iarg<argCount; iarg++)
                             {
-                                operatorNode.ChildNodeList.Add(argNode);
+                                operatorNode.ChildNodeList.Add(argNodes[argCount - iarg - 1]); // Adding and reversing the order.
                             }
                         }
                     }

@@ -540,6 +540,22 @@ fn function_c(arguments: Vec<f64>) -> Result<f64, ExevalatorError> {
     return Ok(arguments[0] + arguments[1]);
 } 
 
+fn function_d(arguments: Vec<f64>) -> Result<f64, ExevalatorError> {
+    if arguments.len() != 3 {
+        return Err(ExevalatorError::new("Incorrect number of args"));
+    }
+    if arguments[0] != 1.25 {
+        return Err(ExevalatorError::new("The value of arguments[0] is incorrect"));
+    }
+    if arguments[1] != 2.5 {
+        return Err(ExevalatorError::new("The value of arguments[1] is incorrect"));
+    }
+    if arguments[2] != 5.0 {
+        return Err(ExevalatorError::new("The value of arguments[2] is incorrect"));
+    }
+    return Ok(0.0);
+} 
+
 fn test_functions() {
     let mut exevalator: Exevalator = Exevalator::new();
 
@@ -614,6 +630,17 @@ fn test_functions() {
         "Test of Function 10",
         exevalator.eval("2 + 256 * funA() * funC(funC(funA(), 3.5 * funB(2.5) / 2.0), funB(1.0)) * 128"),
         2.0 + 256.0 * (1.25 * (1.25 + 3.5 * 2.5 / 2.0 + 1.0)) * 128.0
+    );
+
+    match exevalator.connect_function("funD", function_d) {
+        Ok(_) => {},
+        Err(_connection_error) => panic!("Failed to connect function."),
+    };
+
+    check(
+        "Test of Function 11",
+        exevalator.eval("funD(1.25, 2.5, 5.0)"),
+        0.0
     );
 }
 
