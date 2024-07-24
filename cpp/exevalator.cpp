@@ -785,11 +785,10 @@ std::unique_ptr<AstNode> Parser::parse(const std::vector<Token> &tokens) {
                 } else { // Case of ")"
                     std::vector<std::unique_ptr<AstNode>> arg_nodes;
                     Parser::pop_partial_expr_nodes(arg_nodes, stack, call_begin_lid_token);
-                    size_t arg_count = arg_nodes.size();
                     operator_node = std::move(stack.back());
                     stack.pop_back();
-                    for (size_t iarg=0; iarg<arg_count; ++iarg) {
-                        operator_node->child_nodes.push_back(std::move(arg_nodes[arg_count - iarg - 1])); // Adding and reversing the order.
+                    for (std::unique_ptr<AstNode> &arg_node: arg_nodes) {
+                        operator_node->child_nodes.push_back(std::move(arg_node));
                     }
                 }
             }
@@ -846,6 +845,7 @@ bool Parser::should_add_right_operand_to_stacked_operator(
 
 /**
  * Pops root nodes of ASTs of partial expressions constructed on the stack.
+ * In the returned array, the popped nodes are stored in FIFO order.
  *
  * @param ret Root nodes of ASTs of partial expressions
  * @param stack The working stack used for the parsing
@@ -872,6 +872,7 @@ void Parser::pop_partial_expr_nodes(
             stack.pop_back();
         }
     }
+    std::reverse(ret.begin(), ret.end());
 }
 
 /**

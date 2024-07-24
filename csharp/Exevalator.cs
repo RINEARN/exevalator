@@ -762,11 +762,10 @@ namespace Rinearn.ExevalatorCS
                         else
                         { // Case of ")"
                             AstNode[] argNodes = Parser.PopPartialExprNodes(stack, callBeginStackLidToken);
-                            int argCount = argNodes.Length;
                             operatorNode = stack.Pop();
-                            for (int iarg=0; iarg<argCount; iarg++)
+                            foreach (AstNode argNode in argNodes)
                             {
-                                operatorNode.ChildNodeList.Add(argNodes[argCount - iarg - 1]); // Adding and reversing the order.
+                                operatorNode.ChildNodeList.Add(argNode);
                             }
                         }
                     }
@@ -823,6 +822,7 @@ namespace Rinearn.ExevalatorCS
 
         /// <summary>
         /// Pops root nodes of ASTs of partial expressions constructed on the stack.
+        /// In the returned array, the popped nodes are stored in FIFO order.
         /// </summary>
         /// <param name="stack">The working stack used for the parsing</param>
         /// <param name="targetStackLidToken">
@@ -851,7 +851,12 @@ namespace Rinearn.ExevalatorCS
                     partialExprNodeList.Add(stack.Pop());
                 }
             }
-            return partialExprNodeList.ToArray();
+            int nodeCount = partialExprNodeList.Count;
+            AstNode[] partialExprNodes = new AstNode[nodeCount];
+            for (int inode=0; inode<nodeCount; inode++) {
+                partialExprNodes[inode] = partialExprNodeList[nodeCount - inode - 1]; // Storing elements in reverse order.
+            }
+            return partialExprNodes;
         }
 
         /// <summary>

@@ -783,13 +783,12 @@ impl Parser {
                         itoken += 1;
                         continue;
                     } else { // Case of ")"
-                        let mut arg_nodes: Vec<AstNode> = match Parser::pop_partial_expr_nodes(&mut stack, &call_begin_lid_token) {
+                        let arg_nodes: Vec<AstNode> = match Parser::pop_partial_expr_nodes(&mut stack, &call_begin_lid_token) {
                             Ok(popped_nodes) => popped_nodes,
                             Err(popping_error) => return Err(popping_error),
                         };
                         operator_node = Some(stack.pop_back().unwrap());
                         opnode_mut_ref = operator_node.as_mut().unwrap();
-                        arg_nodes.reverse();
                         for arg_node in arg_nodes {
                             opnode_mut_ref.child_nodes.push(arg_node);
                         }
@@ -851,6 +850,7 @@ impl Parser {
     }
 
     /// Pops root nodes of ASTs of partial expressions constructed on the stack.
+    /// In the returned array, the popped nodes are stored in FIFO order.
     ///
     /// * `stack` - The working stack used for the parsing.
     /// * `end_stack_lid_node_token` - The token of the temporary node pushed in the stack,
@@ -875,6 +875,7 @@ impl Parser {
                 partial_expr_nodes.push(stack.pop_back().unwrap());
             }
         }
+        partial_expr_nodes.reverse();
         return Ok(partial_expr_nodes);
     }
 

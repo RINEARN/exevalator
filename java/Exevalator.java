@@ -700,10 +700,9 @@ final class Parser {
                         continue;
                     } else { // Case of ")"
                         AstNode[] argNodes = popPartialExprNodes(stack, callBeginStackLid);
-                        int argCount = argNodes.length;
                         operatorNode = stack.pop();
-                        for (int iarg=0; iarg<argCount; iarg++) {
-                            operatorNode.childNodeList.add(argNodes[argCount - iarg - 1]); // Adding and reversing the order.
+                        for (AstNode argNode: argNodes) {
+                            operatorNode.childNodeList.add(argNode);
                         }
                     }
                 }
@@ -758,6 +757,7 @@ final class Parser {
 
     /**
      * Pops root nodes of ASTs of partial expressions constructed on the stack.
+     * In the returned array, the popped nodes are stored in FIFO order.
      *
      * @param stack The working stack used for the parsing.
      * @param endStackLidNode The temporary node pushed in the stack, at the end of partial expressions to be popped.
@@ -778,7 +778,12 @@ final class Parser {
                 partialExprNodeList.add(stack.pop());
             }
         }
-        return partialExprNodeList.toArray(new AstNode[partialExprNodeList.size()]);
+        int nodeCount = partialExprNodeList.size();
+        AstNode[] partialExprNodes = new AstNode[nodeCount];
+        for (int inode=0; inode<nodeCount; inode++) {
+            partialExprNodes[inode] = partialExprNodeList.get(nodeCount - inode - 1); // Storing elements in reverse order.
+        }
+        return partialExprNodes;
     }
 
     /**

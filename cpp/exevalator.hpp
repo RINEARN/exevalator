@@ -437,6 +437,7 @@ class Parser {
 
     /**
      * Pops root nodes of ASTs of partial expressions constructed on the stack.
+     * In the returned array, the popped nodes are stored in FIFO order.
      *
      * @param ret Root nodes of ASTs of partial expressions
      * @param stack The working stack used for the parsing
