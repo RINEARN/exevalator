@@ -17,6 +17,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <stdexcept>
+#include <algorithm>
 
 #include "exevalator.hpp"
 
