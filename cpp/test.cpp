@@ -18,6 +18,7 @@ void test_syntax_checks_of_locations_of_operators_and_leafs();
 void test_variables();
 void test_functions();
 void test_empty_expressions();
+void test_reeval();
 
 /// The minimum error between two double-type values to regard them almost equal.
 const double ALLOWABLE_ERROR = 1.0E-12;
@@ -34,6 +35,7 @@ int main() {
         test_variables();
         test_functions();
         test_empty_expressions();
+        test_reeval();
 
         std::cout << "All tests have completed successfully." << std::endl;
         return EXIT_SUCCESS;
@@ -735,6 +737,65 @@ void test_empty_expressions() {
         std::cout << error.what() << std::endl;
         std::cout << "Test of Empty Expression 4: OK." << std::endl;
     }
+}
+
+
+void test_reeval() {
+    Exevalator exevalator;
+
+    check(
+        "Test of reval() Method 1",
+        exevalator.eval("1.2 + 3.4"),
+        1.2 + 3.4
+    );
+
+    check(
+        "Test of reval() Method 2",
+        exevalator.reeval(),
+        1.2 + 3.4
+    );
+
+    check(
+        "Test of reval() Method 3",
+        exevalator.reeval(),
+        1.2 + 3.4
+    );
+
+    check(
+        "Test of reval() Method 4",
+        exevalator.eval("5.6 - 7.8"),
+        5.6 - 7.8
+    );
+
+    check(
+        "Test of reval() Method 5",
+        exevalator.reeval(),
+        5.6 - 7.8
+    );
+
+    check(
+        "Test of reval() Method 6",
+        exevalator.reeval(),
+        5.6 - 7.8
+    );
+
+    check(
+        "Test of reval() Method 7",
+        exevalator.eval("(1.23 + 4.56) * 7.89"),
+        (1.23 + 4.56) * 7.89
+    );
+
+    check(
+        "Test of reval() Method 8",
+        exevalator.reeval(),
+        (1.23 + 4.56) * 7.89
+    );
+
+    check(
+        "Test of reval() Method 9",
+        exevalator.reeval(),
+        (1.23 + 4.56) * 7.89
+    );
 }
 
 

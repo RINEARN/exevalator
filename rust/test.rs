@@ -16,6 +16,7 @@ fn main() {
     test_variables();
     test_functions();
     test_empty_expressions();
+    test_reeval();
 
     println!("All tests have completed successfully.");
 }
@@ -666,6 +667,65 @@ fn test_empty_expressions() {
         Ok(_eval_ok) => panic!("Expected error has not occurred."),
         Err(_eval_error) => println!("Test of Empty Expressions 4: OK."),
     }
+}
+
+
+fn test_reeval() {
+    let mut exevalator: Exevalator = Exevalator::new();
+ 
+    check(
+        "Test of reval() Method 1",
+        exevalator.eval("1.2 + 3.4"),
+        1.2 + 3.4
+    );
+
+    check(
+        "Test of reval() Method 2",
+        exevalator.reeval(),
+        1.2 + 3.4
+    );
+
+    check(
+        "Test of reval() Method 3",
+        exevalator.reeval(),
+        1.2 + 3.4
+    );
+
+    check(
+        "Test of reval() Method 4",
+        exevalator.eval("5.6 - 7.8"),
+        5.6 - 7.8
+    );
+
+    check(
+        "Test of reval() Method 5",
+        exevalator.reeval(),
+        5.6 - 7.8
+    );
+
+    check(
+        "Test of reval() Method 6",
+        exevalator.reeval(),
+        5.6 - 7.8
+    );
+
+    check(
+        "Test of reval() Method 7",
+        exevalator.eval("(1.23 + 4.56) * 7.89"),
+        (1.23 + 4.56) * 7.89
+    );
+
+    check(
+        "Test of reval() Method 8",
+        exevalator.reeval(),
+        (1.23 + 4.56) * 7.89
+    );
+
+    check(
+        "Test of reval() Method 9",
+        exevalator.reeval(),
+        (1.23 + 4.56) * 7.89
+    );
 }
 
 

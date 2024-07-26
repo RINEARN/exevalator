@@ -18,6 +18,7 @@ class Test
         TestVariables();
         TestFunctions();
         TestEmptyExpressions();
+        TestReeval();
 
         Console.WriteLine("All tests have completed successfully.");
     }
@@ -876,6 +877,66 @@ class Test
             // Expected to be thrown
             Console.WriteLine("Test of Empty Expressions 4: OK.");
         }
+    }
+
+
+    private static void TestReeval()
+    {
+        Exevalator exevalator = new Exevalator();
+
+        Check(
+            "Test of reval() Method 1",
+            exevalator.Eval("1.2 + 3.4"),
+            1.2 + 3.4
+        );
+
+        Check(
+            "Test of reval() Method 2",
+            exevalator.Reeval(),
+            1.2 + 3.4
+        );
+
+        Check(
+            "Test of reval() Method 3",
+            exevalator.Reeval(),
+            1.2 + 3.4
+        );
+
+        Check(
+            "Test of reval() Method 4",
+            exevalator.Eval("5.6 - 7.8"),
+            5.6 - 7.8
+        );
+
+        Check(
+            "Test of reval() Method 5",
+            exevalator.Reeval(),
+            5.6 - 7.8
+        );
+
+        Check(
+            "Test of reval() Method 6",
+            exevalator.Reeval(),
+            5.6 - 7.8
+        );
+
+        Check(
+            "Test of reval() Method 7",
+            exevalator.Eval("(1.23 + 4.56) * 7.89"),
+            (1.23 + 4.56) * 7.89
+        );
+
+        Check(
+            "Test of reval() Method 8",
+            exevalator.Reeval(),
+            (1.23 + 4.56) * 7.89
+        );
+
+        Check(
+            "Test of reval() Method 9",
+            exevalator.Reeval(),
+            (1.23 + 4.56) * 7.89
+        );
     }
 
 
