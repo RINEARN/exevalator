@@ -126,7 +126,7 @@ namespace Rinearn.ExevalatorCS
         /// <returns>The evaluated value</returns>
         public double Reeval()
         {
-            if (this.Evaluator.IsEvaluatable()) {
+            if (!this.Evaluator.IsEvaluatable()) {
                 throw new ExevalatorException("\"Reeval\" is not available before using \"Eval\"");
             } else {
                 double evaluatedValue = this.Evaluator.Evaluate(this.Memory);

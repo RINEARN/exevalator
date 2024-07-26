@@ -104,7 +104,7 @@ impl<'exvlife> Exevalator<'exvlife> {
     ///
     #[allow(dead_code)]
     pub fn reeval(&mut self) -> Result<f64,ExevalatorError> {
-        if self.evaluator.is_evaluatable() {
+        if !self.evaluator.is_evaluatable() {
             return Err(ExevalatorError::new("\"reeval\" is not available before using \"eval\""));
         } else {
             match self.evaluator.evaluate(&self.memory) {
