@@ -128,11 +128,11 @@ public final class Exevalator {
      * @return The evaluated value
      */
     public synchronized double reeval() {
-        if (!this.evaluator.isEvaluatable()) {
-            throw new Exevalator.Exception("\"reeval\" is not available before using \"eval\"");
-        } else {
+        if (this.evaluator.isEvaluatable()) {
             double evaluatedValue = this.evaluator.evaluate(this.memory);
             return evaluatedValue;
+        } else {
+            throw new Exevalator.Exception("\"reeval\" is not available before using \"eval\"");
         }
     }
 
