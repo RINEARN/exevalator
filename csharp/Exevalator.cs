@@ -694,8 +694,8 @@ namespace Rinearn.ExevalatorCS
                     itoken++;
                     continue;
 
-                    // Case of parenthesis: "(" or ")"
                 }
+                // Case of parenthesis: "(" or ")"
                 else if (token.Type == TokenType.Parenthesis)
                 {
                     if (token.Word == "(")
@@ -704,21 +704,20 @@ namespace Rinearn.ExevalatorCS
                         itoken++;
                         continue;
                     }
+                    // Case of ")"
                     else
-                    { // Case of ")"
+                    {
                         operatorNode = Parser.PopPartialExprNodes(stack, parenthesisStackLidToken)[0];
                     }
-
-                    // Case of separator: ","
                 }
+                // Case of separator: ","
                 else if (token.Type == TokenType.ExpressionSeparator)
                 {
                     stack.Push(new AstNode(separatorStackLidToken));
                     itoken++;
                     continue;
-
-                    // Case of operators: "+", "-", etc.
                 }
+                // Case of operators: "+", "-", etc.
                 else if (token.Type == TokenType.Operator)
                 {
                     operatorNode = new AstNode(token);
@@ -734,10 +733,10 @@ namespace Rinearn.ExevalatorCS
                             itoken++;
                         } // else: Operand will be connected later. See the bottom of this loop.
 
-                        // Case of binary operators:
-                        // * Always connect the node of left-token as an operand.
-                        // * Connect the node of right-token as an operand, if necessary (depending the next operator's precedence).
                     }
+                    // Case of binary operators:
+                    // * Always connect the node of left-token as an operand.
+                    // * Connect the node of right-token as an operand, if necessary (depending the next operator's precedence).
                     else if (token.Operator!.Value.Type == OperatorType.Binary)
                     {
                         operatorNode.ChildNodeList.Add(stack.Pop());
@@ -746,9 +745,8 @@ namespace Rinearn.ExevalatorCS
                             operatorNode.ChildNodeList.Add(new AstNode(tokens[itoken + 1]));
                             itoken++;
                         } // else: Right-operand will be connected later. See the bottom of this loop.
-
-                        // Case of function-call operators.
                     }
+                    // Case of function-call operators.
                     else if (token.Operator!.Value.Type == OperatorType.Call)
                     {
                         if (token.Word == "(")
@@ -759,8 +757,9 @@ namespace Rinearn.ExevalatorCS
                             itoken++;
                             continue;
                         }
+                        // Case of ")"
                         else
-                        { // Case of ")"
+                        {
                             AstNode[] argNodes = Parser.PopPartialExprNodes(stack, callBeginStackLidToken);
                             operatorNode = stack.Pop();
                             foreach (AstNode argNode in argNodes)
