@@ -153,3 +153,23 @@ jobs:
         dotnet run --project ./Test
       working-directory: ./csharp
 
+
+  test-for-visual-basic:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '7.0.x'
+
+    - name: Run Test Code
+      run: |
+        dotnet new console -n Test --language VB
+        cp ./Exevalator.vb ./Test/Exevalator.vb
+        cp -f ./Test.vb ./Test/Program.vb
+        dotnet clean ./Test
+        dotnet build ./Test
+        dotnet run --project ./Test
+      working-directory: ./vb
+
+
