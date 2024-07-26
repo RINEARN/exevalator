@@ -132,6 +132,7 @@ jobs:
     - name: Run Example Code
       run: |
         dotnet new console -n Examples
+        sed -i -e "s@<TargetFramework>.*</TargetFramework>@<TargetFramework>net7.0</TargetFramework>@g" ./Examples/Examples.csproj
         cp ./Exevalator.cs ./Examples/Exevalator.cs
         cp -f ./Example1.cs ./Examples/Program.cs
         dotnet run --project ./Examples
@@ -148,6 +149,7 @@ jobs:
     - name: Run Test Code
       run: |
         dotnet new console -n Test
+        sed -i -e "s@<TargetFramework>.*</TargetFramework>@<TargetFramework>net7.0</TargetFramework>@g" ./Test/Test.csproj
         cp ./Exevalator.cs ./Test/Exevalator.cs
         cp -f ./Test.cs ./Test/Program.cs
         dotnet run --project ./Test
@@ -165,10 +167,9 @@ jobs:
     - name: Run Test Code
       run: |
         dotnet new console -n Test --language VB
+        sed -i -e "s@<TargetFramework>.*</TargetFramework>@<TargetFramework>net7.0</TargetFramework>@g" ./Test/Test.csproj
         cp ./Exevalator.vb ./Test/Exevalator.vb
         cp -f ./Test.vb ./Test/Program.vb
-        dotnet clean ./Test
-        dotnet build ./Test
         dotnet run --project ./Test
       working-directory: ./vb
 
