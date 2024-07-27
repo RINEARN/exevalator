@@ -106,14 +106,17 @@ namespace Rinearn.ExevalatorCS
                 return evaluatedValue;
 
             }
-            catch (ExevalatorException ee)
-            {
-                    throw ee;
-            }
-            // Wrap an unexpected exception by Exevalator.Exception and rethrow it.
             catch (Exception e)
             {
-                throw new ExevalatorException("Unexpected exception/error occurred", e);
+                if (e is ExevalatorException)
+                {
+                    throw;
+                }
+                else
+                {
+                    // Wrap an unexpected exception by Exevalator.Exception and rethrow it.
+                    throw new ExevalatorException("Unexpected exception/error occurred", e);
+                }
             }
         }
 

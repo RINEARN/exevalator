@@ -89,10 +89,12 @@ Namespace Rinearn.ExevalatorVB
                 Dim evaluatedValue As Double = Me.Evaluator.Evaluate(Me.Memory)
                 Return evaluatedValue
 
-            Catch ee As ExevalatorException
-                Throw ee
             Catch e As Exception
-                Throw New ExevalatorException("Unexpected exception/error occurred", e)
+                If TypeOf e Is ExevalatorException Then
+                    Throw
+                Else
+                    Throw New ExevalatorException("Unexpected exception/error occurred", e)
+                End If
             End Try
         End Function
 
