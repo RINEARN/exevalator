@@ -1,11 +1,12 @@
+Imports System
 Imports Rinearn.ExevalatorVB
 
 ' IMPORTANT NOTE:
 ' In a VB.NET project, by default,
 ' the project name is implicitly added to the top hierarchy of the project's namespaces.
-' If you execute this code in a project named "Test", you must modify the above Imports statement as follows:
+' If you execute this code in a project named "YourProject", you must modify the above Imports statement as follows:
 '
-'    Imports Test.Rinearn.ExevalatorVB
+'    Imports YourProject.Rinearn.ExevalatorVB
 
 Module Test
 
