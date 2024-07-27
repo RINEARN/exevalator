@@ -5,13 +5,13 @@ using Rinearn.ExevalatorCS;
 /*
  * !!! DON'T FORGET TO SPECIFY OPTIMIZATION OPTIONS WHEN YOU COMPILE THIS CODE !!!
  *     e.g.:
- *           csc -optimize Exevalator.cs Benchmark.cs
+ *           csc -optimize Benchmark.cs Exevalator.cs
  */
 
 /// <summary>
 /// A benchmark to measure the speed of repeated calculations.
 /// </summary>
-static class Example1
+static class Benchmark
 {
     static void Main()
     {
