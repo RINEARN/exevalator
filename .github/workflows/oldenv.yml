@@ -131,19 +131,19 @@ jobs:
         sed -i -e "s@<TargetFramework>.*</TargetFramework>@<TargetFramework>net6.0</TargetFramework>@g" ./Examples/Examples.vbproj
         cp ./Exevalator.vb ./Examples/Exevalator.vb
         cp -f ./Example1.vb ./Examples/Program.vb
-        sed -i -e "s@Imports Rinearn\.ExevalatorVB@Imports Examples\.Rinearn\.ExevalatorVB@g" ./Test/Program.vb
+        sed -i -e "s@Imports Rinearn\.ExevalatorVB@Imports Examples\.Rinearn\.ExevalatorVB@g" ./Examples/Program.vb
         dotnet run --project ./Examples
         cp -f ./Example2.vb ./Examples/Program.vb
-        sed -i -e "s@Imports Rinearn\.ExevalatorVB@Imports Examples\.Rinearn\.ExevalatorVB@g" ./Test/Program.vb
+        sed -i -e "s@Imports Rinearn\.ExevalatorVB@Imports Examples\.Rinearn\.ExevalatorVB@g" ./Examples/Program.vb
         dotnet run --project ./Examples
         cp -f ./Example3.vb ./Examples/Program.vb
-        sed -i -e "s@Imports Rinearn\.ExevalatorVB@Imports Examples\.Rinearn\.ExevalatorVB@g" ./Test/Program.vb
+        sed -i -e "s@Imports Rinearn\.ExevalatorVB@Imports Examples\.Rinearn\.ExevalatorVB@g" ./Examples/Program.vb
         dotnet run --project ./Examples
         cp -f ./Example4.vb ./Examples/Program.vb
-        sed -i -e "s@Imports Rinearn\.ExevalatorVB@Imports Examples\.Rinearn\.ExevalatorVB@g" ./Test/Program.vb
+        sed -i -e "s@Imports Rinearn\.ExevalatorVB@Imports Examples\.Rinearn\.ExevalatorVB@g" ./Examples/Program.vb
         dotnet run --project ./Examples
         cp -f ./Example5.vb ./Examples/Program.vb
-        sed -i -e "s@Imports Rinearn\.ExevalatorVB@Imports Examples\.Rinearn\.ExevalatorVB@g" ./Test/Program.vb
+        sed -i -e "s@Imports Rinearn\.ExevalatorVB@Imports Examples\.Rinearn\.ExevalatorVB@g" ./Examples/Program.vb
         dotnet run --project ./Examples
       working-directory: ./vb
 
