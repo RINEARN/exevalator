@@ -167,9 +167,10 @@ jobs:
     - name: Run Test Code
       run: |
         dotnet new console -n Test --language VB
-        sed -i -e "s@<TargetFramework>.*</TargetFramework>@<TargetFramework>net7.0</TargetFramework>@g" ./Test/Test.csproj
+        sed -i -e "s@<TargetFramework>.*</TargetFramework>@<TargetFramework>net7.0</TargetFramework>@g" ./Test/Test.vbproj
         cp ./Exevalator.vb ./Test/Exevalator.vb
         cp -f ./Test.vb ./Test/Program.vb
+        sed -i -e "s@Imports Rinearn\.ExevalatorVB@Imports Test\.Rinearn\.ExevalatorVB@g" ./Test/Program.vb
         dotnet run --project ./Test
       working-directory: ./vb
 
