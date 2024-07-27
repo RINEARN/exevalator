@@ -5,6 +5,7 @@
 ' Put this code in your source code folder, and import it as
 ' "using Rinearn.ExevalatorCS;" from a source file in which you want to use Exevalator.
 
+Imports System
 Imports System.Collections.Generic
 Imports System.Text.RegularExpressions
 Imports System.Text
