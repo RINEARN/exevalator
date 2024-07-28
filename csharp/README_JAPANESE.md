@@ -142,7 +142,7 @@ Exevalator のインタープリタは、単一のファイル「 csharp/Exevala
 
 ### 3. 関数の使用
 
-式の中で使用するための関数も作成できます。それには、Exevalator.FunctionInterface インターフェースを実装したクラスを作成します：
+式の中で使用するための関数も作成できます。それには、IExevalatorFunction インターフェースを実装したクラスを作成します：
 
 	// 式内で使用できる関数を作成
 	class MyFunction : IExevalatorFunction
