@@ -3,7 +3,7 @@
 ![logo](logo.png)
 
 Exevalator (an abbreviation for **Ex**pression-**Eval**u**ator**) is a compact & high-speed interpreter embeddable in your programs/apps, for computing values of expressions.
-Exevalator is currently available for programs/apps written in Java&reg;, Rust&reg;, C#&reg;, and C++.
+Exevalator is currently available for programs/apps written in Java&trade;, Rust, C#, C++, and Visual Basic&reg;.
 
 
 &raquo; [Japanese README](./README_JAPANESE.md)
@@ -20,6 +20,7 @@ Exevalator is currently available for programs/apps written in Java&reg;, Rust&r
 	- <a href="#how-to-use-rust">How to Use in Rust</a>
 	- <a href="#how-to-use-csharp">How to Use in C#</a>
 	- <a href="#how-to-use-cpp">How to Use in C++</a>
+	- <a href="#how-to-use-vb">How to Use in Visual Basic</a>
 - <a href="#performance">Performance</a>
 - <a href="#about-us">About Us</a>
 - <a href="#references">References</a>
@@ -118,10 +119,10 @@ In "csharp" folder, the C# implementation version of Exevalator, various example
 	double result = exevalator.Eval("1.2 + 3.4");
 	Console.WriteLine("result: " + result);
 
-You can run the above code by importing it from any project on Visual Studio&reg;, and you also can run it in command-lines. The latter is more simple way, so Let's do it here. At first, launch "Developer Command Prompt" which is bundled in Visual Studio (Start button > Visual Studio 20** > ... ). Next, "cd" into the folder of this repository. Then compile example code and run it as follows:
+You can run the above code in any project on Visual Studio&reg;, and you also can run it in command-lines. The latter is more simple way, so Let's do it here. At first, launch "Developer Command Prompt" which is bundled in Visual Studio (Start button > Visual Studio 20** > ... ). Next, "cd" into the folder of this repository. Then compile example code and run it as follows:
 
 	cd csharp
-	csc Exevalator.cs Example1.cs
+	csc Example1.cs Exevalator.cs
 	Example1.exe
 
 The result is:
@@ -159,6 +160,30 @@ The result is:
 
 For more details, see [README for using in C++](./cpp/README.md).
 
+
+
+<a id="how-to-use-vb"></a>
+### How to Use in Visual Basic
+
+In "vb" folder, the Visual Basic (VB.NET) implementation version of Exevalator, various example code, and [README for using in Visual Basic](./vb/README.md) are locating. Most simple example code is "Example1.vb", which computes the value of a simple expression "1.2 + 3.4" as follows:
+
+	(in vb/Example1.vb)
+
+	Dim exevalator As Exevalator = New Exevalator()
+	Dim result As Double = exevalator.Eval("1.2 + 3.4")
+	Console.WriteLine("result: " + result.ToString())
+
+You can run the above code in any project on Visual Studio&reg;, and you also can run it in command-lines. The latter is more simple way, so Let's do it here. At first, launch "Developer Command Prompt" which is bundled in Visual Studio (Start button > Visual Studio 20** > ... ). Next, "cd" into the folder of this repository. Then compile example code and run it as follows:
+
+	cd vb
+	vbc Example1.vb Exevalator.vb
+	Example1.exe
+
+The result is:
+
+	result: 4.6
+
+For more details, see [README for using in Visual Basic](./vb/README.md).
 
 
 
@@ -249,7 +274,7 @@ Following webpages may be useful if you need more information about Exevalator.
 
 - Rust is registered trademarks of Mozilla Foundation and/or its affiliates. 
 
-- Microsoft Windows, C#, and Visual Studio are either a registered trademarks or trademarks of Microsoft Corporation in the United States and/or other countries.
+- Microsoft Windows, C#, Visual Basic, .NET, and Visual Studio are either a registered trademarks or trademarks of Microsoft Corporation in the United States and/or other countries.
 
 - Linux is a trademark of linus torvalds in the United States and/or other countries.
 

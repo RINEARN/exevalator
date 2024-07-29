@@ -2,7 +2,7 @@
 
 ![logo](logo.png)
 
-Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムやアプリ内に組み込んで、式の値の計算に使うための、コンパクトで高速なインタープリタです。複数言語対応で、Java&reg;言語、Rust&reg;、C#&reg;、C++製のプログラムに組み込んで使用できます。
+Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムやアプリ内に組み込んで、式の値の計算に使うための、コンパクトで高速なインタープリタです。複数言語対応で、Java&trade;言語、Rust、C#、C++、Visual Basic&reg;製のプログラムに組み込んで使用できます。
 
 &raquo; [English README](./README.md)
 
@@ -18,6 +18,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 	- <a href="#how-to-use-rust">Rustでの使用方法</a>
 	- <a href="#how-to-use-csharp">C#での使用方法</a>
 	- <a href="#how-to-use-cpp">C++での使用方法</a>
+	- <a href="#how-to-use-vb">Visual Basic での使用方法</a>
 - <a href="#performance">処理速度</a>
 - <a href="#about-us">開発元について</a>
 - <a href="#references">参考情報</a>
@@ -122,7 +123,7 @@ Exevalator は、 そのような機能を提供する、非常にコンパク�
 このコードは、Visual Studio&reg;上で適当なプロジェクト内に取り込んでも実行できますが、ここで即席で動かして確認するには、コマンドラインが便利です。Visual Studio 付属の Developer Command Prompt（スタートボタン > Visual Studio 20** > … ）を起動し、その上でリポジトリのフォルダに cd して、以下のようにコンパイル/実行できます：
 
 	cd csharp
-	csc Exevalator.cs Example1.cs
+	csc Example1.cs Exevalator.cs
 	Example1.exe
 
 結果は以下の通りです：
@@ -159,6 +160,31 @@ Exevalator は、 そのような機能を提供する、非常にコンパク�
 	result: 4.6
 
 より詳しい解説や機能一覧については [C++用README](./cpp/README_JAPANESE.md) をご参照ください。
+
+
+<a id="how-to-use-vb"></a>
+### Visual Basic での使用方法
+
+「 vb 」フォルダ内に、Visual Basic（VB.NET）実装版の Exevalator と用例サンプルコード類、および [Visual Basic用README](./vb/README_JAPANESE.md) があります。
+最もシンプルな用例は「 Example1.vb 」で、以下のように単純な式「 1.2 + 3.4 」を計算する内容になっています：
+
+	(in vb/Example1.vb)
+
+	exevalator As Exevalator = New Exevalator()
+	result As Double = exevalator.Eval("1.2 + 3.4")
+	Console.WriteLine("result: " + result.ToString())
+
+このコードは、Visual Studio&reg;上で適当なプロジェクト内に取り込んでも実行できますが、ここで即席で動かして確認するには、コマンドラインが便利です。Visual Studio 付属の Developer Command Prompt（スタートボタン > Visual Studio 20** > … ）を起動し、その上でリポジトリのフォルダに cd して、以下のようにコンパイル/実行できます：
+
+	cd vb
+	vbc Example1.vb Exevalator.vb
+	Example1.exe
+
+結果は以下の通りです：
+
+	result: 4.6
+
+より詳しい解説や機能一覧については [Visual Basic 用README](./vb/README_JAPANESE.md) をご参照ください。
 
 
 <a id="performance"></a>
@@ -246,7 +272,7 @@ Exevalator についての情報をもっと知りたい場合は、以下のウ
 
 - Rustは、Mozilla Foundation の米国及びその他の国における登録商標です。 
 
-- Windows、C#、Visual Studio は米国 Microsoft Corporation の米国およびその他の国における登録商標です。
+- Windows、C#、Visual Basic、.NET、Visual Studio は米国 Microsoft Corporation の米国およびその他の国における登録商標です。
 
 - Linux は、Linus Torvalds 氏の米国およびその他の国における商標または登録商標です。
 

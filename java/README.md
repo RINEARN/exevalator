@@ -1,4 +1,4 @@
-# How to Use Exevalator in Java&reg;
+# How to Use Exevalator in Java&trade;
 
 &raquo; [Japanese](./README_JAPANESE.md)
 
@@ -25,7 +25,7 @@
 <a id="requirements"></a>
 ## Requirements
 
-* Java&reg; Development Kit (JDK) 8 or later
+* Java Development Kit (JDK) 8 or later
 
 
 

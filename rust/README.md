@@ -1,4 +1,4 @@
-# How to Use Exevalator in Rust&reg;
+# How to Use Exevalator in Rust
 
 &raquo; [Japanese](./README_JAPANESE.md)
 

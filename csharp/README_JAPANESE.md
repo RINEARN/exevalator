@@ -1,4 +1,4 @@
-# C#&reg; での Exevalator の使用方法
+# C# での Exevalator の使用方法
 
 &raquo; [English](./README.md)
 

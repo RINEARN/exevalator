@@ -1,4 +1,4 @@
-# Java&reg; 言語での Exevalator の使用方法
+# Java&trade; 言語での Exevalator の使用方法
 
 &raquo; [English](./README.md)
 
@@ -27,7 +27,7 @@
 <a id="requirements"></a>
 ## 必要な環境
 
-* Java&reg; 開発環境 (JDK) 8 以降
+* Java 開発環境 (JDK) 8 以降
 
 
 

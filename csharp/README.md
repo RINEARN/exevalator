@@ -1,4 +1,4 @@
-# How to Use Exevalator in C#&reg;
+# How to Use Exevalator in C#
 
 &raquo; [Japanese](./README_JAPANESE.md)
 

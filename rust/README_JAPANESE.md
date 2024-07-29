@@ -1,4 +1,4 @@
-# Rust&reg; での Exevalator の使用方法
+# Rust での Exevalator の使用方法
 
 &raquo; [English](./README.md)
 
