@@ -315,7 +315,7 @@ Exevalator クラスで提供されている各メソッドの一覧と詳細仕
 | 形式 | size_t connect_function(const std::string &amp;name, const std::shared_ptr&lt;ExevalatorFunctionInterface&gt; &amp;function_ptr) |
 |:---|:---|
 | 説明 | 式の中で使用するための関数を接続します。 |
-| 引数 | name: 接続する関数の名前<br>function: 関数の処理を提供する ExevalatorFunctionInterface 継承クラスのインスタンス<br>（「 double invoke(const std::vector&lt;double&gt; &arguments) 」メソッドのみが定義されており、このメソッドに関数処理を実装します） |
+| 引数 | name: 接続する関数の名前<br>function: 関数の処理を提供する ExevalatorFunctionInterface 継承クラスのインスタンス<br>（ExevalatorFunctionInterface には「 double invoke(const std::vector&lt;double&gt; &arguments) 」メソッドのみが定義されており、このメソッドに関数処理を実装します） |
 | 戻り値 | このバージョンでは使用しません |
 | 例外 | 無効な関数名が指定された場合に ExevalatorException がスローされます。 |
 

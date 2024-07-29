@@ -78,7 +78,7 @@ Exevalator のインタープリタは、単一のファイル「 csharp/Exevala
 これらも先と同様、Visual Studio のIDE上で適当なプロジェクト内に取り込んでも実行できますが、ここで即席で動かして確認するには、コマンドライン実行が便利です。方法としては、Visual Studio 付属の Developer Command Prompt（スタートボタン > Visual Studio 20** > … ）を起動し、その上でリポジトリのフォルダに cd して、以下のようにコンパイル/実行できます：
 
 	cd csharp
-	csc Exevalator.cs Example1.cs
+	csc Example1.cs Exevalator.cs
 	Example1.exe
 
 上記の「 Example1.cs 」は、"1.2 + 3.4" の値を Exevalator で計算するサンプルコードです。内容は、すぐ前の節で掲載したサンプル「 YourClass 」とほぼ同一です：
@@ -94,7 +94,7 @@ Exevalator のインタープリタは、単一のファイル「 csharp/Exevala
 
 なお、このリポジトリ内には、処理速度を測定するためのベンチマークプログラム「 csharp/Benchmark.cs 」も同梱されています。これをコンパイルする際には、以下のように最適化オプションを指定してください：
 
-	csc -optimize Exevalator.cs Benchmark.cs
+	csc -optimize Benchmark.cs Exevalator.cs
 
 上での「 -optimize 」が最適化オプションで、忘れると Exevalator がフル性能を発揮できないため、処理速度が遅くなります。
 

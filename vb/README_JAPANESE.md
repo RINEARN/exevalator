@@ -10,14 +10,14 @@
 - [主な機能](#features)
 - [メソッド仕様一覧](#methods)
 	- [コンストラクタ](#methods-constructor)
-	- [double Eval(string expression)](#methods-eval)
-	- [double Reeval()](#methods-reeval)
-	- [int DeclareVariable(string name)](#methods-declare-variable)
-	- [void WriteVariable(string name, double value)](#methods-write-variable)
-	- [void WriteVariableAt(int address, double value)](#methods-write-variable-at)
-	- [double ReadVariable(string name)](#methods-read-variable)
-	- [double ReadVariableAt(int address)](#methods-read-variable-at)
-	- [void ConnectFunction(string name, IExevalatorFunction function)](#methods-connect-function)
+	- [Eval(expression As String) As Double](#methods-eval)
+	- [Reeval() As Double](#methods-reeval)
+	- [DeclareVariable(name As String) As Integer](#methods-declare-variable)
+	- [WriteVariable(name As String, value As Double)](#methods-write-variable)
+	- [WriteVariableAt(address As Integer, value As Double)](#methods-write-variable-at)
+	- [ReadVariable(name As String) As Double](#methods-read-variable)
+	- [ReadVariableAt(address As Integer) As Double](#methods-read-variable-at)
+	- [ConnectFunction(name As String, function As IExevalatorFunction)](#methods-connect-function)
 
 
 
@@ -188,14 +188,14 @@ Visual Basic .NET のプロジェクトのデフォルト設定では、プロ�
 Exevalator クラスで提供されている各メソッドの一覧と詳細仕様です。
 
 - [コンストラクタ](#methods-constructor)
-- [double Eval(string expression)](#methods-eval)
-- [double Reeval()](#methods-reeval)
-- [int DeclareVariable(string name)](#methods-declare-variable)
-- [void WriteVariable(string name, double value)](#methods-write-variable)
-- [void WriteVariableAt(int address, double value)](#methods-write-variable-at)
-- [double ReadVariable(string name)](#methods-read-variable)
-- [double ReadVariableAt(int address)](#methods-read-variable-at)
-- [void ConnectFunction(string name, IExevalatorFunction function)](#methods-connect-function)
+- [Eval(expression As String) As Double](#methods-eval)
+- [Reeval() As Double](#methods-reeval)
+- [DeclareVariable(name As string) As Integer](#methods-declare-variable)
+- [WriteVariable(name As String, value As Double)](#methods-write-variable)
+- [WriteVariableAt(address As Integer, value As Double)](#methods-write-variable-at)
+- [ReadVariable(name As String) As Double](#methods-read-variable)
+- [ReadVariableAt(address As Integer) As Double](#methods-read-variable-at)
+- [ConnectFunction(name As String, function As IExevalatorFunction)](#methods-connect-function)
 
 
 <a id="methods-constructor"></a>
@@ -216,7 +216,7 @@ Exevalator クラスで提供されている各メソッドの一覧と詳細仕
 
 
 <a id="methods-reeval"></a>
-| 形式 | Reeval() |
+| 形式 | Reeval() As Double |
 |:---|:---|
 | 説明 | 前回 eval メソッドによって評価されたのと同じ式を、再評価（再計算）します。<br>このメソッドは、繰り返し使用した場合に eval メソッドよりも僅かに高速な場合があります。<br>なお、変数の値や関数の振る舞いが、前回評価時から変化している場合、式の評価結果も前回とは変わり得る事に留意してください。 |
 | 引数 | なし |
@@ -273,7 +273,7 @@ Exevalator クラスで提供されている各メソッドの一覧と詳細仕
 | 形式 | ConnectFunction(name As String, function As IExevalatorFunction) |
 |:---|:---|
 | 説明 | 式の中で使用するための関数を接続します。 |
-| 引数 | name: 接続する関数の名前<br>function: 関数の処理を提供する IExevalatorFunction 実装クラスのインスタンス<br>（「 Invoke(arguments() As Double) As Double 」メソッドのみが定義されており、このメソッドに関数処理を実装します） |
+| 引数 | name: 接続する関数の名前<br>function: 関数の処理を提供する IExevalatorFunction 実装クラスのインスタンス<br>（IExevalatorFunctionインターフェースには「 Invoke(arguments() As Double) As Double 」メソッドのみが定義されており、このメソッドに関数処理を実装します） |
 | 戻り値 | なし |
 | 例外 | 無効な関数名が指定された場合に ExevalatorException がスローされます。 |
 

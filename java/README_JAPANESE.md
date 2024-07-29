@@ -263,7 +263,7 @@ Exevalator クラスで提供されている各メソッドの一覧と詳細仕
 | 形式 | void connectFunction(String name, Exevalator.FunctionInterface function) |
 |:---|:---|
 | 説明 | 式の中で使用するための関数を接続します。 |
-| 引数 | name: 接続する関数の名前<br>function: 関数の処理を提供する Exevalator.FunctionInterface 実装クラスのインスタンス<br>（「 double invoke(double[] arguments) 」メソッドのみが定義されており、このメソッドに関数処理を実装します） |
+| 引数 | name: 接続する関数の名前<br>function: 関数の処理を提供する Exevalator.FunctionInterface 実装クラスのインスタンス<br>（FunctionInterface には「 double invoke(double[] arguments) 」メソッドのみが定義されており、このメソッドに関数処理を実装します） |
 | 戻り値 | なし |
 | 例外 | 無効な関数名が指定された場合に Exevalator.Exception がスローされます。 |
 
