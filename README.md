@@ -14,7 +14,7 @@ Exevalator is currently available for programs/apps written in Java&trade;, Rust
 
 ## English README Index
 - <a href="#what-is">What is Exevalator ?</a>
-- <a href="#license">License (Copyright-Free)</a>
+- <a href="#license">License (Public Domain)</a>
 - <a href="#how-to-use">How to Use in Each Language</a>
 	- <a href="#how-to-use-java">How to Use in Java</a>
 	- <a href="#how-to-use-rust">How to Use in Rust</a>
@@ -29,25 +29,23 @@ Exevalator is currently available for programs/apps written in Java&trade;, Rust
 <a id="what-is"></a>
 ## What is Exevalator ?
 
-When you are developing software, don't you want to calculate (evaluate) the value of a numerical expression stored in a string-type variable? For example:
+Are you developing software and need to calculate the value of a numerical expression stored in a string-type variable? For example:
 
 	"1 + 2"
 	"(1.2 + 3.4) * 5.6"
 	"x + f(y)"
 
-and so on.
+Most compiled languages, as opposed to scripting languages, do not support this feature by default. You are usually required to implement your own calculation routine or use a library that provides this capability.
 
-Most of compiled (not scripting) languages don't support such feature by default, so you are required to implement a calculation routine by yourself, or use a library providing such feature.
-
-Exevalator is a very compact library to provide such feature on Java/Rust/C#/C++ programs.
+Exevalator is a very compact library designed to offer this functionality in Java, Rust, C#, C++, and Visual Basic programs.
 
 
 <a id="license"></a>
-## License (Copyright-Free)
+## License (Public Domain)
 
-This library is released under the "Unlicense" license, which is almost the same as the so-called "copyright-free" (public domain). 
+This library is released under the "Unlicense," which is effectively equivalent to releasing it into the public domain.
 
-Also, you can choose the [CC0](https://creativecommons.org/publicdomain/zero/1.0/deed.en) license instead, if you want. The Unlicense and the CC0 is similar in that they are licenses to release something into the public domain, but their details are little different. Choose the one you want.
+Alternatively, you can opt for the [CC0](https://creativecommons.org/publicdomain/zero/1.0/deed.en) license, which is similar to the Unlicense in that it also facilitates releasing works into the public domain, though there are minor differences in the terms. Feel free to choose the one that best suits your needs.
 
 
 <a id="how-to-use"></a>
@@ -56,7 +54,7 @@ Also, you can choose the [CC0](https://creativecommons.org/publicdomain/zero/1.0
 <a id="how-to-use-java"></a>
 ### How to Use in Java
 
-In "java" folder, the Java implementation version of Exevalator, various example code, and [README for using in Java](./java/README.md) are locating. Most simple example code is "Example1.java", which computes the value of a simple expression "1.2 + 3.4" as follows:
+In the "java" folder, you'll find the Java implementation of Exevalator, various example codes, and a [README for using in Java](./java/README.md). The simplest example code is "Example1.java", which computes the value of the expression "1.2 + 3.4" as follows:
 
 	(in java/Example1.java)
 
@@ -64,7 +62,7 @@ In "java" folder, the Java implementation version of Exevalator, various example
 	double result = exevalator.eval("1.2 + 3.4");
 	System.out.println("result: " + result);
 
-How to compile/run this code is:
+To compile and run this code, follow these steps:
 
 	cd java
 	javac Exevalator.java
@@ -75,13 +73,13 @@ The result is:
 
 	result: 4.6
 
-For more details, see [README for using in Java](./java/README.md).
+For more details, see the [README for using in Java](./java/README.md).
 
 
 <a id="how-to-use-rust"></a>
 ### How to Use in Rust
 
-In "rust" folder, the Rust implementation version of Exevalator, various example code, and [README for using in Rust](./rust/README.md) are locating. Most simple example code is "example1.rs", which computes the value of a simple expression "1.2 + 3.4" as follows:
+In the "rust" folder, the Rust implementation of Exevalator, various example codes, and a [README for using in Rust](./rust/README.md) are provided. The simplest example code is "example1.rs", which computes the value of the expression "1.2 + 3.4" as follows:
 
 	(in rust/example1.rs)
 
@@ -92,7 +90,7 @@ In "rust" folder, the Rust implementation version of Exevalator, various example
 	};
 	println!("result: {}", result);
 
-How to compile/run this code is:
+To compile and run this code, use the following commands:
 
 	cd rust
 	rustc example1.rs
@@ -105,13 +103,13 @@ The result is:
 
 	result: 4.6
 
-For more details, see [README for using in Rust](./rust/README.md).
+For more details, see the [README for using in Rust](./rust/README.md).
 
 
 <a id="how-to-use-csharp"></a>
 ### How to Use in C#
 
-In "csharp" folder, the C# implementation version of Exevalator, various example code, and [README for using in C#](./csharp/README.md) are locating. Most simple example code is "Example1.cs", which computes the value of a simple expression "1.2 + 3.4" as follows:
+In the "csharp" folder, the C# implementation of Exevalator, various example codes, and a [README for using in C#](./csharp/README.md) are available. The simplest example code is "Example1.cs", which computes the value of the expression "1.2 + 3.4" as follows:
 
 	(in csharp/Example1.cs)
 
@@ -119,7 +117,7 @@ In "csharp" folder, the C# implementation version of Exevalator, various example
 	double result = exevalator.Eval("1.2 + 3.4");
 	Console.WriteLine("result: " + result);
 
-You can run the above code in any project on Visual Studio&reg;, and you also can run it in command-lines. The latter is more simple way, so Let's do it here. At first, launch "Developer Command Prompt" which is bundled in Visual Studio (Start button > Visual Studio 20** > ... ). Next, "cd" into the folder of this repository. Then compile example code and run it as follows:
+This code can be run in any project on Visual Studio&reg;, or in command lines. For command line execution, use the Developer Command Prompt provided with Visual Studio:
 
 	cd csharp
 	csc Example1.cs Exevalator.cs
@@ -129,14 +127,14 @@ The result is:
 
 	result: 4.6
 
-For more details, see [README for using in C#](./csharp/README.md).
+For more details, the see [README for using in C#](./csharp/README.md).
 
 
 
 <a id="how-to-use-cpp"></a>
 ### How to Use in C++
 
-In "cpp" folder, the C++ implementation version of Exevalator and various example code, and [README for using in C++](./cpp/README.md) are locating. Most simple example code is "example1.cpp", which computes the value of a simple expression "1.2 + 3.4" as follows:
+In the "cpp" folder, the C++ implementation of Exevalator and various example codes, along with a [README for using in C++](./cpp/README.md), are provided. The simplest example code is "example1.cpp", which computes the value of the expression "1.2 + 3.4" as follows:
 
 	(in cpp/example1.cpp)
 
@@ -148,7 +146,7 @@ In "cpp" folder, the C++ implementation version of Exevalator and various exampl
 		std::cerr << e.what() << std::endl;
 	}
 
-How to compile/run this code depends on your environment and compiler. As an example, if you are using clang++ on Linux:
+To compile and run this code, depending on your environment and compiler, use:
 
 	cd cpp
 	clang++ -std=c++17 -Wall -o example1 example1.cpp
@@ -158,14 +156,14 @@ The result is:
 
 	result: 4.6
 
-For more details, see [README for using in C++](./cpp/README.md).
+For more details, see the [README for using in C++](./cpp/README.md).
 
 
 
 <a id="how-to-use-vb"></a>
 ### How to Use in Visual Basic
 
-In "vb" folder, the Visual Basic (VB.NET) implementation version of Exevalator, various example code, and [README for using in Visual Basic](./vb/README.md) are locating. Most simple example code is "Example1.vb", which computes the value of a simple expression "1.2 + 3.4" as follows:
+In the "vb" folder, the Visual Basic (VB.NET) implementation of Exevalator, various example codes, and a [README for using in Visual Basic](./vb/README.md) are provided. The simplest example code is "Example1.vb", which computes the value of the expression "1.2 + 3.4" as follows:
 
 	(in vb/Example1.vb)
 
@@ -173,7 +171,7 @@ In "vb" folder, the Visual Basic (VB.NET) implementation version of Exevalator, 
 	Dim result As Double = exevalator.Eval("1.2 + 3.4")
 	Console.WriteLine("result: " + result.ToString())
 
-You can run the above code in any project on Visual Studio&reg;, and you also can run it in command-lines. The latter is more simple way, so Let's do it here. At first, launch "Developer Command Prompt" which is bundled in Visual Studio (Start button > Visual Studio 20** > ... ). Next, "cd" into the folder of this repository. Then compile example code and run it as follows:
+This code can be run in any project on Visual Studio&reg;, or in command lines. For command line execution, use the Developer Command Prompt provided with Visual Studio:
 
 	cd vb
 	vbc Example1.vb Exevalator.vb
@@ -183,23 +181,23 @@ The result is:
 
 	result: 4.6
 
-For more details, see [README for using in Visual Basic](./vb/README.md).
+For more details, see the [README for using in Visual Basic](./vb/README.md).
 
 
 
 <a id="performance"></a>
 ## Performance
 
-### Performance (processing speed) of Exevalator
+### Processing Speed of Exevalator
 
-One of the assumed use of Exevalator is calculation/data-analysis software, so when we designed internal architecture of Exevalator, we placed importance on processing speed.
+Exevalator is designed with applications in calculation and data analysis software in mind. Consequently, we have prioritized processing speed in its internal architecture design.
 
-Especially, Exevalator works in high speed when evaluating (computing) the same expression repeatedly. For example:
+Exevalator is particularly efficient when evaluating the same expression repeatedly. For example:
 
-	// Declare an variable "x" and get the address
+	// Declare a variable "x" and get its address
 	int varAddress = exevalator.declareVariable("x");
 
-	// Loop taking sum of values of an expression, with changing the value of "x"
+	// Loop to sum values of an expression while changing the value of "x"
 	// (10 numerical operations per cycle)
 	double result = 0.0;
 	for (long i=1; i<=loops; ++i) {
@@ -207,57 +205,58 @@ Especially, Exevalator works in high speed when evaluating (computing) the same 
 		result += exevalator.eval("x + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1");
 	}
 
-	(See: java/Benchmark.java)
+	(Refer to: java/Benchmark.java)
 
-The above code is practically useless, but there are many practical calculation code having similar pattern everywhere.
+While the example above may seem trivial or practically useless, it serves to demonstrate how Exevalator handles repetitive numerical operations efficiently. Many practical calculation tasks follow a similar pattern, even though they perform meaningful computations.
 
-The for-loop in the above code runs in the speed of **some tens of millions of cycles per second** (depending on your environment). In the above loop, 10 numerical operations are performed for each cycle, so the operating speed is **some hundreds of MFLOPS**. We think that this speed is enough for converting values of arrays, or sampling coordinates of curves of expressions, and so on.
+In this code, the for-loop can process **tens of millions of cycles per second**, depending on your environment. Since each cycle includes 10 numerical operations, the effective processing speed reaches **several hundred MFLOPS**. We believe this speed is sufficient for a variety of tasks, including transforming array values and sampling curve coordinates from expressions, among others.
 
-### How to tune performance when different expressions are inputted frequently
 
-Exevalator realizes the above processing speed by caching results of parsing and lexical-analysis of the previously-inputted expression. Hence, if an different expressions are inputted into an instance of Exevalator frequently, the cache does not work effective. For example:
+### How to Tune Performance When Different Expressions Are Frequently Inputted
+
+Exevalator achieves the previously mentioned processing speeds by caching the results of parsing and lexical analysis of previously inputted expressions. Therefore, if different expressions are frequently inputted into an instance of Exevalator, the cache does not work effectively. For example:
 
 	...
 	for (long i=0; i<loops; ++i) {
 		exevalator.writeVariableAt(varAddress, (double)i);
-		result += exevalator.eval("x + 1 - 1 + 1 - 1 + 1"); // Different with the below
-		result += exevalator.eval("x - 1 + 1 - 1 + 1 - 1"); // Different with the above
+		result += exevalator.eval("x + 1 - 1 + 1 - 1 + 1"); // Different from the next
+		result += exevalator.eval("x - 1 + 1 - 1 + 1 - 1"); // Different from the previous
 	}
 
-In the above code, the for-loop runs in the speed of **some tens/hundreds of thousands of cycles per second**. It is about 100 times slower than the previous example code.
+In the code above, the for-loop runs at the speed of **some tens or hundreds of thousands of cycles per second**, which is about 100 times slower than the previous example.
 
-You can avoid this kind of performance-down by creating an independent instance of Exevalator for each expression:
+You can avoid this kind of performance degradation by creating an independent instance of Exevalator for each expression:
 
 	...
 	for (long i=0; i<loops; ++i) {
 		exevalatorA.writeVariableAt(varAddressA, (double)i);
 		exevalatorB.writeVariableAt(varAddressB, (double)i);
-		result += exevalatorA.eval("x + 1 - 1 + 1 - 1 + 1"); // Different with the below
-		result += exevalatorB.eval("x - 1 + 1 - 1 + 1 - 1"); // Different with the above
+		result += exevalatorA.eval("x + 1 - 1 + 1 - 1 + 1"); // Different from the next
+		result += exevalatorB.eval("x - 1 + 1 - 1 + 1 - 1"); // Different from the previous
 	}
 
-In the above code, caches in each instance of Exevalator work well, so it runs about 100 times faster than the previous code.
+In the scenario above, caches in each instance of Exevalator function effectively, enabling the code to run approximately 100 times faster than the previous code.
 
-### If you need more speed, consider the use of "reeval( )" method
 
-By the way, as we did here, when you want to re-evaluate (re-compute) the value of the same expression which is evaluated by "eval" method last time, you can also use "reeval( )" method instead of "eval".
-When you use "reeval" method, Exevalator can skip the detection of the change of the inputted expression from the cached expression. So it can work faster than "eval" method, in principle.
+### If You Need More Speed, Consider Using the "reeval()" Method
 
-For example, on benchmark programs bundled in this repository, "reeval" of C++ version of the Exevalator works about 1.4 times faster than "eval". For rust version, about 1.1 - 1.2 times faster. On the other hand, "reeval" probably gives no significant advantage on Java version and C# version.
+When you need to re-evaluate the same expression that was previously evaluated using the "eval()" method, you can also use the "reeval()" method instead. The "reeval()" method allows Exevalator to skip checking for changes between the inputted expression and the cached expression, which in principle allows it to operate faster than the "eval()" method.
+
+For instance, in the benchmark programs included in this repository, the "reeval()" method in the C++ version of Exevalator operates approximately 1.4 times faster than "eval()". For the Rust version, it is about 1.1 to 1.2 times faster. However, the "reeval()" method does not provide a significant advantage in the Java and C# versions.
 
 
 <a id="about-us"></a>
 ## About Us
 
-Exevalator is developed by a Japanese software development studio: [RINEARN](https://www.rinearn.com/). The author is Fumihiro Matsui.
+Exevalator is developed by a Japanese software development studio, [RINEARN](https://www.rinearn.com/). The author is Fumihiro Matsui.
 
-Please free to contact us if you have any questions, feedbacks, and so on!
+Please feel free to contact us if you have any questions, feedback, or other inquiries!
 
 
 <a id="references"></a>
 ## References
 
-Following webpages may be useful if you need more information about Exevalator.
+The following webpages may be useful if you need more information about Exevalator:
 
 * [Official Website](https://www.rinearn.com/en-us/exevalator/)
 

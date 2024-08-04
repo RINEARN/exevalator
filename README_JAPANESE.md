@@ -37,7 +37,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 
 大抵のコンパイラ型の（スクリプト言語ではない）言語では、そのような機能は、標準ではサポートされていません。そのため、計算処理を自力で実装するか、そのような機能を提供するライブラリを使用する必要があります。
 
-Exevalator は、 そのような機能を提供する、非常にコンパクトなライブラリです。多言語に対応していて、現在は Java/Rust/C#/C++ 製のソフトウェア開発で使用できます。
+Exevalator は、 そのような機能を提供する、非常にコンパクトなライブラリです。多言語に対応していて、現在は Java / Rust / C# / C++ / Visual Basic 製のソフトウェア開発で使用できます。
 
 
 <a id="license"></a>
@@ -120,7 +120,7 @@ Exevalator は、 そのような機能を提供する、非常にコンパク�
 	double result = exevalator.Eval("1.2 + 3.4");
 	Console.WriteLine("result: " + result);
 
-このコードは、Visual Studio&reg;上で適当なプロジェクト内に取り込んでも実行できますが、ここで即席で動かして確認するには、コマンドラインが便利です。Visual Studio 付属の Developer Command Prompt（スタートボタン > Visual Studio 20** > … ）を起動し、その上でリポジトリのフォルダに cd して、以下のようにコンパイル/実行できます：
+このコードは、Visual Studio&reg;上で適当なプロジェクト内に取り込んでも実行できますが、ここで即席で動かして確認するには、コマンドラインが便利です。その場合、Visual Studio に付属している Developer Command Prompt 上で、以下のようにコンパイル/実行できます：
 
 	cd csharp
 	csc Example1.cs Exevalator.cs
@@ -174,7 +174,7 @@ Exevalator は、 そのような機能を提供する、非常にコンパク�
 	result As Double = exevalator.Eval("1.2 + 3.4")
 	Console.WriteLine("result: " + result.ToString())
 
-このコードは、Visual Studio&reg;上で適当なプロジェクト内に取り込んでも実行できますが、ここで即席で動かして確認するには、コマンドラインが便利です。Visual Studio 付属の Developer Command Prompt（スタートボタン > Visual Studio 20** > … ）を起動し、その上でリポジトリのフォルダに cd して、以下のようにコンパイル/実行できます：
+このコードは、Visual Studio&reg;上で適当なプロジェクト内に取り込んでも実行できますが、ここで即席で動かして確認するには、コマンドラインが便利です。その場合、Visual Studio に付属している Developer Command Prompt 上で、以下のようにコンパイル/実行できます：
 
 	cd vb
 	vbc Example1.vb Exevalator.vb
