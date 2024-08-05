@@ -2,8 +2,7 @@
 
 ![logo](logo.png)
 
-Exevalator (an abbreviation for **Ex**pression-**Eval**u**ator**) is a compact & high-speed interpreter embeddable in your programs/apps, for computing values of expressions.
-Exevalator is currently available for programs/apps written in Java&trade;, Rust, C#, C++, and Visual Basic&reg;.
+Exevalator, an abbreviation for "**Ex**pression-**Eval**u**ator**," is a compact and high-speed interpreter that can be embedded in your programs or apps for computing the values of expressions. Exevalator is currently available for programs and apps written in Java&trade;, Rust, C#, C++, and Visual Basic&reg;.
 
 
 &raquo; [Japanese README](./README_JAPANESE.md)

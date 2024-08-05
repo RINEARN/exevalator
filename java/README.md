@@ -6,7 +6,7 @@
 ## English Index
 - [Requirements](#requirements)
 - [How to Use](#how-to-use)
-- [Example Code](#example-code)
+- [How to Compile and Run Example Code](#example-code)
 - [Features](#features)
 - [List of Methods/Specifications](#methods)
 	- [Constructor](#methods-constructor)
@@ -32,24 +32,24 @@
 <a id="how-to-use"></a>
 ## How to Use
 
-The interpreter of Exevalator is implemented in a single file "java/Exevalator.java", so you can import and use it in your project by very easy 3 steps!
+Exevalator is an interpreter, compactly implemented in just a single file, "java/Exevalator.java." This unique design allows for easy integration in the following three steps:
 
-### 1. Put into your source code folder
+### 1. Place the File in Your Source Code Folder
 
-Firstly, put "java/Exevalator.java" into anywere in your source code folder, e.g.:
+First, place "java/Exevalator.java" anywhere within your source code folder, for example:
 
 	src/your/projects/package/anywhere/Exevalator.java
 
-### 2. Write the package statement
+### 2. Add a Package Statement
 
-Secondly, the package statement at the top of the content of "Exevalator.java" as the following example:
+Next, add a package statement at the top of "Exevalator.java" as shown in the following example:
 
-	(in Exevalator.java)
+	// in Exevalator.java
 	package your.projects.package.anywhere;
 
-### 3. Import from your code and use
+### 3. Import and Use in Your Code
 
-Now you are ready to use Exevalator! You can import the Exevalator from any your source, code and compute expressions as follows:
+Now, you are ready to use Exevalator! Import it from any source file and compute expressions as follows:
 
 	...
 	import your.projects.package.anywhere.Exevalator;
@@ -62,7 +62,7 @@ Now you are ready to use Exevalator! You can import the Exevalator from any your
 			// Create an interpreter for evaluating expressions
 			Exevalator exevalator = new Exevalator();
 
-			// Evaluate (compute) the value of an expression
+			// Evaluate the value of an expression
 			double result = exevalator.eval("1.2 + 3.4");
 			
 			// Display the result
@@ -71,67 +71,67 @@ Now you are ready to use Exevalator! You can import the Exevalator from any your
 		...
 	}
 
-On Exevalator, all numbers in expressions will be handled as double-type values, so the result is always double-type.
-However, the computation may fail when an incorrect expression is inputted, or when an undeclared variable is accessed, and so on. If a computation failed, "eval" method throws an Exevalator.Exception, so catch and handle it if necessary.
+In Exevalator, all numbers in expressions are handled as double-type values, and the return value is also double-type. However, computation may fail due to incorrect expressions, access to undeclared variables, etc. If a computation fails, the "eval" method will throw an Exevalator.Exception, which should be caught and handled appropriately in practical applications.
+
 
 
 <a id="example-code"></a>
-## Example Code
+## How to Compile and Run Example Code
 
-Simple example code "java/Example*.java" are bundled in this repository. You can compile and run them as follows:
+Simple example codes such as "java/Example*.java" are bundled in this repository. You can compile and run them as follows:
 
 	cd java
 	javac Exevalator.java
 	javac Example1.java
 	java Example1
 
-"Example1.java" is an example for computing the value of "1.2 + 3.4" by using Exevalator. Its code is almost the same as "YourClass" in the previous section:
+
+"Example1.java" demonstrates how to compute the value "1.2 + 3.4" using Exevalator. Its code is similar to the "YourClass" example in the previous section:
 
 	...
 	double result = exevalator.eval("1.2 + 3.4");
 
-
-The result is:
+The result will be displayed as:
 
 	result: 4.6
 
-As the above, the computed value of "1.2 + 3.4" will be displayed. You can compile/run other examples in the same way.
+As shown above, the computed value of "1.2 + 3.4" will be displayed. You can compile and run other examples in the same manner.
 
-Also, a benchmark program "java/Benchmark.java" for measuring processing speed of Exevalator is bundled in this repository. You can compile/run it in the same way as other example code.
+Additionally, a benchmark program "java/Benchmark.java" for measuring the processing speed of Exevalator is also included in this repository. You can compile and run it in the same way as the other example codes.
 
 
 <a id="features"></a>
 ## Features
 
-The followings are main features of Exevalator.
+The following are the main features of Exevalator:
 
 ### 1. Evaluate (Compute) Expressions
 
-As shown in previous sections, Exevalator can evaluate (compute) the value of an expression:
+As demonstrated in previous sections, Exevalator can evaluate the value of an expression:
 
 	double result = exevalator.eval("(-(1.2 + 3.4) * 5) / 2");
 	// result: -11.5
 
 	(See: java/Example2.java)
 
-As the above, you can use "+" (addition), "-" (subtraction and unary-minus operation), "\*" (multiplication), and "/" (division) operators in an expression. In order of operations, "multiplications and divisions" are prioritized than "additions and subtractions".
+You can use operators such as "+" (addition), "-" (subtraction and unary-minus operation), "*" (multiplication), and "/" (division) in expressions. Multiplications and divisions are prioritized over additions and subtractions in the order of operations.
 
 
 ### 2. Use Variables
 
-You can use variables in expressions:
+You can declare variables programmatically using Exevalator's "declareVariable" method during application development, allowing these variables to be freely used within expressions:
 
-	// Declare a variable available in expressions
+	// Declare a variable to be used in expressions
 	exevalator.declareVariable("x");
 	exevalator.writeVariable("x", 1.25);
 
-	// Compute the expression in which the above variable is used
+	// Evaluate the expression using the declared variable
 	double result = exevalator.eval("x + 1");
 	// result: 2.25
 
 	(See: java/Example3.java)
 
-If you change the value of a variable very frequently, access to the variable by the address as follows:
+For more frequent variable value updates, access the variable by address for faster performance:
 
 	int address = exevalator.declareVariable("x");
 	exevalator.writeVariableAt(address, 1.25);
@@ -139,11 +139,12 @@ If you change the value of a variable very frequently, access to the variable by
 
 	(See: java/Example4.java)
 
-This way works faster than accessings by the name.
+Access by address is quicker than by name.
+
 
 ### 3. Use Functions
 
-You can create functions available in expressions, by implementing Exevalator.FunctionInterface:
+You can create functions by implementing the "Exevalator.FunctionInterface", allowing these functions to be used within expressions:
 
 	// Create a function available in expressions.
 	class MyFunction implements Exevalator.FunctionInterface {
@@ -167,13 +168,15 @@ You can create functions available in expressions, by implementing Exevalator.Fu
 
 	(See: java/Example5.java)
 
-**CAUTION: In Ver.1.0, values of arguments passed from expressions had been stored in the above "double[] arguments" array in reversed order. This behavior has been fixed in Ver.2.0. For details, please see the issue #2.**
+This setup ensures that developers can programmatically define and integrate custom functions, which users can then utilize seamlessly within their expressions.
+
+**CAUTION: In Ver.1.0, values of arguments passed from expressions were stored in the "double[] arguments" array in reversed order. This behavior has been corrected in Ver.2.0. For details, please refer to issue #2.**
 
 
 <a id="methods"></a>
 ## List of Methods/Specifications
 
-The list of methods of Exevalator class, and their specifications.
+Here is a list of methods for the Exevalator class, along with their specifications:
 
 - [Constructor](#methods-constructor)
 - [double eval(String expression)](#methods-eval)
@@ -189,93 +192,93 @@ The list of methods of Exevalator class, and their specifications.
 <a id="methods-constructor"></a>
 | Signature | (constructor) Exevalator() |
 |:---|:---|
-| Description | Creates a new interpreter of the Exevalator. |
+| Description | Creates a new Exevalator interpreter instance. |
 | Parameters | None |
-| Return | The created instance. |
+| Return | The newly created instance. |
 
 
 <a id="methods-eval"></a>
 | Signature | double eval(String expression) |
 |:---|:---|
-| Description | Evaluates (computes) the value of an expression. |
+| Description | Evaluates the value of a given expression. |
 | Parameters | expression: The expression to be evaluated. |
-| Return | The evaluated value. |
-| Exception | Exevalator.Exception will be thrown if any error occurred when evaluating the expression. |
+| Return | The resulting value of the expression. |
+| Exception | Exevalator.Exception is thrown if an error occurs during the evaluation. |
 
 
 <a id="methods-reeval"></a>
 | Signature | double reeval() |
 |:---|:---|
-| Description | Re-evaluates (re-computes) the value of the expression evaluated by "eval" method last time.<br>This method may (slightly) work faster than calling "eval" method repeatedly for the same expression.<br>Note that, the result value may different with the last evaluated value, if values of variables or behaviour of functions had changed. |
+| Description | Re-evaluates the value of the expression last evaluated by the "eval" method. <br>This method may work slightly faster than repeatedly calling "eval" for the same expression.<br> Note that the result may differ from the last evaluation if variables or function behaviors have changed. |
 | Parameters | None |
-| Return | The evaluated value. |
-| Exception | Exevalator.Exception will be thrown if any error occurred when evaluating the expression. |
+| Return | The re-evaluated value. |
+| Exception | Exevalator.Exception is thrown if an error occurs during the evaluation. |
 
 
 <a id="methods-declare-variable"></a>
 | Signature | int declareVariable(String name) |
 |:---|:---|
-| Description | Declares a new variable, for using the value of it in expressions. |
-| Parameters | name: The name of the variable to be declared. |
-| Return | The virtual address of the declared variable, which is useful for accessing to the variable faster.<br>See "writeVariableAt" and "readVariableAt" method. |
+| Description | Declares a new variable to be used in expressions. |
+| Parameters | name: The name of the variable. |
+| Return | 	The virtual address of the declared variable, facilitating faster access.<br>See the "writeVariableAt" and "readVariableAt" methods. |
 | Exception | Exevalator.Exception will be thrown if invalid name is specified. |
 
 
 <a id="methods-write-variable"></a>
 | Signature | void writeVariable(String name, double value) |
 |:---|:---|
-| Description | Writes the value to the variable having the specified name. |
-| Parameters | name: The name of the variable to be written.<br>value: The new value of the variable. |
+| Description | Sets the specified variable to a new value. |
+| Parameters | name: The name of the variable.<br>value: The new value to set. |
 | Return | None |
-| Exception | Exevalator.Exception will be thrown if the specified variable is not found, or invalid name is specified. |
+| Exception | Exevalator.Exception is thrown if the variable does not exist or the name is invalid. |
 
 
 <a id="methods-write-variable-at"></a>
 | Signature | void writeVariableAt(int address, double value) |
 |:---|:---|
-| Description | Writes the value to the variable at the specified virtual address.<br>This method works faster than "writeVariable" method. |
-| Parameters | address: The virtual address of the variable to be written.<br>value: The new value of the variable. |
+| Description | Sets the value of a variable at the specified virtual address, which is faster than using "writeVariable." |
+| Parameters | address: The virtual address of the variable.<br>value: The new value to set. |
 | Return | None |
-| Exception | Exevalator.Exception will be thrown if the invalid address is specified. |
+| Exception | Exevalator.Exception is thrown if the address is invalid. |
 
 
 <a id="methods-read-variable"></a>
 | Signature | double readVariable(String name) |
 |:---|:---|
-| Description | Reads the value of the variable having the specified name. |
-| Parameters | name: The name of the variable to be read. |
+| Description | Retrieves the current value of the specified variable. |
+| Parameters | name: The name of the variable. |
 | Return | The current value of the variable. |
-| Exception | Exevalator.Exception will be thrown if the specified variable is not found, or invalid name is specified. |
+| Exception | Exevalator.Exception is thrown if the variable does not exist or the name is invalid. |
 
 
 <a id="methods-read-variable-at"></a>
 | Signature | double readVariableAt(int address) |
 |:---|:---|
-| Description | Reads the value of the variable at the specified virtual address.<br>This method works faster than "readVariable" method. |
-| Parameters | address: The virtual address of the variable to be read. |
+| Description | Retrieves the value of a variable at the specified virtual address, which is faster than using "readVariable." |
+| Parameters | address: The virtual address of the variable. |
 | Return | The current value of the variable. |
-| Exception | Exevalator.Exception will be thrown if the invalid address is specified. |
+| Exception | Exevalator.Exception is thrown if the address is invalid. |
 
 
 <a id="methods-connect-function"></a>
 | Signature | void connectFunction(String name, Exevalator.FunctionInterface function) |
 |:---|:---|
-| Description | Connects a function, for using it in expressions. |
-| Parameters | name: The name of the function used in the expression.<br>function: The function to be connected. It is an instance of the class implementing Exevalator.FunctionInterface (only "double invoke(double[] arguments)" method is defined, to implement the process of a function). |
+| Description | Connects a function to be used in expressions. |
+| Parameters | name: The function name as used in expressions.<br>function: An instance of a class implementing the Exevalator.FunctionInterface, which must define the method "double invoke(double[] arguments)" to process the function. |
 | Return | None |
-| Exception | Exevalator.Exception will be thrown if invalid name is specified. |
+| Exception | 	Exevalator.Exception is thrown if an invalid name is specified. |
 
 
 
 
 
 <a id="vnano"></a>
-## If You Want More Features: Try to Use Vnano
+## If You Want More Features: Consider Using Vnano
 
-Features of Exevalator is not so rich, because we prioritize to make the interpreter compact.
+While Exevalator is designed to be compact, its feature set is accordingly limited.
 
-If you want more features, try to use the [Vnano](https://github.com/RINEARN/vnano) which is an script engine for embedded use in Java&reg; applications, instead of Exevalator.
-Vnano can execute relatively complex expressions/scripts, containing conditional branches, loops, and so on.
+If you require more advanced features, consider using Vnano, which is a scripting engine designed for embedding in Java applications. Vnano supports relatively complex expressions and scripts, including conditional branches, loops, and more.
+
 
 
 <hr />
