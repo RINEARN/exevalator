@@ -3,7 +3,7 @@
 &raquo; [Japanese](./README_JAPANESE.md)
 
 
-## English Index
+## Table of Contents
 - [Requirements](#requirements)
 - [How to Use](#how-to-use)
 - [Example Code (and How to Use in Command Lines)](#example-code)
@@ -52,7 +52,7 @@ For simplicity, let's assume the project name where you added "Exevalator.vb" is
 Please check the actual project name at this stage, and use it to replace "YourProject" in the next step.
 
 
-### 3. Load Exevalator From Your Code, and Use It
+### 3. Load Exevalator from Your Code, and Use It
 
 Next, load Exevalator in your code with the following "Imports" statement. Then, you can begin using Exevalator:
 

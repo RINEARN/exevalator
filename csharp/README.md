@@ -3,7 +3,7 @@
 &raquo; [Japanese](./README_JAPANESE.md)
 
 
-## English Index
+## Table of Contents
 - [Requirements](#requirements)
 - [How to Use](#how-to-use)
 - [Example Code (and How to Use in Command-Lines)](#example-code)
@@ -42,7 +42,7 @@ If you are using Visual Studio, simply right-click on your project in the "Solut
 (Instructions for compiling and running from the command line will be provided later.)
 
 
-### 2. Load Exevalator From Your Code, and Use It
+### 2. Load Exevalator from Your Code, and Use It
 
 In your code, include Exevalator with the following statement: "using Rinearn.ExevalatorCS;". Here’s how you can use it within your application:
 

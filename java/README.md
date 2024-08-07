@@ -3,7 +3,7 @@
 &raquo; [Japanese](./README_JAPANESE.md)
 
 
-## English Index
+## Table of Contents
 - [Requirements](#requirements)
 - [How to Use](#how-to-use)
 - [How to Compile and Run Example Code](#example-code)
@@ -32,7 +32,8 @@
 <a id="how-to-use"></a>
 ## How to Use
 
-Exevalator is an interpreter, compactly implemented in just a single file, "java/Exevalator.java." This unique design allows for easy integration in the following three steps:
+Exevalator is an interpreter, compactly implemented in just a single file, "java/Exevalator.java." This streamlined design allows for easy integration in the following three steps:
+
 
 ### 1. Place the File in Your Source Code Folder
 
