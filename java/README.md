@@ -146,7 +146,7 @@ Access by address is quicker than by name.
 
 You can create functions by implementing the "Exevalator.FunctionInterface", allowing these functions to be used within expressions:
 
-	// Create a function available in expressions.
+	// Create a function available in expressions
 	class MyFunction implements Exevalator.FunctionInterface {
 		@Override
 		public double invoke (double[] arguments) {
@@ -266,7 +266,7 @@ Here is a list of methods for the Exevalator class, along with their specificati
 | Description | Connects a function to be used in expressions. |
 | Parameters | name: The function name as used in expressions.<br>function: An instance of a class implementing the Exevalator.FunctionInterface, which must define the method "double invoke(double[] arguments)" to process the function. |
 | Return | None |
-| Exception | 	Exevalator.Exception is thrown if an invalid name is specified. |
+| Exception | Exevalator.Exception is thrown if an invalid name is specified. |
 
 
 
