@@ -67,7 +67,7 @@ In your code, include Exevalator with the following statement: "using Rinearn.Ex
 		...
 	}
 
-In Exevalator, all numbers in expressions are handled as double-type values, and the return value is also double-type. However, the computation may fail due to incorrect expressions, access to undeclared variables, etc. If an error occurs, the "Eval" method throws an ExevalatorException, which should be caught and handled appropriately in practical applications.
+In Exevalator, all numbers in expressions are handled as double-type values, and the return value is also double-type. However, computations may fail due to incorrect expressions, access to undeclared variables, etc. If an error occurs, the "Eval" method throws an ExevalatorException, which should be caught and handled appropriately in practical applications.
 
 
 <a id="example-code"></a>
@@ -181,7 +181,7 @@ This setup ensures that developers can programmatically define and integrate cus
 <a id="methods"></a>
 ## List of Methods/Specifications
 
-The list of methods of Exevalator class, and their specifications.
+Here is a list of methods for the Exevalator class, along with their specifications:
 
 - [Constructor](#methods-constructor)
 - [double Eval(string expression)](#methods-eval)

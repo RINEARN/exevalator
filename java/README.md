@@ -71,7 +71,7 @@ Now, you are ready to use Exevalator! Import it from any source file and compute
 		...
 	}
 
-In Exevalator, all numbers in expressions are handled as double-type values, and the return value is also double-type. However, computation may fail due to incorrect expressions, access to undeclared variables, etc. If a computation fails, the "eval" method will throw an Exevalator.Exception, which should be caught and handled appropriately in practical applications.
+In Exevalator, all numbers in expressions are handled as double-type values, and the return value is also double-type. However, computations may fail due to incorrect expressions, access to undeclared variables, etc. If a computation fails, the "eval" method will throw an Exevalator.Exception, which should be caught and handled appropriately in practical applications.
 
 
 

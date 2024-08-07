@@ -24,40 +24,40 @@
 ## Requirements
 
 * Microsoft&reg; Visual Studio&reg;, 2022 or later (recommended)
-* Or, other Visual Basic .NET development environment (for .NET 6.0 later, recommended)
+* Or, any other Visual Basic .NET development environment (for .NET 6.0 or later, recommended)
 
 
 
 <a id="how-to-use"></a>
 ## How to Use
 
-The interpreter of Exevalator is implemented in a single file "vb/Exevalator.vb", so you can import and use it in your project by very easy 3 steps!
-
-### 1. Add "Exevalator.vb" to any project
-
-If you are using IDE of Visual Studio, add the file "vb/Exevalator.vb" to your project, as follows:
-
-At first, right-click your project on "Solution Exproler", and select "Add" > "Existing Item". Then a window will be popped-up for choosing a file, so choose "Exevalator.vb" exists in "csharp" folder of this repository. If you added it successfully, "Exevalator.vb" becomes visible on "Solution Exproler".
-
-(If you want to compile/run in command lines, we will explain how to do it later.)
+Exevalator is an interpreter, compactly implemented in just a single file, "vb/Exevalator.vb." This streamlined design allows for easy integration into your projects in the following three steps:
 
 
-### 2. Check the name of the project
+### 1. Add "Exevalator.vb" to Any Project
 
-In a VB.NET project, by default, the project name is implicitly added to the top hierarchy of the project's namespaces. If you overlook this, you will be troubled by errors when you refer a library added to the project.
+If you are using Visual Studio, simply right-click on your project in the "Solution Explorer", select "Add" > "Existing Item", then navigate to and choose "Exevalator.vb" from the "vb" folder of this repository. Once added, "Exevalator.vb" will be visible in your "Solution Explorer".
 
-Here, for simplicity, let assume that the project name in which you added Exevalator.vb is:
+(Instructions for compiling and running from the command line will be provided later.)
+
+
+### 2. Check the Name of the Project
+
+In VB.NET projects, the project name is by default added to the top hierarchy of the project's namespaces. Overlooking this detail can lead to errors when referencing a library added to the project.
+
+For simplicity, let's assume the project name where you added "Exevalator.vb" is:
 
 	YourProject
 
-Please check the actual project name here, and in the next step, replace "YourProject" to the actual name.
+Please check the actual project name at this stage, and use it to replace "YourProject" in the next step.
 
-### 3. Load Exevalator from your code, and use it
 
-Next, load Exevalator from your code by "Imports" as follows. Then you can use Exevalator in the code:
+### 3. Load Exevalator From Your Code, and Use It
+
+Next, load Exevalator in your code with the following "Imports" statement. Then, you can begin using Exevalator:
 
 	...
-	' Please replace "YourProject" in the following to the actual project name.
+	' Replace "YourProject" with your actual project name.
 	Imports YourProject.Rinearn.ExevalatorVB
 	...
 
@@ -67,7 +67,7 @@ Next, load Exevalator from your code by "Imports" as follows. Then you can use E
 			' Create an interpreter for evaluating expressions
 			Dim exevalator As Exevalator = New Exevalator()
 
-			' Evaluate (compute) the value of an expression
+			' Evaluate the value of an expression
 			Dim result As Double = exevalator.Eval("1.2 + 3.4")
 	
 			' Display the result
@@ -76,8 +76,10 @@ Next, load Exevalator from your code by "Imports" as follows. Then you can use E
 		...
 	End Module
 
-On Exevalator, all numbers in expressions will be handled as Double-type values, so the result is always Double-type.
-However, the computation may fail when an incorrect expression is inputted, or when an undeclared variable is accessed, and so on. If a computation failed, "Eval" method throws an ExevalatorException, so catch and handle it if necessary.
+In Exevalator, all numerical values in expressions are treated as Double-type, and the result is also a Double-type. However, computations may fail due to incorrect expressions, access to undeclared variables, etc. If an error occurs, the "Eval" method will throw an ExevalatorException, which should be caught and handled appropriately in practical applications.
+
+
+
 
 <a id="example-code"></a>
 ## Example Code (and How to Use in Command-Lines)
@@ -115,35 +117,35 @@ In the above, "-optimize" is the optimization-option. If you forget it, Exevalat
 <a id="features"></a>
 ## Features
 
-The followings are main features of Exevalator.
+The following are the main features of Exevalator:
 
 ### 1. Evaluate (Compute) Expressions
 
-As shown in previous sections, Exevalator can evaluate (compute) the value of an expression:
+As demonstrated in previous sections, Exevalator can evaluate the value of an expression:
 
 	Dim result As Double = exevalator.Eval("(-(1.2 + 3.4) * 5) / 2")
 	' result: -11.5
 
 	(See: vb/Example2.vb)
 
-As the above, you can use "+" (addition), "-" (subtraction and unary-minus operation), "\*" (multiplication), and "/" (division) operators in an expression. In order of operations, "multiplications and divisions" are prioritized than "additions and subtractions".
+You can use operators such as "+" (addition), "-" (subtraction and unary-minus operation), "*" (multiplication), and "/" (division) in expressions. Multiplications and divisions are prioritized over additions and subtractions in the order of operations.
 
 
 ### 2. Use Variables
 
-You can use variables in expressions:
+You can declare variables programmatically using Exevalator's "declareVariable" method during application development, allowing these variables to be freely used within expressions:
 
-	' Declare a variable available in expressions
+	' Declare a variable to be used in expressions
 	exevalator.DeclareVariable("x")
 	exevalator.WriteVariable("x", 1.25)
 	
-	' Compute the expression in which the above variable is used
+	' Evaluate the expression using the declared variable
 	Dim result As Double = exevalator.Eval("x + 1")
 	' result: 2.25
 
 	(See: vb/Example3.vb)
 
-If you change the value of a variable very frequently, access to the variable by the address as follows:
+For more frequent variable value updates, access the variable by address for faster performance:
 
 	Dim address As Integer = exevalator.DeclareVariable("x")
 	exevalator.WriteVariableAt(address, 1.25)
@@ -151,21 +153,25 @@ If you change the value of a variable very frequently, access to the variable by
 
 	(See: vb/Example4.vb)
 
-This way works faster than accessings by the name.
+Access by address is quicker than by name.
+
+
 
 ### 3. Use Functions
 
-You can create functions available in expressions, by implementing IExevalatorFunction interface:
+You can create functions by implementing the "IExevalatorFunction" interface, allowing these functions to be used within expressions:
 
-	' Create a function available in expressions.
+	' Create a function available in expressions
 	Class MyFunction : Implements IExevalatorFunction
-	{
+
 		Public Function Invoke(arguments() As Double) As Double
 			If arguments.Length <> 2 Then
 				Throw New ExevalatorException("Incorrected number of args")
 			End If
+
 			Return arguments(0) + arguments(1)
 		End Function
+
 	End Class
 	...
 
@@ -179,13 +185,15 @@ You can create functions available in expressions, by implementing IExevalatorFu
 
 	(See: vb/Example5.vb)
 
+This setup ensures that developers can programmatically define and integrate custom functions, which users can then utilize seamlessly within their expressions.
+
 
 
 
 <a id="methods"></a>
 ## List of Methods/Specifications
 
-The list of methods of Exevalator class, and their specifications.
+Here is a list of methods for the Exevalator class, along with their specifications:
 
 - [Constructor](#methods-constructor)
 - [Eval(expression As String) As Double](#methods-eval)
@@ -204,79 +212,81 @@ The list of methods of Exevalator class, and their specifications.
 <a id="methods-constructor"></a>
 | Signature | (constructor) New() |
 |:---|:---|
-| Description | Creates a new interpreter of the Exevalator. |
+| Description | Creates a new Exevalator interpreter instance. |
 | Parameters | None |
-| Return | The created instance. |
+| Return | The newly created instance. |
 
 
 <a id="methods-eval"></a>
 | Signature | Eval(expression As String) As Double |
 |:---|:---|
-| Description | Evaluates (computes) the value of an expression. |
+| Description | Evaluates the value of a given expression. |
 | Parameters | expression: The expression to be evaluated. |
-| Return | The evaluated value. |
-| Exception | ExevalatorException will be thrown if any error occurred when evaluating the expression. |
+| Return | The resulting value of the expression. |
+| Exception | ExevalatorException is thrown if an error occurs during the evaluation. |
 
 
 <a id="methods-reeval"></a>
 | Signature | Reeval() As Double |
 |:---|:---|
-| Description | Re-evaluates (re-computes) the value of the expression evaluated by "eval" method last time.<br>This method may (slightly) work faster than calling "eval" method repeatedly for the same expression.<br>Note that, the result value may different with the last evaluated value, if values of variables or behaviour of functions had changed. |
+| Description | Re-evaluates the value of the expression last evaluated by the "Eval" method. <br>This method may work slightly faster than repeatedly calling "eval" for the same expression.<br> Note that the result may differ from the last evaluation if variables or function behaviors have changed. |
 | Parameters | None |
-| Return | The evaluated value. |
-| Exception | ExevalatorException will be thrown if any error occurred when evaluating the expression. |
+| Return | The re-evaluated value. |
+| Exception | ExevalatorException is thrown if an error occurs during the evaluation. |
 
 
 <a id="methods-declare-variable"></a>
 | Signature | DeclareVariable(name As String) As Integer |
 |:---|:---|
-| Description | Declares a new variable, for using the value of it in expressions. |
-| Parameters | name: The name of the variable to be declared. |
-| Return | The virtual address of the declared variable, which is useful for accessing to the variable faster.<br>See "WriteVariableAt" and "ReadVariableAt" method. |
+| Description | Declares a new variable to be used in expressions. |
+| Parameters | name: The name of the variable. |
+| Return | The virtual address of the declared variable, facilitating faster access.<br>See the "writeVariableAt" and "readVariableAt" methods. |
 | Exception | ExevalatorException will be thrown if invalid name is specified. |
 
 
 <a id="methods-write-variable"></a>
 | Signature | WriteVariable(name As String, value As Double) |
 |:---|:---|
-| Description | Writes the value to the variable having the specified name. |
-| Parameters | name: The name of the variable to be written.<br>value: The new value of the variable. |
+| Description | Sets the specified variable to a new value. |
+| Parameters | name: The name of the variable.<br>value: The new value to set. |
 | Return | None |
-| Exception | ExevalatorException will be thrown if the specified variable is not found, or invalid name is specified. |
+| Exception | ExevalatorException is thrown if the variable does not exist or the name is invalid. |
 
 
 <a id="methods-write-variable-at"></a>
 | Signature | WriteVariableAt(address As Integer, value As Double) |
 |:---|:---|
-| Description | Writes the value to the variable at the specified virtual address.<br>This method works faster than "WriteVariable" method. |
-| Parameters | address: The virtual address of the variable to be written.<br>value: The new value of the variable. |
+| Description | Sets the value of a variable at the specified virtual address, which is faster than using "WriteVariable." |
+| Parameters | address: The virtual address of the variable.<br>value: The new value to set. |
 | Return | None |
-| Exception | ExevalatorException will be thrown if the invalid address is specified. |
+| Exception | ExevalatorException is thrown if the address is invalid. |
 
 
 <a id="methods-read-variable"></a>
 | Signature | ReadVariable(name As String) As Double |
 |:---|:---|
-| Description | Reads the value of the variable having the specified name. |
-| Parameters | name: The name of the variable to be read. |
+| Description | Retrieves the current value of the specified variable. |
+| Parameters | name: The name of the variable. |
 | Return | The current value of the variable. |
-| Exception | ExevalatorException will be thrown if the specified variable is not found, or invalid name is specified. |
+| Exception | ExevalatorException is thrown if the variable does not exist or the name is invalid. |
 
 
 <a id="methods-read-variable-at"></a>
 | Signature | ReadVariableAt(address As Integer) As Double |
 |:---|:---|
-| Description | Reads the value of the variable at the specified virtual address.<br>This method works faster than "ReadVariable" method. |
-| Parameters | address: The virtual address of the variable to be read. |
+| Description | Retrieves the value of a variable at the specified virtual address, which is faster than using "ReadVariable." |
+| Parameters | address: The virtual address of the variable. |
 | Return | The current value of the variable. |
-| Exception | ExevalatorException will be thrown if the invalid address is specified. |
+| Exception | Exevalator.Exception is thrown if the address is invalid. |
 
 
 <a id="methods-connect-function"></a>
 | Signature | ConnectFunction(name As String, function As IExevalatorFunction) |
 |:---|:---|
-| Description | Connects a function, for using it in expressions. |
-| Parameters | name: The name of the function used in the expression.<br>function: The function to be connected. It is an instance of the class implementing IExevalatorFunction (only "Invoke(arguments() As Double) As Double" method is defined, to implement the process of a function). |
+| Description | Connects a function to be used in expressions. |
+| Parameters | name: The function name as used in expressions.<br>function: An instance of a class implementing the IExevalatorFunction interface, which must define the method "Invoke(arguments() As Double) As Double" to process the function. |
+| Return | None |
+| Exception | ExevalatorException is thrown if an invalid name is specified. |
 | Return | None |
 | Exception | ExevalatorException will be thrown if invalid name is specified. |
 
