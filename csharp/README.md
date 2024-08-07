@@ -116,7 +116,7 @@ As demonstrated in previous sections, Exevalator can evaluate the value of an ex
 
 	(See: csharp/Example2.cs)
 
-You can use operators such as "+" (addition), "-" (subtraction and unary-minus operation), "*" (multiplication), and "/" (division) in expressions. Multiplications and divisions are prioritized over additions and subtractions in the order of operations.
+You can use operators such as "+" (addition), "-" (subtraction and unary-minus operation), "\*" (multiplication), and "/" (division) in expressions. Multiplications and divisions are prioritized over additions and subtractions in the order of operations.
 
 
 ### 2. Use Variables
@@ -225,7 +225,7 @@ Here is a list of methods for the Exevalator class, along with their specificati
 |:---|:---|
 | Description | Declares a new variable to be used in expressions. |
 | Parameters | name: The name of the variable. |
-| Return | The virtual address of the declared variable, facilitating faster access.<br>See the "writeVariableAt" and "readVariableAt" methods. |
+| Return | The virtual address of the declared variable, facilitating faster access.<br>See the "WriteVariableAt" and "ReadVariableAt" methods. |
 | Exception | ExevalatorException will be thrown if invalid name is specified. |
 
 

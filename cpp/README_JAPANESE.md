@@ -88,13 +88,15 @@ Exevalator のインタープリタは、ファイル「 cpp/exevalator.cpp 」�
 なお、Exevalator では、式の中のすべての数値は double 型で扱われます。従って、結果も常に double 型です。
 ただし、式の内容がおかしい場合や、未宣言の変数を使った場合など、計算に失敗する場合もあり得ます。その際には eval メソッドを呼んでいる箇所で例外 ExevalatorException がスローされます。従って、上記のように catch してハンドルするようにしてください。
 
-### 3. 分割コンパイルしたい場合
+### 3. 分割コンパイルしたい場合（必須の内容ではありません）
 
-現実的なプロジェクトにおいては、モジュールをなるべく細かい規模で分割コンパイルし、それらを後でリンクする場合も多いと思います。そのような場合は、Exevalator を使用するコードからはヘッダ「 exevalator.hpp 」のみを include します。例えば先ほどの example.cpp では：
+実務的なC++のプロジェクトにおいては、まず各ソースファイルをモジュールとして分割コンパイルし、それらを後工程でリンクする事で、実行ファイルを生成する場合も多いと思います。そのような場合は、Exevalator を使用するソースファイルからはヘッダ「 exevalator.hpp 」のみを include します。そして、exevalator.cpp は単体でコンパイルしてモジュールにし、最後に実行ファイル生成時にリンクするようにします。
+
+この例に沿ってビルドする例を示しましょう。まず先ほどの example.cpp の include 部分を以下のように改変します：
 
 	#include <iostream>
 	#include <cstdlib>
-	#include "exevalator.hpp" // cpp の方は include しない
+	#include "exevalator.hpp" // .cpp の方は include しない
 
 	int main() {
 
@@ -102,7 +104,7 @@ Exevalator のインタープリタは、ファイル「 cpp/exevalator.cpp 」�
 		exevalator::Exevalator exevalator;
 	...
 
-とします。そして上記と exevalator.cpp は別々にコンパイルします。
+そして上記と exevalator.cpp は別々に、それぞれモジュールとしてコンパイルします。
 
 	clang++ -std=c++17 -c exevalator.cpp
 	clang++ -std=c++17 -c example.cpp

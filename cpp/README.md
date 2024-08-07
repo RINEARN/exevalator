@@ -3,7 +3,7 @@
 &raquo; [Japanese](./README_JAPANESE.md)
 
 
-## English Index
+## Table of Contents
 - [Requirements](#requirements)
 - [How to Use](#how-to-use)
 - [Example Code](#example-code)
@@ -33,28 +33,21 @@
 <a id="how-to-use"></a>
 ## How to Use
 
-The interpreter of Exevalator is implemented in the file "cpp/exevalator.cpp". The header file is "cpp/exevalator.hpp". Only these two files are required to use Exevalator in your programs.
-In this section, we will use the above in a simple example code.
-
-### 1. Put above files into the source code folder of your program
-
-At first, put above files into the source code folder(s) of your program, in which you want to use Exevalator.
-
-When you want to use Exevalator in projects in which source files and build steps are tidy organized, you should probably put "exevalator.hpp" into the folder storing header files, and put "exevalator.cpp" into the folder storing implementation files. Then modify the content of a build file appropriately.
-
-On the other hand, when you want to use Exevalator in more small anf simple project
-<span style="text-decoration: line-through">&nbsp;&nbsp;&nbsp;&nbsp;</span>
-e.g: all source files are locating in one folder, and they are "include"ed directly from a source file having a main function
-<span style="text-decoration: line-through">&nbsp;&nbsp;&nbsp;&nbsp;</span>,
-put both "exevalator.app" and "exevalator.cpp" into the folder.
+Exevalator is an interpreter, compactly implemented across two files: "cpp/exevalator.cpp" and "cpp/exevalator.hpp" (the header file). Below, we demonstrate how to use these files in a simple example.
 
 
+### 1. Place the Files in Your Program's Source Code Folder
 
-### 2. Load Exevalator from your code, and use it
+First, place the files in the source code folder(s) of your program where you want to use Exevalator.
+
+For projects with strictly organized source directories, you should place "exevalator.hpp" in the headers directory and "exevalator.cpp" in the implementation files directory. Then, adjust your build configuration files accordingly.
+
+For smaller, simpler projects, such as those where all source files are in a single folder and directly included from a file containing the main function, place both "exevalator.hpp" and "exevalator.cpp" in the same folder.
 
 
-Next, load Exevalator from your code. If you don't care much about manners, it is most simple way that "include" directly both "exevalator.hpp" and "exevalator.cpp" from your code in which you want to use Exevalator:
+### 2. Load Exevalator from Your Code, and Use it
 
+Next, include Exevalator in your code. The simplest way, though not best practice, is to directly include both "exevalator.hpp" and "exevalator.cpp" as shown:
 
 	#include <iostream>
 	#include <cstdlib>
@@ -83,30 +76,29 @@ Next, load Exevalator from your code. If you don't care much about manners, it i
 		return EXIT_SUCCESS;
 	}
 
-
-The above example code computes the value of an expression "1.2 + 3.4", and displays the result. You can compile and run the above code (saved as "example.cpp") as follows:
+This example evaluates "1.2 + 3.4" and displays the result. Compile and run the code (saved as "example.cpp") as follows:
 
 	clang++ -std=c++17 -o example example.cpp
 	./example
 
-The result is:
+The output will be:
 
 	result: 4.6
 
-As the above, the correct value of "1.2 + 3.4" will be computed and displayed.
+This demonstrates the correct computation of "1.2 + 3.4".
 
-By the way, on Exevalator, all numbers in expressions will be handled as double-type values, so the result is always double-type.
-However, the computation may fail when an incorrect expression is inputted, or when an undeclared variable is accessed, and so on. If a computation failed, "eval" method throws an ExevalatorException, so catch and handle it as the above example code.
+In Exevalator, all numbers are handled as double-type values, and the return value is also double-type. Note, however, that the computation may fail if the expression is incorrect, or if an undeclared variable is accessed, among other reasons. If a computation fails, the "eval" method throws an ExevalatorException, so it's important to catch and handle it as shown in the example above.
 
 
-### 3. How to compile separately and link
+### 3. (Additional) How to Compile Separately and Link
 
-On many projects developing software in C++, source files are compiled separately as modules, and they are linked at the end of building steps.
-If you want to use Exevalator in such project, include ONLY header file "exevalator.hpp" from your code. For example, modify the previous example code as follows:
+Additionally, if your project uses separate compilation, which compiles each source file into modules and then links them, you should only include "exevalator.hpp" in the source files that utilize Exevalator. "exevalator.cpp" should be compiled as a separate module, which will then be linked during the final build step to generate the executable.
+
+For example, modify the previous example code as follows:
 
 	#include <iostream>
 	#include <cstdlib>
-	#include "exevalator.hpp" // don't include .cpp
+	#include "exevalator.hpp" // Do not include the .cpp file
 
 	int main() {
 
@@ -119,93 +111,94 @@ You can compile the above code and "exevalator.cpp" separately as follows:
 	clang++ -std=c++17 -c exevalator.cpp
 	clang++ -std=c++17 -c example.cpp
 
-Above command lines generates two compiled module files: "exevalator.o" and "example.o". You can link them as:
+The above commands generate two compiled module files: "exevalator.o" and "example.o". You can then link them as follows:
 
 	clang++ -o linked_example example.o exevalator.o
 
-Above command generates an executable file "linked_example". Let's execute it:
+This command generates the executable file "linked_example". Execute it to see the result:
 
 	./linked_example
 
 	result: 4.6
 
-As the above, we've got the same (and correct) result with the previous section.
+As shown above, we've achieved the same (and correct) result as in the previous section.
 
-By the way, ordinarily, on practical projects requiring separate compilation, build tools are used for doing compilation/link steps automatically.
-Build tools perform compilation/link steps based on code written in build files, such as "Makefile".
-Here we have demonstrated how to compile/link sources manually, but on practical projects, you are required to write/modify contents of the build file appropriately.
+Typically, in practical projects that require separate compilation, build tools are used to automate the compilation and linking steps. These tools execute these steps based on instructions written in build configuration files, such as Makefiles. While we have demonstrated how to compile and link sources manually here, in practical projects, you would need to write or modify the contents of the build file appropriately.
 
 
 <a id="example-code"></a>
 ## Example Code
 
-Simple example code "cpp/example*.cpp" are bundled in this repository.
+Simple example code files named "cpp/example*.cpp" are bundled in this repository.
 
-You can compile and run them by completely same way as step 2. in the previous section. For example, how to compile/run "example1.cpp" is:
+You can compile and run them in exactly the same way as described in step 2 of the previous section. For example, to compile and run "example1.cpp", use the following commands:
 
 	clang++ -std=c++17 -o example1 example1.cpp
 	./example1
 
-The code of "example1.cpp" is almost the same as "example.cpp" in the previous section, so the result is:
+The code in "example1.cpp" is almost identical to that in "example.cpp" from the previous section, so the result will be:
 
 	result: 4.6
 
-As the above, the computed value of an expression "1.2 + 3.4" will be displayed. You can compile/run other examples in the same way. 
+As shown above, the computed value of the expression "1.2 + 3.4" will be displayed. You can compile and run other examples in the same way.
 
-Also, a benchmark program "cpp/benchmark.cpp" for measuring processing speed of Exevalator is bundled in this repository. For compiling it, specify the optimization-option as:
+Additionally, a benchmark program named "cpp/benchmark.cpp" for measuring the processing speed of Exevalator is included in this repository. To compile it, include the optimization option as follows:
 
 	clang++ -std=c++17 -O2 -o benchmark benchmark.cpp
 
-In the above, "-O2" is the optimization option. If you forget it, Exevalator can not work in full-speed.
+In the above command, "-O2" specifies the optimization level. Omitting this may prevent Exevalator from operating at full speed.
 
 
 <a id="features"></a>
 ## Features
 
-The followings are main features of Exevalator.
+The following are the main features of Exevalator:
 
 ### 1. Evaluate (Compute) Expressions
 
-As shown in previous sections, Exevalator can evaluate (compute) the value of an expression:
+As demonstrated in previous sections, Exevalator can evaluate the value of an expression:
 
 	double result = exevalator.eval("(-(1.2 + 3.4) * 5) / 2");
 	// result: -11.5
 
 	(See: cpp/example2.cpp)
 
-As the above, you can use "+" (addition), "-" (subtraction and unary-minus operation), "\*" (multiplication), and "/" (division) operators in an expression. In order of operations, "multiplications and divisions" are prioritized than "additions and subtractions".
+You can use operators such as "+" (addition), "-" (subtraction and unary-minus operation), "\*" (multiplication), and "/" (division) in expressions. Multiplications and divisions are prioritized over additions and subtractions in the order of operations.
 
 
 ### 2. Use Variables
 
-You can use variables in expressions:
+You can declare variables programmatically using Exevalator's "declareVariable" method during application development, allowing these variables to be freely used within expressions:
 
-	// Declare a variable available in expressions
+	// Declare a variable to be used in expressions
 	exevalator.declare_variable("x");
 	exevalator.write_variable("x", 1.25);
 
-	// Compute the expression in which the above variable is used
+	// Evaluate the expression using the declared variable
 	double result = exevalator.eval("x + 1");
 	// result: 2.25
 
 	(See: cpp/example3.cpp)
 
-If you change the value of a variable very frequently, access to the variable by the address as follows:
+For more frequent variable value updates, access the variable by address for faster performance:
 
-	int address = exevalator.declare_variable("x");
+	#include <cstddef>
+	...
+
+	size_t address = exevalator.declare_variable("x");
 	exevalator.write_variable_at(address, 1.25);
 	...
 
 	(See: cpp/example4.cpp)
 
-This way works faster than accessings by the name.
+Access by address is quicker than by name.
 
-Please note that, above variable-related methods can throw ExevalatorException when they failed to declare or access to variables.
+Please note that the above variable-related methods can throw an "ExevalatorException" when they fail to declare or access variables.
 
 
 ### 3. Use Functions
 
-You can create functions available in expressions, by inheriting the abstract class "ExevalatorFunctionInterface" as follows:
+You can create functions by implementing the "exevalator::ExevalatorFunctionInterface", allowing these functions to be used within expressions:
 
 	// Create a function available in expressions
 	class MyFun : public exevalator::ExevalatorFunctionInterface {
@@ -219,7 +212,7 @@ You can create functions available in expressions, by inheriting the abstract cl
 	...
 
 	// Connect the above function for using it in expressions
-	// (Pass an instance of the class through "shared_ptr")
+	// (Passing an instance of the class through "shared_ptr")
 	exevalator::Exevalator exevalator;
 	exevalator.connect_function("fun", std::make_shared<MyFun>());
 
@@ -229,18 +222,17 @@ You can create functions available in expressions, by inheriting the abstract cl
 
 	(See: cpp/example5.cpp)
 
-**CAUTION: In Ver.1.0, values of arguments passed from expressions had been stored in the above "const std::vector\<double\> &arguments" array in reversed order. This behavior has been fixed in Ver.2.0. For details, please see the issue #2.**
+This setup ensures that developers can programmatically define and integrate custom functions, which users can then utilize seamlessly within their expressions.
 
-Please note that, as variable-related methods, above function-related methods can throw ExevalatorException.
-In addition, exception may occur in process of a functions called in an expression evaluated by "eval" method.
-(For example, in the above example, the function implemented in MyFun class throws an exception when too many/few arguments are passed.)
-In such case, "eval" method re-throws the exception by wrapping ExevalatorException.
+**CAUTION: In Ver.1.0, values of arguments passed from expressions were stored in the "std::vector<double> &arguments" in reversed order. This behavior has been corrected in Ver.2.0. For details, please refer to issue #2.**
+
+Please note that, like variable-related methods, the above function-related methods can also throw an ExevalatorException. In addition, an exception may occur in the process of functions called in an expression evaluated by the "eval" method (for example, in the above example, the function implemented in the MyFun class throws an exception when too many or few arguments are passed). In such cases, the "eval" method re-throws the exception by wrapping it in an ExevalatorException.
 
 
 <a id="methods"></a>
 ## List of Methods/Specifications
 
-The list of methods of Exevalator class, and their specifications.
+Here is a list of methods for the Exevalator class, along with their specifications:
 
 - [Constructor](#methods-constructor)
 - [double eval(const std::string &amp;expression)](#methods-eval)
@@ -256,81 +248,82 @@ The list of methods of Exevalator class, and their specifications.
 <a id="methods-constructor"></a>
 | Signature | (constructor) Exevalator() |
 |:---|:---|
-| Description | Creates a new interpreter of the Exevalator. |
+| Description | Creates a new Exevalator interpreter instance. |
 | Parameters | None |
-| Return | The created instance. |
+| Return | The newly created instance. |
 
 
 <a id="methods-eval"></a>
 | Signature | double eval(const std::string &amp;expression) |
 |:---|:---|
-| Description | Evaluates (computes) the value of an expression. |
+| Description | Evaluates the value of a given expression. |
 | Parameters | expression: The expression to be evaluated. |
-| Return | The evaluated value. |
-| Exception | ExevalatorException will be thrown if any error occurred when evaluating the expression. |
+| Return | The resulting value of the expression. |
+| Exception | ExevalatorException is thrown if an error occurs during the evaluation. |
 
 
 <a id="methods-reeval"></a>
 | Signature | double reeval() |
 |:---|:---|
-| Description | Re-evaluates (re-computes) the value of the expression evaluated by "eval" method last time.<br>This method works faster than calling "eval" method repeatedly for the same expression.<br>Note that, the result value may different with the last evaluated value, if values of variables or behaviour of functions had changed. |
+| Description | Re-evaluates the last expression processed by the "eval" method.<br>This method may work slightly faster than repeatedly calling "eval" for the same expression.<br> Note that the result may differ from the last evaluation if variables or function behaviors have changed. |
 | Parameters | None |
-| Return | The evaluated value. |
-| Exception | ExevalatorException will be thrown if any error occurred when evaluating the expression. |
+| Return | The re-evaluated value. |
+| Exception | ExevalatorException is thrown if an error occurs during the evaluation. |
 
 
 <a id="methods-declare-variable"></a>
 | Signature | size_t declare_variable(const std::string &amp;name) |
 |:---|:---|
-| Description | Declares a new variable, for using the value of it in expressions. |
-| Parameters | name: The name of the variable to be declared. |
-| Return | The virtual address of the declared variable, which is useful for accessing to the variable faster.<br>See "write_variable_at" and "read_variable_at" method. |
+| Description | Declares a new variable for use in expressions. |
+| Parameters | name: The name of the variable. |
+| Return | 	The virtual address of the declared variable, facilitating faster access.<br>See the "write_variable_at" and "read_variable_at" methods. |
 | Exception | ExevalatorException will be thrown if invalid name is specified. |
 
 
 <a id="methods-write-variable"></a>
 | Signature | void write_variable(const std::string &amp;name, double value) |
 |:---|:---|
-| Description | Writes the value to the variable having the specified name. |
-| Parameters | name: The name of the variable to be written.<br>value: The new value of the variable. |
+| Description | Assigns a new value to the specified variable. |
+| Parameters | name: The name of the variable.<br>value: The new value to assign. |
 | Return | None |
-| Exception | ExevalatorException will be thrown if the specified variable is not found, or invalid name is specified. |
+| Exception | ExevalatorException is thrown if the variable does not exist or the name is invalid. |
 
 
 <a id="methods-write-variable-at"></a>
 | Signature | void write_variable_at(size_t address, double value) |
 |:---|:---|
-| Description | Writes the value to the variable at the specified virtual address.<br>This method works faster than "write_variable" method. |
-| Parameters | address: The virtual address of the variable to be written.<br>value: The new value of the variable. |
+| Description | Assigns a value to a variable at a specified virtual address, which is faster than using "write_variable." |
+| Parameters | address: The virtual address of the variable.<br>value: The new value to assign. |
 | Return | None |
-| Exception | ExevalatorException will be thrown if the invalid address is specified. |
+| Exception | ExevalatorException is thrown if the address is invalid. |
 
 
 <a id="methods-read-variable"></a>
 | Signature | double read_variable(const std::string &amp;name) |
 |:---|:---|
-| Description | Reads the value of the variable having the specified name. |
-| Parameters | name: The name of the variable to be read. |
+| Description | Retrieves the current value of the specified variable. |
+| Parameters | name: The name of the variable. |
 | Return | The current value of the variable. |
-| Exception | ExevalatorException will be thrown if the specified variable is not found, or invalid name is specified. |
+| Exception | ExevalatorException is thrown if the variable does not exist or the name is invalid. |
 
 
 <a id="methods-read-variable-at"></a>
 | Signature | double read_variable_at(size_t address) |
 |:---|:---|
-| Description | Reads the value of the variable at the specified virtual address.<br>This method works faster than "read_variable" method. |
-| Parameters | address: The virtual address of the variable to be read. |
+| Description | Retrieves the value of a variable at the specified virtual address, which is faster than using "read_variable." |
+| Parameters | address: The virtual address of the variable. |
 | Return | The current value of the variable. |
-| Exception | ExevalatorException will be thrown if the invalid address is specified. |
+| Exception | ExevalatorException is thrown if the address is invalid. |
 
 
 <a id="methods-connect-function"></a>
 | Signature | size_t connect_function(const std::string &amp;name, const std::shared_ptr&lt;ExevalatorFunctionInterface&gt; &amp;function_ptr) |
 |:---|:---|
-| Description | Connects a function, for using it in expressions. |
-| Parameters | name: The name of the function used in the expression.<br>function_ptr: The shared_ptr pointing to the function to be connected. The function is an instance of the class inheriting ExevalatorFunctionInterface (only "double invoke(const std::vector&lt;double&gt; &amp;arguments)" method is defined, to implement the process of a function). |
-| Return | Unused in this version |
-| Exception | ExevalatorException will be thrown if invalid name is specified. |
+| Description | Connects a function for use in expressions. |
+| Parameters | name: The function name as used in expressions.<br>function_ptr: The shared pointer to the class implementing "exevalator::ExevalatorFunctionInterface", which defines the method "double invoke(const std::vector&lt;double&gt; &amp;arguments)" to process the function. |
+| Return | None |
+| Exception | ExevalatorException is thrown if an invalid name is specified. |
+
 
 
 

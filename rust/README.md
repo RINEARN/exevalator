@@ -121,7 +121,7 @@ As demonstrated in previous sections, Exevalator can evaluate the value of an ex
 
 	(See: rust/example2.rs)
 
-You can use operators such as "+" (addition), "-" (subtraction and unary-minus operation), "*" (multiplication), and "/" (division) in expressions. Multiplications and divisions are prioritized over additions and subtractions in the order of operations.
+You can use operators such as "+" (addition), "-" (subtraction and unary-minus operation), "\*" (multiplication), and "/" (division) in expressions. Multiplications and divisions are prioritized over additions and subtractions in the order of operations.
 
 
 ### 2. Use Variables
