@@ -9,6 +9,8 @@ Exevalator, an abbreviation for "**Ex**pression-**Eval**u**ator**," is a compact
 
 &raquo; [Official Website](https://www.rinearn.com/en-us/exevalator/)
 
+&raquo; [Ask the AI for help (ChatGPT account required)](https://chatgpt.com/g/g-UjkEJeO8x-exevalator-assistant)
+
 <hr />
 
 ## English README Index
@@ -275,6 +277,8 @@ The following webpages may be useful if you need more information about Exevalat
 - Microsoft Windows, C#, Visual Basic, .NET, and Visual Studio are either a registered trademarks or trademarks of Microsoft Corporation in the United States and/or other countries.
 
 - Linux is a trademark of linus torvalds in the United States and/or other countries.
+
+- ChatGPT is a trademark or a registered trademark of OpenAI OpCo, LLC in the United States and other countries.
 
 - Other names may be either a registered trademarks or trademarks of their respective owners. 
 

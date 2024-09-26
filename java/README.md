@@ -2,6 +2,7 @@
 
 &raquo; [Japanese](./README_JAPANESE.md)
 
+&raquo; [Ask the AI for help (ChatGPT account required)](https://chatgpt.com/g/g-UjkEJeO8x-exevalator-assistant)
 
 ## Table of Contents
 - [Requirements](#requirements)
@@ -288,6 +289,8 @@ If you require more advanced features, consider using Vnano, which is a scriptin
 ## Credits
 
 - Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+
+- ChatGPT is a trademark or a registered trademark of OpenAI OpCo, LLC in the United States and other countries.
 
 - Other names may be either a registered trademarks or trademarks of their respective owners. 
 

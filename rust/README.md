@@ -2,6 +2,7 @@
 
 &raquo; [Japanese](./README_JAPANESE.md)
 
+&raquo; [Ask the AI for help (ChatGPT account required)](https://chatgpt.com/g/g-UjkEJeO8x-exevalator-assistant)
 
 ## Table of Contents
 - [Requirements](#requirements)
@@ -301,6 +302,8 @@ Here are the methods of the Exevalator struct, along with their specifications:
 - Microsoft Windows is either a registered trademarks or trademarks of Microsoft Corporation in the United States and/or other countries.
 
 - Linux is a trademark of linus torvalds in the United States and/or other countries.
+
+- ChatGPT is a trademark or a registered trademark of OpenAI OpCo, LLC in the United States and other countries.
 
 - Other names may be either a registered trademarks or trademarks of their respective owners. 
 

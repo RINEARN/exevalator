@@ -2,6 +2,7 @@
 
 &raquo; [Japanese](./README_JAPANESE.md)
 
+&raquo; [Ask the AI for help (ChatGPT account required)](https://chatgpt.com/g/g-UjkEJeO8x-exevalator-assistant)
 
 ## Table of Contents
 - [Requirements](#requirements)
@@ -297,6 +298,8 @@ Here is a list of methods for the Exevalator class, along with their specificati
 ## Credits
 
 - Microsoft Windows, Visual Basic, .NET, and Visual Studio are either a registered trademarks or trademarks of Microsoft Corporation in the United States and/or other countries.
+
+- ChatGPT is a trademark or a registered trademark of OpenAI OpCo, LLC in the United States and other countries.
 
 - Other names may be either a registered trademarks or trademarks of their respective owners. 
 

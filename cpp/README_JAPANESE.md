@@ -2,6 +2,7 @@
 
 &raquo; [English](./README.md)
 
+&raquo; [AIに使い方を聞く（ChatGPTのアカウントが必要）](https://chatgpt.com/g/g-UjkEJeO8x-exevalator-assistant)
 
 ## 日本語版 目次
 - [必要な環境](#requirements)
@@ -329,6 +330,8 @@ Exevalator クラスで提供されている各メソッドの一覧と詳細仕
 ## 本文中の商標など
 
 - Linux は、Linus Torvalds 氏の米国およびその他の国における商標または登録商標です。
+
+- ChatGPT は、米国 OpenAI OpCo, LLC による米国またはその他の国における商標または登録商標です。
 
 - その他、文中に使用されている商標は、その商標を保持する各社の各国における商標または登録商標です。
 

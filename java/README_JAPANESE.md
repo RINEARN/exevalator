@@ -2,6 +2,7 @@
 
 &raquo; [English](./README.md)
 
+&raquo; [AIに使い方を聞く（ChatGPTのアカウントが必要）](https://chatgpt.com/g/g-UjkEJeO8x-exevalator-assistant)
 
 ## 日本語版 目次
 
@@ -286,6 +287,8 @@ Vnano では、条件分岐や繰り返しも含めた、それなりに複雑�
 ## 本文中の商標など
 
 - OracleとJavaは、Oracle Corporation 及びその子会社、関連会社の米国及びその他の国における登録商標です。文中の社名、商品名等は各社の商標または登録商標である場合があります。 
+
+- ChatGPT は、米国 OpenAI OpCo, LLC による米国またはその他の国における商標または登録商標です。
 
 - その他、文中に使用されている商標は、その商標を保持する各社の各国における商標または登録商標です。
 
