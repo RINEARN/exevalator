@@ -4,7 +4,7 @@
 
 ## Introduction
 
-We have developed and made publicly available an assistant AI using ChatGPT's GPTs service that can help guide users through Exevalator and assist with coding tasks:
+We have developed and made publicly available an assistant AI using ChatGPT's GPTs service that can help guide users of Exevalator and assist with coding tasks:
 
 * [Exevalator Assistant](https://chatgpt.com/g/g-UjkEJeO8x-exevalator-assistant)
 
