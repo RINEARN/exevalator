@@ -10,9 +10,9 @@
  * You can customize the error message of Exevalator by modifying the values of the properties of this class.
  */
 class ErrorMessages {
-    public static readonly DEFICIENT_OPEN_PARENTHESIS: string = 'The number of open parentheses "(" is deficient.';
-    public static readonly DEFICIENT_CLOSED_PARENTHESIS: string = 'The number of closed parentheses ")" is deficient.';
-    public static readonly EMPTY_PARENTHESIS: string = 'The content of parentheses "()" should not be empty.';
+    public static readonly DEFICIENT_OPEN_PARENTHESIS: string = "The number of open parentheses '(' is deficient.";
+    public static readonly DEFICIENT_CLOSED_PARENTHESIS: string = "The number of closed parentheses ')' is deficient.";
+    public static readonly EMPTY_PARENTHESIS: string = "The content of parentheses '()' should not be empty.";
     public static readonly RIGHT_OPERAND_REQUIRED: string = "An operand is required at the right of: '$0'";
     public static readonly LEFT_OPERAND_REQUIRED: string = "An operand is required at the left of: '$0'";
     public static readonly UNKNOWN_UNARY_PREFIX_OPERATOR: string = "Unknown unary-prefix operator: '$0'";
@@ -1073,7 +1073,6 @@ class AstNode {
         return result;
     }
 }
-
 
 
 /**
