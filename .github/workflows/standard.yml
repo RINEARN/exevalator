@@ -23,6 +23,8 @@ jobs:
         javac Example3.java
         javac Example4.java
         javac Example5.java
+        javac Example6.java
+        javac Example7.java
       working-directory: ./java
 
     - name: Run Example Code
@@ -32,6 +34,8 @@ jobs:
         java Example3
         java Example4
         java Example5
+        yes "" | java Example6
+        yes "" | java Example7
       working-directory: ./java
 
     - name: Compile Test Code
@@ -61,6 +65,8 @@ jobs:
         clang++ -std=c++2b -Wall -o example3 example3.cpp
         clang++ -std=c++2b -Wall -o example4 example4.cpp
         clang++ -std=c++2b -Wall -o example5 example5.cpp
+        clang++ -std=c++2b -Wall -o example5 example6.cpp
+        clang++ -std=c++2b -Wall -o example5 example7.cpp
       working-directory: ./cpp
 
     - name: Run Example Code
@@ -70,6 +76,8 @@ jobs:
         ./example3
         ./example4
         ./example5
+        yes "" | example6
+        yes "" | example7
       working-directory: ./cpp
 
     - name: Compile Test Code
@@ -101,6 +109,8 @@ jobs:
         rustc example3.rs
         rustc example4.rs
         rustc example5.rs
+        rustc example6.rs
+        rustc example7.rs
       working-directory: ./rust
 
     - name: Run Example Code
@@ -110,6 +120,8 @@ jobs:
         ./example3
         ./example4
         ./example5
+        yes "" | ./example6
+        yes "" | ./example7
       working-directory: ./rust
 
     - name: Compile Test Code
@@ -144,6 +156,10 @@ jobs:
         dotnet run --project ./Examples
         cp -f ./Example5.cs ./Examples/Program.cs
         dotnet run --project ./Examples
+        cp -f ./Example6.cs ./Examples/Program.cs
+        yes "" | dotnet run --project ./Examples
+        cp -f ./Example7.cs ./Examples/Program.cs
+        yes "" | dotnet run --project ./Examples
       working-directory: ./csharp
 
     - name: Run Test Code
@@ -184,6 +200,12 @@ jobs:
         cp -f ./Example5.vb ./Examples/Program.vb
         sed -i -e "s@Imports Rinearn\.ExevalatorVB@Imports Examples\.Rinearn\.ExevalatorVB@g" ./Examples/Program.vb
         dotnet run --project ./Examples
+        cp -f ./Example6.vb ./Examples/Program.vb
+        sed -i -e "s@Imports Rinearn\.ExevalatorVB@Imports Examples\.Rinearn\.ExevalatorVB@g" ./Examples/Program.vb
+        yes "" | dotnet run --project ./Examples
+        cp -f ./Example7.vb ./Examples/Program.vb
+        sed -i -e "s@Imports Rinearn\.ExevalatorVB@Imports Examples\.Rinearn\.ExevalatorVB@g" ./Examples/Program.vb
+        yes "" | dotnet run --project ./Examples
       working-directory: ./vb
 
     - name: Run Test Code
@@ -195,5 +217,4 @@ jobs:
         sed -i -e "s@Imports Rinearn\.ExevalatorVB@Imports Test\.Rinearn\.ExevalatorVB@g" ./Test/Program.vb
         dotnet run --project ./Test
       working-directory: ./vb
-
 
