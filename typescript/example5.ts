@@ -1,4 +1,4 @@
-import Exevalator, { FunctionInterface, ExevalatorError } from "./exevalator";
+import Exevalator, { ExevalatorFunctionInterface, ExevalatorError } from "./exevalator";
 
 /*
  * An example to create a function for available in expressions.
@@ -7,7 +7,7 @@ import Exevalator, { FunctionInterface, ExevalatorError } from "./exevalator";
 /**
  * Function available in expressions.
  */
-class MyFunction implements FunctionInterface {
+class MyFunction implements ExevalatorFunctionInterface {
 
     /**
      * Invoke the function.
@@ -16,8 +16,8 @@ class MyFunction implements FunctionInterface {
      * @return The return value of the function.
      */
     public invoke(args: number[]): number {
-        if (arguments.length != 2) {
-            throw new ExevalatorError("Incorrected number of args");
+        if (args.length !== 2) {
+            throw new ExevalatorError(`Incorrected number of args: ${args.length}`);
         }
         return args[0] + args[1];
     }
