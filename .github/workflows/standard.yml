@@ -65,8 +65,8 @@ jobs:
         clang++ -std=c++2b -Wall -o example3 example3.cpp
         clang++ -std=c++2b -Wall -o example4 example4.cpp
         clang++ -std=c++2b -Wall -o example5 example5.cpp
-        clang++ -std=c++2b -Wall -o example5 example6.cpp
-        clang++ -std=c++2b -Wall -o example5 example7.cpp
+        clang++ -std=c++2b -Wall -o example6 example6.cpp
+        clang++ -std=c++2b -Wall -o example7 example7.cpp
       working-directory: ./cpp
 
     - name: Run Example Code
@@ -218,3 +218,47 @@ jobs:
         dotnet run --project ./Test
       working-directory: ./vb
 
+
+  test-for-typescript:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set-up Environment
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+      run: npm install typescript @types/node
+      run: npm install esbuild
+
+    - name: Compile Exevalator
+      run: npx tsc exevalator.ts
+      working-directory: ./typescript
+
+    - name: Compile Example Code
+      run: |
+        npx tsc example1.ts
+        npx tsc example2.ts
+        npx tsc example3.ts
+        npx tsc example4.ts
+        npx tsc example5.ts
+        npx esbuild example6.ts --bundle --outfile=example6.bundle.js
+        npx esbuild example7.ts --bundle --outfile=example7.bundle.js
+      working-directory: ./typescript
+
+    - name: Run Example Code
+      run: |
+        node example1.js
+        node example2.js
+        node example3.js
+        node example4.js
+        node example5.js
+      working-directory: ./typescript
+
+    - name: Compile Test Code
+      run: npx tsc test.ts
+      working-directory: ./typescript
+
+    - name: Run Test Code
+      run: node test.js
+      working-directory: ./typescript
