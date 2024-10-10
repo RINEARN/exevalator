@@ -54,7 +54,7 @@ export default class Exevalator {
     private variableTable: Map<string, number>;
 
     /** The Map mapping each function name to an IExevalatorFunction instance. */
-    private functionTable: Map<string, FunctionInterface>;
+    private functionTable: Map<string, ExevalatorFunctionInterface>;
 
     /** Caches the content of the expression evaluated last time, to skip re-parsing. */
     private lastEvaluatedExpression : string | undefined;
@@ -66,7 +66,7 @@ export default class Exevalator {
         this.memory = [];
         this.evaluator = new Evaluator();
         this.variableTable = new Map<string, number>();
-        this.functionTable = new Map<string, FunctionInterface>();
+        this.functionTable = new Map<string, ExevalatorFunctionInterface>();
         this.lastEvaluatedExpression = undefined;
     }
 
@@ -246,7 +246,7 @@ export default class Exevalator {
      * @param overwrite - (The default value is false) Specify true if overwrite the function which is already connected with the same name.
      * @throws ExevalatorError - Thrown if the specified function name is invalid or already used.
      */
-    public connectFunction(name: string, functionImpl: FunctionInterface, overwrite: boolean = false): void {
+    public connectFunction(name: string, functionImpl: ExevalatorFunctionInterface, overwrite: boolean = false): void {
         if (name == null || name === undefined) {
             throw new ExevalatorError(ErrorMessages.ARGS_MUST_NOT_BE_NULL_OR_UNDEFINED.replace("$0", "name"));
         }
@@ -288,7 +288,7 @@ export class ExevalatorImplementationError extends Error {
 /**
  * The interface to implement functions available in expressions.
  */
-export interface FunctionInterface {
+export interface ExevalatorFunctionInterface {
 
     /**
      * Invokes the function.
@@ -1090,7 +1090,7 @@ class Evaluator {
      * @param variableTable - The Map mapping each variable name to an address of the variable.
      * @param functionTable - The Map mapping each function name to an IExevalatorFunction instance.
      */
-    update(ast: AstNode, variableTable: Map<string, number>, functionTable: Map<string, FunctionInterface>): void {
+    update(ast: AstNode, variableTable: Map<string, number>, functionTable: Map<string, ExevalatorFunctionInterface>): void {
         this.evaluatorNodeTree = Evaluator.createEvaluatorNodeTree(ast, variableTable, functionTable);
     }
 
@@ -1125,7 +1125,7 @@ class Evaluator {
      * @returns The root node of the created tree of evaluator nodes.
      */
     public static createEvaluatorNodeTree (
-            ast: AstNode, variableTable: Map<string, number>, functionTable: Map<string, FunctionInterface>): EvaluatorNode {
+            ast: AstNode, variableTable: Map<string, number>, functionTable: Map<string, ExevalatorFunctionInterface>): EvaluatorNode {
 
         // Note: This method creates a tree of evaluator nodes by traversing each node in the AST recursively.
 
@@ -1172,7 +1172,7 @@ class Evaluator {
                 if (!functionTable.has(identifier)) {
                     throw new ExevalatorError(ErrorMessages.FUNCTION_NOT_FOUND.replace("$0", identifier));
                 }
-                const functionImpl: FunctionInterface = functionTable.get(identifier)!;
+                const functionImpl: ExevalatorFunctionInterface = functionTable.get(identifier)!;
                 const argCount: number = childCount - 1;
                 let argNodes: EvaluatorNode[] = new Array(argCount);
                 for (let iarg: number = 0; iarg<argCount; iarg++) {
@@ -1451,7 +1451,7 @@ class FunctionEvaluatorNode extends EvaluatorNode {
      * @param argumentEvalNodes - Evaluator nodes for evaluating values of arguments.
      */
     public constructor(
-            private functionImpl: FunctionInterface,
+            private functionImpl: ExevalatorFunctionInterface,
             private functionName: string,
             private argumentEvalNodes: EvaluatorNode[]
     ) {
