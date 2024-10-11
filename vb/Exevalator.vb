@@ -9,6 +9,7 @@ Imports System
 Imports System.Collections.Generic
 Imports System.Text.RegularExpressions
 Imports System.Text
+Imports System.Globalization
 
 Namespace Rinearn.ExevalatorVB
 
@@ -101,7 +102,7 @@ Namespace Rinearn.ExevalatorVB
         ''' <summary>
         ''' Re-evaluates (re-computes) the value of the expression evaluated by "eval" method last time.
         ''' This method may (slightly) work faster than calling "eval" method repeatedly for the same expression.
-        ''' Note that, the result value may different with the last evaluated value, 
+        ''' Note that, the result value may differ from the last evaluated value, 
         ''' if values of variables or behaviour of functions had changed.
         ''' </summary>
         ''' <returns>The evaluated value</returns>
@@ -157,7 +158,7 @@ Namespace Rinearn.ExevalatorVB
 
         ''' <summary>
         ''' Writes the value to the variable at the specified virtual address.
-        ''' This method works faster than "WriteVariable" method.
+        ''' This method is more efficient than "WriteVariable" method.
         ''' </summary>
         ''' <param name="address">The virtual address of the variable to be written</param>
         ''' <param name="value">The new value of the variable</param>
@@ -186,7 +187,7 @@ Namespace Rinearn.ExevalatorVB
 
         ''' <summary>
         ''' Reads the value of the variable at the specified virtual address.
-        ''' This method works faster than "EeadVariable" method.
+        ''' This method is more efficient than "ReadVariable" method.
         ''' </summary>
         ''' <param name="address">The virtual address of the variable to be read</param>
         ''' <returns>The current value of the variable</returns>
@@ -278,7 +279,7 @@ Namespace Rinearn.ExevalatorVB
             Dim tokens As Token() = LexicalAnalyzer.CreateTokensFromTokenWords(tokenWords, numberLiterals.ToArray())
 
             ' Check syntactic correctness of tokens.
-            LexicalAnalyzer.CheckParenthesisOpeningClosings(tokens)
+            LexicalAnalyzer.CheckParenthesisBalance(tokens)
             LexicalAnalyzer.CheckEmptyParentheses(tokens)
             LexicalAnalyzer.CheckLocationsOfOperatorsAndLeafs(tokens)
 
@@ -422,7 +423,7 @@ Namespace Rinearn.ExevalatorVB
         ''' If no error detected, nothing will occur.
         ''' </summary>
         ''' <param name="tokens">Tokens of the inputted expression.</param>
-        Private Shared Sub CheckParenthesisOpeningClosings(tokens() As Token)
+        Private Shared Sub CheckParenthesisBalance(tokens() As Token)
             Dim tokenCount As Integer = tokens.Length
             Dim hierarchy As Integer = 0 ' Increases at "(" and decreases at ")".
 
@@ -1163,7 +1164,7 @@ Namespace Rinearn.ExevalatorVB
             Dim token As Token = ast.Token
             If token.Type = TokenType.NumberLiteral Then
                 Dim literalValue As Double = Double.NaN
-                If Not Double.TryParse(token.Word, literalValue) Then
+                If Not Double.TryParse(token.Word, NumberStyles.Number, CultureInfo.InvariantCulture, literalValue) Then
                     Throw new ExevalatorException("Invalid number literal: " + token.Word)
                 End If
                 Return New Evaluator.NumberLiteralEvaluatorNode(literalValue)
@@ -1523,9 +1524,9 @@ Namespace Rinearn.ExevalatorVB
 
         ''' <summary>The regular expression of number literals.</summary>
         Public Const NumberLiteralRegex As String =
-            "(?<=(\s|\+|-|\*|/|\(|\)|,|^))" + ' Token splitters, or beginning of the expression
-            "([0-9]+(\.[0-9]+)?)" +               ' Significand part
-            "((e|E)(\+|-)?[0-9]+)?"               ' Exponent part
+            "(?<=(\s|\+|-|\*|/|\(|\)|,|^))" + ' Token splitters or start of expression
+            "([0-9]+(\.[0-9]+)?)" +           ' Significand part
+            "((e|E)(\+|-)?[0-9]+)?"           ' Exponent part
 
         ''' <summary>The escaped representation of number literals in expressions.</summary>
         Public Const EscapedNumberLiteral As String = "@NUMBER_LITERAL@"

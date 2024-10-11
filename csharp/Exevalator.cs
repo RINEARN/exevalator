@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace Rinearn.ExevalatorCS
 {
@@ -123,7 +124,7 @@ namespace Rinearn.ExevalatorCS
         /// <summary>
         /// Re-evaluates (re-computes) the value of the expression evaluated by "eval" method last time.
         /// This method may (slightly) work faster than calling "eval" method repeatedly for the same expression.
-        /// Note that, the result value may different with the last evaluated value, 
+        /// Note that, the result value may differ from the last evaluated value, 
         /// if values of variables or behaviour of functions had changed.
         /// </summary>
         /// <returns>The evaluated value</returns>
@@ -186,7 +187,7 @@ namespace Rinearn.ExevalatorCS
 
         /// <summary>
         /// Writes the value to the variable at the specified virtual address.
-        /// This method works faster than "WriteVariable" method.
+        /// This method is more efficient than "WriteVariable" method.
         /// </summary>
         /// <param name="address">The virtual address of the variable to be written</param>
         /// <param name="value">The new value of the variable</param>
@@ -220,7 +221,7 @@ namespace Rinearn.ExevalatorCS
 
         /// <summary>
         /// Reads the value of the variable at the specified virtual address.
-        /// This method works faster than "EeadVariable" method.
+        /// This method is more efficient than "ReadVariable" method.
         /// </summary>
         /// <param name="address">The virtual address of the variable to be read</param>
         /// <returns>The current value of the variable</returns>
@@ -321,7 +322,7 @@ namespace Rinearn.ExevalatorCS
             Token[] tokens = LexicalAnalyzer.CreateTokensFromTokenWords(tokenWords, numberLiterals.ToArray());
 
             // Check syntactic correctness of tokens.
-            LexicalAnalyzer.CheckParenthesisOpeningClosings(tokens);
+            LexicalAnalyzer.CheckParenthesisBalance(tokens);
             LexicalAnalyzer.CheckEmptyParentheses(tokens);
             LexicalAnalyzer.CheckLocationsOfOperatorsAndLeafs(tokens);
 
@@ -493,7 +494,7 @@ namespace Rinearn.ExevalatorCS
         /// If no error detected, nothing will occur.
         /// </summary>
         /// <param name="tokens">Tokens of the inputted expression.</param>
-        private static void CheckParenthesisOpeningClosings(Token[] tokens)
+        private static void CheckParenthesisBalance(Token[] tokens)
         {
             int tokenCount = tokens.Length;
             int hierarchy = 0; // Increases at "(" and decreases at ")".
@@ -1317,7 +1318,7 @@ namespace Rinearn.ExevalatorCS
             if (token.Type == TokenType.NumberLiteral)
             {
                 double literalValue = System.Double.NaN;
-                if (!System.Double.TryParse(token.Word, out literalValue))
+                if (!System.Double.TryParse(token.Word, NumberStyles.Number, CultureInfo.InvariantCulture, out literalValue))
                 {
                     throw new ExevalatorException("Invalid number literal: " + token.Word);
                 }
@@ -1706,7 +1707,7 @@ namespace Rinearn.ExevalatorCS
 
         /// <summary>The regular expression of number literals.</summary>
         public const string NumberLiteralRegex =
-            "(?<=(\\s|\\+|-|\\*|/|\\(|\\)|,|^))" + // Token splitters, or beginning of the expression
+            "(?<=(\\s|\\+|-|\\*|/|\\(|\\)|,|^))" + // Token splitters or start of expression
             "([0-9]+(\\.[0-9]+)?)" +               // Significand part
             "((e|E)(\\+|-)?[0-9]+)?";              // Exponent part
 
