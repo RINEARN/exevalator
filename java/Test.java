@@ -743,6 +743,12 @@ public class Test {
             exevalator.eval("funD(1.25, 2.5, 5.0)"),
             0.0
         );
+
+        check(
+            "Test of Functions 12",
+            exevalator.eval("-funC(-1.25, -2.5)"),
+            - (-1.25 + -2.5)
+        );
     }
 
     private void testEmptyExpressions() {

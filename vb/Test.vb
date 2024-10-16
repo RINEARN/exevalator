@@ -750,6 +750,12 @@ Module Test
             exevalator.Eval("funD(1.25, 2.5, 5.0)"), _
             0.0 _
         )
+
+        Check(
+            "Test of Functions 12", _
+            exevalator.Eval("-funC(-1.25, -2.5)"), _
+            - (-1.25 + -2.5) _
+        )
     End Sub
 
     Private Sub TestEmptyExpressions()

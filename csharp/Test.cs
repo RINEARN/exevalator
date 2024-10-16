@@ -829,6 +829,12 @@ class Test
             exevalator.Eval("funD(1.25, 2.5, 5.0)"),
             0.0
         );
+
+        Check(
+            "Test of Functions 12",
+            exevalator.Eval("-funC(-1.25, -2.5)"),
+            - (-1.25 + -2.5)
+        );
     }
 
     private static void TestEmptyExpressions()
