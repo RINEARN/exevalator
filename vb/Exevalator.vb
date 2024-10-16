@@ -368,7 +368,9 @@ Namespace Rinearn.ExevalatorVB
                     tokens(itoken) = New Token(TokenType.OperatorToken, word)
 
                     Dim op As OperatorInfo?
-                    If lastToken Is Nothing OrElse String.equals(lastToken?.Word, "(") _
+                    If lastToken Is Nothing _
+                            OrElse String.equals(lastToken?.Word, "(") _
+                            OrElse String.equals(lastToken?.Word, ",") _
                             OrElse (lastToken?.Type = TokenType.OperatorToken _
                             AndAlso lastToken?.OperatorInfo?.Type <> OperatorType.FunctionCall) Then
 

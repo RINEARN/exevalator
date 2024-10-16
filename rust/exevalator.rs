@@ -491,7 +491,9 @@ impl LexicalAnalyzer {
                 let operator_symbol_char: char = word.chars().nth(0).unwrap();
 
                 // Cases of unary-prefix operators.
-                if last_token.is_none() || last_token.unwrap().word.eq("(")
+                if last_token.is_none()
+                        || last_token.unwrap().word.eq("(")
+                        || last_token.unwrap().word.eq(",")
                         || (last_token.unwrap().token_type == TokenType::Operator
                         && *last_operator_type.unwrap() != OperatorType::Call) {
 

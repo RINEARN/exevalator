@@ -504,7 +504,9 @@ std::vector<Token> LexicalAnalyzer::create_tokens_from_token_words(
         } else if (word.length() == 1 && settings.operator_symbol_set.find(word[0]) != settings.operator_symbol_set.end()) {
 
             OperatorInfo opinfo;
-            if (!has_last_token || last_token.word == "("
+            if (!has_last_token
+                        || last_token.word == "("
+                        || last_token.word == ","
                         || (last_token.type == TokenType::OPERATOR && last_token.opinfo.type != OperatorType::CALL)) {
 
                 if (settings.unary_prefix_symbol_operator_map.find(word[0]) != settings.unary_prefix_symbol_operator_map.end()) {

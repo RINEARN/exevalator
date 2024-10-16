@@ -423,7 +423,9 @@ namespace Rinearn.ExevalatorCS
                     tokens[itoken] = new Token(TokenType.Operator, word);
 
                     Operator? op;
-                    if (lastToken == null || lastToken?.Word == "("
+                    if (lastToken == null
+                            || lastToken?.Word == "("
+                            || lastToken?.Word == ","
                             || (lastToken?.Type == TokenType.Operator
                             && lastToken?.Operator?.Type != OperatorType.Call))
                     {

@@ -407,6 +407,7 @@ class LexicalAnalyzer {
                 // Cases of unary-prefix operators.
                 if (!lastToken
                         || lastToken.word === "("
+                        || lastToken.word === ","
                         || (lastToken.type === TokenType.OPERATOR && lastToken.operator?.type != OperatorType.CALL) ) {
 
                     if (!StaticSettings.UNARY_PREFIX_OPERATOR_SYMBOL_MAP.has(word.charAt(0))) {
