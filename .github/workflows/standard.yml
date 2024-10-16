@@ -224,10 +224,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set-up Environment
+    - name: Set-up Environment (Node)
       uses: actions/setup-node@v4
       with:
         node-version: '20'
+
+    - name: Set-up Environment (Other tools)
       run: |
         npm install typescript @types/node
         npm install esbuild
