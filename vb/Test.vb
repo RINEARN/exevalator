@@ -25,6 +25,7 @@ Module Test
         TestFunctions()
         TestEmptyExpressions()
         TestReeval()
+        TestTokenization()
 
         Console.WriteLine("All tests have completed successfully.")
     End Sub
@@ -328,9 +329,9 @@ Module Test
                 exevalator.Eval("((1 + 2)"), _
                 (1 + 2) _
             )
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to thrown
+            ' Expected to Thrown
             Console.WriteLine("Test of Detection of Mismatching of Open/Closed Parentheses 2: OK.")
         End Try
 
@@ -340,9 +341,9 @@ Module Test
                 exevalator.Eval("(1 + 2))"), _
                 (1 + 2) _
             )
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to thrown
+            ' Expected to Thrown
             Console.WriteLine("Test of Detection of Mismatching of Open/Closed Parentheses 3: OK.")
         End Try
 
@@ -358,9 +359,9 @@ Module Test
                 exevalator.Eval("1 + 2) + (3 + 4"), _
                 (1 + 2) + (3 + 4) _
             )
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to thrown
+            ' Expected to Thrown
             Console.WriteLine("Test of Detection of Mismatching of Open/Closed Parentheses 5: OK.")
         End Try
 
@@ -376,9 +377,9 @@ Module Test
                 exevalator.Eval("1 + ((2 + (3 + 4) + 5) + 6"), _
                 1 + ((2 + (3 + 4) + 5) + 6) _
             )
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to thrown
+            ' Expected to Thrown
             Console.WriteLine("Test of Detection of Mismatching of Open/Closed Parentheses 7: OK.")
         End Try
 
@@ -388,9 +389,9 @@ Module Test
                 exevalator.Eval("1 + (2 + (3 + 4) + 5) + 6)"), _
                 1 + ((2 + (3 + 4) + 5) + 6) _
             )
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to thrown
+            ' Expected to Thrown
             Console.WriteLine("Test of Detection of Mismatching of Open/Closed Parentheses 8: OK.")
         End Try
 
@@ -400,9 +401,9 @@ Module Test
                 exevalator.Eval("()"), _
                 Double.NaN _
             )
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to thrown
+            ' Expected to Thrown
             Console.WriteLine("Test of Detection of Empty Parentheses 1: OK.")
         End Try
 
@@ -412,9 +413,9 @@ Module Test
                 exevalator.Eval("1 + ()"), _
                 Double.NaN _
             )
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to thrown
+            ' Expected to Thrown
             Console.WriteLine("Test of Detection of Empty Parentheses 2: OK.")
         End Try
 
@@ -424,9 +425,9 @@ Module Test
                 exevalator.Eval("() + 1"), _
                 Double.NaN _
             )
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to thrown
+            ' Expected to Thrown
             Console.WriteLine("Test of Detection of Empty Parentheses 3: OK.")
         End Try
     End Sub
@@ -448,9 +449,9 @@ Module Test
                 exevalator.Eval("1 + -"), _
                 1 + -123 _
             )
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to thrown
+            ' Expected to Thrown
             Console.WriteLine("Test of Detection of Left Operand of Unary-Prefix Operator 2: OK.")
         End Try
 
@@ -460,9 +461,9 @@ Module Test
                 exevalator.Eval("(1 + -)"), _
                 1 + -123 _
             )
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to thrown
+            ' Expected to Thrown
             Console.WriteLine("Test of Detection of Left Operand of Unary-Prefix Operator 3: OK.")
         End Try
 
@@ -478,9 +479,9 @@ Module Test
                 exevalator.Eval("123 *"), _
                 123 * 456 _
             )
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to thrown
+            ' Expected to Thrown
             Console.WriteLine("Test of Detection of Left Operand of Binary Operator 2: OK.")
         End Try
 
@@ -490,9 +491,9 @@ Module Test
                 exevalator.Eval("* 456"), _
                 123 * 456 _
             )
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to thrown
+            ' Expected to Thrown
             Console.WriteLine("Test of Detection of Left Operand of Binary Operator 3: OK.")
         End Try
 
@@ -502,9 +503,9 @@ Module Test
                 exevalator.Eval("123 + ( * 456)"), _
                 123 * 456 _
             )
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to thrown
+            ' Expected to Thrown
             Console.WriteLine("Test of Detection of Left Operand of Binary Operator 4: OK.")
         End Try
 
@@ -514,9 +515,9 @@ Module Test
                 exevalator.Eval("(123 *) + 456"), _
                 123 * 456 _
             )
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to thrown
+            ' Expected to Thrown
             Console.WriteLine("Test of Detection of Left Operand of Binary Operator 5: OK.")
         End Try
 
@@ -526,9 +527,9 @@ Module Test
                 exevalator.Eval("123 456"), _
                 123 * 456 _
             )
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to thrown
+            ' Expected to Thrown
             Console.WriteLine("Test of Detection of Lacking Operator: OK.")
         End Try
     End Sub
@@ -539,9 +540,9 @@ Module Test
 
         Try
             exevalator.Eval("x")
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to be thrown
+            ' Expected to be Thrown
             Console.WriteLine("Test of Variables 1: OK.")
         End Try
 
@@ -571,17 +572,17 @@ Module Test
 
         Try
             exevalator.WriteVariableAt(100, 5.0)
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to be thrown
+            ' Expected to be Thrown
             Console.WriteLine("Test of Variables 5: OK.")
         End Try
 
         Try
             exevalator.Eval("y")
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to be thrown
+            ' Expected to be Thrown
             Console.WriteLine("Test of Variables 6: OK.")
         End Try
 
@@ -678,9 +679,9 @@ Module Test
 
         Try
             exevalator.Eval("funA()")
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to be thrown
+            ' Expected to be Thrown
             Console.WriteLine("Test of Functions 1: OK.")
         End Try
 
@@ -693,9 +694,9 @@ Module Test
 
         Try
             exevalator.Eval("funB(2.5)")
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to be thrown
+            ' Expected to be Thrown
             Console.WriteLine("Test of Functions 3: OK.")
         End Try
 
@@ -756,33 +757,33 @@ Module Test
 
         Try
             exevalator.Eval("")
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to be thrown
+            ' Expected to be Thrown
             Console.WriteLine("Test of Empty Expressions 1: OK.")
         End Try
 
         Try
             exevalator.Eval(" ")
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to be thrown
+            ' Expected to be Thrown
             Console.WriteLine("Test of Empty Expressions 2: OK.")
         End Try
 
         Try
             exevalator.Eval("  ")
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to be thrown
+            ' Expected to be Thrown
             Console.WriteLine("Test of Empty Expressions 3: OK.")
         End Try
 
         Try
             exevalator.Eval("   ")
-            Throw New ExevalatorTestException("Expected exception has not been thrown")
+            Throw New ExevalatorTestException("Expected exception has not been Thrown")
         Catch ee As ExevalatorException
-            ' Expected to be thrown
+            ' Expected to be Thrown
             Console.WriteLine("Test of Empty Expressions 4: OK.")
         End Try
     End Sub
@@ -846,6 +847,93 @@ Module Test
         )
     End Sub
 
+    Private Sub TestTokenization()
+        Dim exevalator As Exevalator = new Exevalator()
+
+        Check( _
+            "Test of Tokenization 1", _
+            exevalator.Eval("1.2345678"), _
+            1.2345678 _
+        )
+
+        Try
+            exevalator.Eval("1.234\n5678")
+            Throw new ExevalatorTestException("Expected exception has not been thrown")
+        Catch ee As ExevalatorException
+            ' Expected to be 
+            Console.WriteLine("Test of Tokenization 2: OK.")
+        End Try
+
+        Try
+            exevalator.Eval("1.234\r\n5678")
+            Throw new ExevalatorTestException("Expected exception has not been thrown")
+        Catch ee As ExevalatorException
+            ' Expected to be thrown
+            Console.WriteLine("Test of Tokenization 3: OK.")
+        End Try
+
+        Try
+            exevalator.Eval("1.234\t5678")
+            Throw new ExevalatorTestException("Expected exception has not been thrown")
+        Catch ee As ExevalatorException
+            ' Expected to be thrown
+            Console.WriteLine("Test of Tokenization 4: OK.")
+        End Try
+
+        Try
+            exevalator.Eval("1.234 5678")
+            Throw new ExevalatorTestException("Expected exception has not been thrown")
+        Catch ee As ExevalatorException
+            ' Expected to be thrown
+            Console.WriteLine("Test of Tokenization 5: OK.")
+        End Try
+
+        Check( _
+            "Test of Tokenization 6", _
+            exevalator.Eval("1+2*3-4/5"), _
+            1.0 + 2.0 * 3.0 - 4.0 / 5.0 _
+        )
+
+        Check( _
+            "Test of Tokenization 7", _
+            exevalator.Eval("1+" & vbLf & "2*3" & vbCrLf & "-4/5"), _
+            1.0 + 2.0 * 3.0 - 4.0 / 5.0 _
+        )
+
+        Check( _
+            "Test of Tokenization 8", _
+            exevalator.Eval("((1+2)*3)-(4/5)"), _
+            ((1.0 + 2.0) * 3.0) - (4.0 / 5.0) _
+        )
+
+        Dim funC As FunctionC = new FunctionC()
+        exevalator.ConnectFunction("funC", funC)
+
+        Check( _
+            "Test of Tokenization 9", _
+            exevalator.Eval("funC(1,2)"), _
+            1.0 + 2.0 _
+        )
+
+        Check( _
+            "Test of Tokenization 10", _
+            exevalator.Eval("funC(" & vbLf & "1," & vbCrLf & "2" & vbTab & ")"), _
+            1.0 + 2.0 _
+        )
+
+        Check( _
+            "Test of Tokenization 11", _
+            exevalator.Eval("3*funC(1,2)/2"), _
+            3.0 * (1.0 + 2.0) / 2.0 _
+        )
+
+        Check( _
+            "Test of Tokenization 12", _
+            exevalator.Eval("3*(-funC(1,2)+2)"), _
+            3.0 * (-(1.0 + 2.0) + 2.0) _
+        )
+    End Sub
+
 
     ' Checks the evaluated (computed) value of the testing expression by the Exevalator.
     ' evaluatedValue: The evaluated (computed) value of the testing expression by Exevalator
@@ -864,7 +952,7 @@ Module Test
     End Sub
 
 
-    ' The Exception class thrown when any test has failed.
+    ' The Exception class Thrown when any test has failed.
     Private Class ExevalatorTestException
         Inherits Exception
         Public Sub New(errorMessage As String)

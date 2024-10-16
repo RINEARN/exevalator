@@ -19,6 +19,7 @@ void test_variables();
 void test_functions();
 void test_empty_expressions();
 void test_reeval();
+void test_tokenizations();
 
 /// The minimum error between two double-type values to regard them almost equal.
 const double ALLOWABLE_ERROR = 1.0E-12;
@@ -36,6 +37,7 @@ int main() {
         test_functions();
         test_empty_expressions();
         test_reeval();
+        test_tokenizations();
 
         std::cout << "All tests have completed successfully." << std::endl;
         return EXIT_SUCCESS;
@@ -707,7 +709,7 @@ void test_empty_expressions() {
         std::cerr << "Expected error has not occurred." << std::endl;
         exit(EXIT_FAILURE);
     } catch (ExevalatorException &error) {
-        std::cout << error.what() << std::endl;
+        //std::cout << error.what() << std::endl;
         std::cout << "Test of Empty Expression 1: OK." << std::endl;
     }
 
@@ -716,7 +718,7 @@ void test_empty_expressions() {
         std::cerr << "Expected error has not occurred." << std::endl;
         exit(EXIT_FAILURE);
     } catch (ExevalatorException &error) {
-        std::cout << error.what() << std::endl;
+        //std::cout << error.what() << std::endl;
         std::cout << "Test of Empty Expression 2: OK." << std::endl;
     }
 
@@ -725,7 +727,7 @@ void test_empty_expressions() {
         std::cerr << "Expected error has not occurred." << std::endl;
         exit(EXIT_FAILURE);
     } catch (ExevalatorException &error) {
-        std::cout << error.what() << std::endl;
+        //std::cout << error.what() << std::endl;
         std::cout << "Test of Empty Expression 3: OK." << std::endl;
     }
 
@@ -734,7 +736,7 @@ void test_empty_expressions() {
         std::cerr << "Expected error has not occurred." << std::endl;
         exit(EXIT_FAILURE);
     } catch (ExevalatorException &error) {
-        std::cout << error.what() << std::endl;
+        //std::cout << error.what() << std::endl;
         std::cout << "Test of Empty Expression 4: OK." << std::endl;
     }
 }
@@ -795,6 +797,105 @@ void test_reeval() {
         "Test of reval() Method 9",
         exevalator.reeval(),
         (1.23 + 4.56) * 7.89
+    );
+}
+
+
+void test_tokenizations() {
+    Exevalator exevalator;
+
+    check(
+        "Test of Tokenization 1",
+        exevalator.eval("1.2345678"),
+        1.2345678
+    );
+
+    try {
+        exevalator.eval("1.234\n5678");
+        std::cerr << "Expected error has not occurred." << std::endl;
+        exit(EXIT_FAILURE);
+    } catch (ExevalatorException &error) {
+        //std::cout << error.what() << std::endl;
+        std::cout << "Test of Tokenization 2: OK." << std::endl;
+    }
+
+    try {
+        exevalator.eval("1.234\r\n5678");
+        std::cerr << "Expected error has not occurred." << std::endl;
+        exit(EXIT_FAILURE);
+    } catch (ExevalatorException &error) {
+        //std::cout << error.what() << std::endl;
+        std::cout << "Test of Tokenization 3: OK." << std::endl;
+    }
+
+    try {
+        exevalator.eval("1.234\t5678");
+        std::cerr << "Expected error has not occurred." << std::endl;
+        exit(EXIT_FAILURE);
+    } catch (ExevalatorException &error) {
+        //std::cout << error.what() << std::endl;
+        std::cout << "Test of Tokenization 4: OK." << std::endl;
+    }
+
+    try {
+        exevalator.eval("1.234 5678");
+        std::cerr << "Expected error has not occurred." << std::endl;
+        exit(EXIT_FAILURE);
+    } catch (ExevalatorException &error) {
+        //std::cout << error.what() << std::endl;
+        std::cout << "Test of Tokenization 5: OK." << std::endl;
+    }
+
+    check(
+        "Test of Tokenization 6",
+        exevalator.eval("1+2*3-4/5"),
+        1.0 + 2.0 * 3.0 - 4.0 / 5.0
+    );
+
+    // !!!!! Bug about handling "\r" !!!!!
+    try {
+        std::cout << "|" << "1+\n2*3\r\n-4/5" << "|" << std::endl;
+        exevalator.eval("1+\n2*3\r\n-4/5");
+    } catch (ExevalatorException &error) {
+        std::cout << error.what() << std::endl;
+    }
+
+    check(
+        "Test of Tokenization 7",
+        exevalator.eval("1+\n2*3\r\n-4/5"),
+        1.0 + 2.0 * 3.0 - 4.0 / 5.0
+    );
+
+    check(
+        "Test of Tokenization 8",
+        exevalator.eval("((1+2)*3)-(4/5)"),
+        ((1.0 + 2.0) * 3.0) - (4.0 / 5.0)
+    );
+
+    exevalator.connect_function("funC", std::make_shared<FunctionC>());
+
+    check(
+        "Test of Tokenization 9",
+        exevalator.eval("funC(1,2)"),
+        1.0 + 2.0
+    );
+
+    check(
+        "Test of Tokenization 10",
+        exevalator.eval("funC(\n1,\r\n2\t)"),
+        1.0 + 2.0
+    );
+
+    check(
+        "Test of Tokenization 11",
+        exevalator.eval("3*funC(1,2)/2"),
+        3.0 * (1.0 + 2.0) / 2.0
+    );
+
+    check(
+        "Test of Tokenization 12",
+        exevalator.eval("3*(-funC(1,2)+2)"),
+        3.0 * (-(1.0 + 2.0) + 2.0)
     );
 }
 

@@ -19,6 +19,7 @@ function main(): void {
     testFunctions();
     testEmptyExpressions();
     testReeval();
+    testTokenizations();
 
     console.log("All tests have completed successfully.");
 }
@@ -861,6 +862,93 @@ function testReeval() {
         "Test of reval() Method 9",
         exevalator.reeval(),
         (1.23 + 4.56) * 7.89
+    );
+}
+
+
+function testTokenizations() {
+    let exevalator: Exevalator = new Exevalator();
+
+    check(
+        "Test of Tokenization 1",
+        exevalator.eval("1.2345678"),
+        1.2345678
+    );
+
+    try {
+        exevalator.eval("1.234\n5678");
+        throw new ExevalatorTestError("Expected exception has not been thrown");
+    } catch (error) {
+        // Expected to be thrown
+        console.log("Test of Tokenization 2: OK.");
+    }
+
+    try {
+        exevalator.eval("1.234\r\n5678");
+        throw new ExevalatorTestError("Expected exception has not been thrown");
+    } catch (error) {
+        // Expected to be thrown
+        console.log("Test of Tokenization 3: OK.");
+    }
+
+    try {
+        exevalator.eval("1.234\t5678");
+        throw new ExevalatorTestError("Expected exception has not been thrown");
+    } catch (error) {
+        // Expected to be thrown
+        console.log("Test of Tokenization 4: OK.");
+    }
+
+    try {
+        exevalator.eval("1.234 5678");
+        throw new ExevalatorTestError("Expected exception has not been thrown");
+    } catch (error) {
+        // Expected to be thrown
+        console.log("Test of Tokenization 5: OK.");
+    }
+
+    check(
+        "Test of Tokenization 6",
+        exevalator.eval("1+2*3-4/5"),
+        1.0 + 2.0 * 3.0 - 4.0 / 5.0
+    );
+
+    check(
+        "Test of Tokenization 7",
+        exevalator.eval("1+\n2*3\r\n-4/5"),
+        1.0 + 2.0 * 3.0 - 4.0 / 5.0
+    );
+
+    check(
+        "Test of Tokenization 8",
+        exevalator.eval("((1+2)*3)-(4/5)"),
+        ((1.0 + 2.0) * 3.0) - (4.0 / 5.0)
+    );
+
+    exevalator.connectFunction("funC", new FunctionC());
+
+    check(
+        "Test of Tokenization 9",
+        exevalator.eval("funC(1,2)"),
+        1.0 + 2.0
+    );
+
+    check(
+        "Test of Tokenization 10",
+        exevalator.eval("funC(\n1,\r\n2\t)"),
+        1.0 + 2.0
+    );
+
+    check(
+        "Test of Tokenization 11",
+        exevalator.eval("3*funC(1,2)/2"),
+        3.0 * (1.0 + 2.0) / 2.0
+    );
+
+    check(
+        "Test of Tokenization 12",
+        exevalator.eval("3*(-funC(1,2)+2)"),
+        3.0 * (-(1.0 + 2.0) + 2.0)
     );
 }
 

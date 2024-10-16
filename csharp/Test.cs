@@ -19,6 +19,7 @@ class Test
         TestFunctions();
         TestEmptyExpressions();
         TestReeval();
+        TestTokenization();
 
         Console.WriteLine("All tests have completed successfully.");
     }
@@ -936,6 +937,106 @@ class Test
             "Test of reval() Method 9",
             exevalator.Reeval(),
             (1.23 + 4.56) * 7.89
+        );
+    }
+
+
+    private static void TestTokenization() {
+        Exevalator exevalator = new Exevalator();
+
+        Check(
+            "Test of Tokenization 1",
+            exevalator.Eval("1.2345678"),
+            1.2345678
+        );
+
+        try
+        {
+            exevalator.Eval("1.234\n5678");
+            throw new ExevalatorTestException("Expected exception has not been thrown");
+        }
+        catch (ExevalatorException)
+        {
+            // Expected to be 
+            Console.WriteLine("Test of Tokenization 2: OK.");
+        }
+
+        try
+        {
+            exevalator.Eval("1.234\r\n5678");
+            throw new ExevalatorTestException("Expected exception has not been thrown");
+        }
+        catch (ExevalatorException)
+        {
+            // Expected to be thrown
+            Console.WriteLine("Test of Tokenization 3: OK.");
+        }
+
+        try
+        {
+            exevalator.Eval("1.234\t5678");
+            throw new ExevalatorTestException("Expected exception has not been thrown");
+        }
+        catch (ExevalatorException)
+        {
+            // Expected to be thrown
+            Console.WriteLine("Test of Tokenization 4: OK.");
+        }
+
+        try
+        {
+            exevalator.Eval("1.234 5678");
+            throw new ExevalatorTestException("Expected exception has not been thrown");
+        }
+        catch (ExevalatorException)
+        {
+            // Expected to be thrown
+            Console.WriteLine("Test of Tokenization 5: OK.");
+        }
+
+        Check(
+            "Test of Tokenization 6",
+            exevalator.Eval("1+2*3-4/5"),
+            1.0 + 2.0 * 3.0 - 4.0 / 5.0
+        );
+
+        Check(
+            "Test of Tokenization 7",
+            exevalator.Eval("1+\n2*3\r\n-4/5"),
+            1.0 + 2.0 * 3.0 - 4.0 / 5.0
+        );
+
+        Check(
+            "Test of Tokenization 8",
+            exevalator.Eval("((1+2)*3)-(4/5)"),
+            ((1.0 + 2.0) * 3.0) - (4.0 / 5.0)
+        );
+
+        FunctionC funC = new FunctionC();
+        exevalator.ConnectFunction("funC", funC);
+
+        Check(
+            "Test of Tokenization 9",
+            exevalator.Eval("funC(1,2)"),
+            1.0 + 2.0
+        );
+
+        Check(
+            "Test of Tokenization 10",
+            exevalator.Eval("funC(\n1,\r\n2\t)"),
+            1.0 + 2.0
+        );
+
+        Check(
+            "Test of Tokenization 11",
+            exevalator.Eval("3*funC(1,2)/2"),
+            3.0 * (1.0 + 2.0) / 2.0
+        );
+
+        Check(
+            "Test of Tokenization 12",
+            exevalator.Eval("3*(-funC(1,2)+2)"),
+            3.0 * (-(1.0 + 2.0) + 2.0)
         );
     }
 
