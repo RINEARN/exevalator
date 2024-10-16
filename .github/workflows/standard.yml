@@ -76,8 +76,8 @@ jobs:
         ./example3
         ./example4
         ./example5
-        yes "" | example6
-        yes "" | example7
+        yes "" | ./example6
+        yes "" | ./example7
       working-directory: ./cpp
 
     - name: Compile Test Code
