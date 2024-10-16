@@ -17,22 +17,33 @@ int main() {
     std::cout << "" << std::endl;
     std::cout << "This program computes the value of f(x) at x." << std::endl;
     std::cout << "" << std::endl;
-    std::cout << "f(x) = ?               (example: 3*x*x)" << std::endl;
-    std::cin >> expression;
+    std::cout << "f(x) = ?               (default: 3*x*x + 2*x + 1)" << std::endl;
+    std::getline(std::cin, expression);
+    if (expression.empty()) {
+        expression = "3*x*x + 2*x + 1";
+    }
 
     // Get the value of the lower limit from the standard-input
-    double lower_limit;
-    std::cout << "lower-limit = ?                  (example: 1)" << std::endl;
-    std::cin >> lower_limit;
+    std::string lower_limit_str;
+    std::cout << "lower-limit = ?                  (default: 0)" << std::endl;
+    std::getline(std::cin, lower_limit_str);
+    if (lower_limit_str.empty()) {
+        lower_limit_str = "0";
+    }
+    double lower_limit_value = std::stod(lower_limit_str);
 
     // Get the value of the upper limit from the standard-input
-    double upper_limit;
-    std::cout << "upper-limit = ?                  (example: 2)" << std::endl;
-    std::cin >> upper_limit;
+    std::string upper_limit_str;
+    std::cout << "upper-limit = ?                  (default: 1)" << std::endl;
+    std::getline(std::cin, upper_limit_str);
+    if (upper_limit_str.empty()) {
+        upper_limit_str = "1";
+    }
+    double upper_limit_value = std::stod(upper_limit_str);
 
     // Other numerical integration parameters
     long number_of_steps = 65536;
-    double delta = (upper_limit - lower_limit) / number_of_steps;
+    double delta = (upper_limit_value - lower_limit_value) / number_of_steps;
     double result = 0.0;
 
     // Create an instance of Exevalator Engine
@@ -45,7 +56,7 @@ int main() {
         for (long i=0; i<number_of_steps; ++i) {
 
             // The x-coordinate value of the left-bottom point of i-th tiny interval
-            double x = lower_limit + i * delta;
+            double x = lower_limit_value + i * delta;
 
             // Compute area of i-th tiny interval approximately by using Simpson's rule,
             // and add it to the variable "result"
@@ -66,8 +77,8 @@ int main() {
         // Display the result
         std::cout << "----------" << std::endl;
         std::cout << "f(x)        = " << expression << std::endl;
-        std::cout << "lower-limit = " << lower_limit << std::endl;
-        std::cout << "upper-limit = " << upper_limit << std::endl;
+        std::cout << "lower-limit = " << upper_limit_value << std::endl;
+        std::cout << "upper-limit = " << upper_limit_value << std::endl;
         std::cout << "result      = " << result << std::endl;
 
     } catch (exevalator::ExevalatorException &e) {

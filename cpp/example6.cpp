@@ -13,13 +13,20 @@ int main() {
     std::cout << "" << std::endl;
     std::cout << "This program computes the value of f(x) at x." << std::endl;
     std::cout << "" << std::endl;
-    std::cout << "f(x) = ?               (example: 3*x+1)" << std::endl;
-    std::cin >> expression;
+    std::cout << "f(x) = ?               (default: 3*x*x + 2*x + 1)" << std::endl;
+    std::getline(std::cin, expression);
+    if (expression.empty()) {
+        expression = "3*x*x + 2*x + 1";
+    }
 
-    // Get the value of x from the standard-input
-    double x_value;
-    std::cout << "x = ?                  (example: 2)" << std::endl;
-    std::cin >> x_value;
+    // Get the value of the x from the standard-input
+    std::string x_str;
+    std::cout << "x = ?                  (default: 1)" << std::endl;
+    std::getline(std::cin, x_str);
+    if (x_str.empty()) {
+        x_str = "1";
+    }
+    double x_value = std::stod(x_str);
 
     // Create an instance of Exevalator Engine
     exevalator::Exevalator exevalator;
