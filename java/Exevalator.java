@@ -122,7 +122,7 @@ public final class Exevalator {
     /**
      * Re-evaluates (re-computes) the value of the expression evaluated by "eval" method last time.
      * This method may (slightly) work faster than calling "eval" method repeatedly for the same expression.
-     * Note that, the result value may different with the last evaluated value, 
+     * Note that, the result value may differ from the last evaluated value, 
      * if values of variables or behaviour of functions had changed.
      * 
      * @return The evaluated value
@@ -190,7 +190,7 @@ public final class Exevalator {
 
     /**
      * Writes the value to the variable at the specified virtual address.
-     * This method works faster than "WriteVariable" method.
+     * This method is more efficient than "WriteVariable" method.
      *
      * @param address The virtual address of the variable to be written.
      * @param value The new value of the variable.
@@ -221,7 +221,7 @@ public final class Exevalator {
 
     /**
      * Reads the value of the variable at the specified virtual address.
-     * This method works faster than "EeadVariable" method.
+     * This method is more efficient than "ReadVariable" method.
      *
      * @param address The virtual address of the variable to be read.
      * @return The current value of the variable.
@@ -338,7 +338,7 @@ final class LexicalAnalyzer {
         Token[] tokens = createTokensFromTokenWords(tokenWords, numberLiteralList);
 
         // Checks syntactic correctness of tokens of inputted expressions.
-        checkParenthesisOpeningClosings(tokens);
+        checkParenthesisBalance(tokens);
         checkEmptyParentheses(tokens);
         checkLocationsOfOperatorsAndLeafs(tokens);
 
@@ -473,7 +473,7 @@ final class LexicalAnalyzer {
      *
      * @param tokens Tokens of the inputted expression.
      */
-    private static void checkParenthesisOpeningClosings(Token[] tokens) {
+    private static void checkParenthesisBalance(Token[] tokens) {
         int tokenCount = tokens.length;
         int hierarchy = 0; // Increases at "(" and decreases at ")".
 
@@ -1478,7 +1478,7 @@ final class StaticSettings {
 
     /** The regular expression of number literals. */
     public static final String NUMBER_LITERAL_REGEX =
-        "(?<=(\\s|\\+|-|\\*|/|\\(|\\)|,|^))" + // Token splitters, or beginning of the expression
+        "(?<=(\\s|\\+|-|\\*|/|\\(|\\)|,|^))" + // Token splitters or start of expression
         "([0-9]+(\\.[0-9]+)?)" +               // Significand part
         "((e|E)(\\+|-)?[0-9]+)?";              // Exponent part
 

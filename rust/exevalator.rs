@@ -96,8 +96,8 @@ impl<'exvlife> Exevalator<'exvlife> {
     }
 
     /// Re-evaluates (re-computes) the value of the expression evaluated by "eval" method last time.
-    /// This method works faster than calling "eval" method repeatedly for the same expression.
-    /// Note that, the result value may different with the last evaluated value, 
+    /// This method is more efficient than calling "eval" method repeatedly for the same expression.
+    /// Note that, the result value may differ from the last evaluated value, 
     /// if values of variables or behaviour of functions had changed.
     /// 
     /// * Return value - The evaluated value, or ExevalatorError if any error detected.
@@ -151,7 +151,7 @@ impl<'exvlife> Exevalator<'exvlife> {
     }
 
     /// Writes the value to the variable at the specified virtual address.
-    /// This function works faster than `write_variable` function.
+    /// This function is more efficient than `write_variable` function.
     ///
     /// * 'address' - The virtual address of the variable to be written.
     /// * `value` - The new value of the variable.
@@ -181,7 +181,7 @@ impl<'exvlife> Exevalator<'exvlife> {
     }
 
     /// Reads the value of the variable at the specified virtual address.
-    /// This function works faster than `read_variable` function.
+    /// This function is more efficient than `read_variable` function.
     ///
     /// * 'address' - The virtual address of the variable to be read.
     /// * Return value - The current value of the variable.
@@ -289,7 +289,7 @@ impl LexicalAnalyzer {
         };
 
         // Check syntactic correctness of tokens.
-        if let Err(syntax_error) = LexicalAnalyzer::check_parenthesis_opening_closings(&tokens) {
+        if let Err(syntax_error) = LexicalAnalyzer::check_parenthesis_balance(&tokens) {
             return Err(syntax_error);
         }
         if let Err(syntax_error) = LexicalAnalyzer::check_empty_parentheses(&tokens) {
@@ -539,7 +539,7 @@ impl LexicalAnalyzer {
     /// * `tokens` - Tokens to be checked.
     /// * Return value - Nothing, or ExevalatorError if any error detected.
     ///
-    fn check_parenthesis_opening_closings(tokens: &Vec<Token>) -> Result<(), ExevalatorError> {
+    fn check_parenthesis_balance(tokens: &Vec<Token>) -> Result<(), ExevalatorError> {
         let token_count: usize = tokens.len();
         let mut hierarchy: i64 = 0; // Increases at "(" and decreases at ")".
 

@@ -378,7 +378,7 @@ class LexicalAnalyzer {
      *
      * @param tokens Tokens of the inputted expression.
      */
-    static void check_parenthesis_opening_closings(const std::vector<Token> &tokens);
+    static void check_parenthesis_balance(const std::vector<Token> &tokens);
 
     /**
      * Checks that empty parentheses "()" are not contained in the expression.
@@ -818,8 +818,8 @@ public:
 
     /**
      * Re-evaluates (re-computes) the value of the expression evaluated by "eval" method last time.
-     * This method works faster than calling "eval" method repeatedly for the same expression.
-     * Note that, the result value may different with the last evaluated value, 
+     * This function works faster than calling "eval" function repeatedly for the same expression.
+     * Note that, the result value may differ from the last evaluated value, 
      * if values of variables or behaviour of functions had changed.
      * 
      * @return The evaluated value
@@ -846,7 +846,7 @@ public:
 
     /**
      * Writes the value to the variable at the specified virtual address.
-     * This function works faster than "write_variable" function.
+     * This function is more efficient than "write_variable" function.
      * 
      * @param address The virtual address of the variable to be written
      * @param value The new value of the variable
@@ -863,7 +863,7 @@ public:
 
     /**
      * Reads the value of the variable at the specified virtual address.
-     * This function works faster than "read_variable" function.
+     * This function is more efficient than "read_variable" function.
      * 
      * @param address The virtual address of the variable to be read
      * @return The current value of the variable

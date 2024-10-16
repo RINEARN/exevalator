@@ -104,8 +104,8 @@ double Exevalator::eval(const std::string &expression) {
 
 /**
  * Re-evaluates (re-computes) the value of the expression evaluated by "eval" method last time.
- * This method works faster than calling "eval" method repeatedly for the same expression.
- * Note that, the result value may different with the last evaluated value, 
+ * This function is more efficient than calling "eval" function repeatedly for the same expression.
+ * Note that, the result value may differ from the last evaluated value, 
  * if values of variables or behaviour of functions had changed.
  * 
  * @return The evaluated value
@@ -157,7 +157,7 @@ void Exevalator::write_variable(const std::string &name, double value) {
 
 /**
  * Writes the value to the variable at the specified virtual address.
- * This function works faster than "write_variable" function.
+ * This function is more efficient than "write_variable" function.
  * 
  * @param address The virtual address of the variable to be written
  * @param value The new value of the variable
@@ -186,7 +186,7 @@ double Exevalator::read_variable(const std::string &name) {
 
 /**
  * Reads the value of the variable at the specified virtual address.
- * This function works faster than "read_variable" function.
+ * This function is more efficient than "read_variable" function.
  * 
  * @param address The virtual address of the variable to be read
  * @return The current value of the variable
@@ -280,7 +280,7 @@ std::vector<Token> LexicalAnalyzer::analyze(const std::string &expression, const
     );
 
     // Check syntactic correctness of tokens.
-    LexicalAnalyzer::check_parenthesis_opening_closings(tokens);
+    LexicalAnalyzer::check_parenthesis_balance(tokens);
     LexicalAnalyzer::check_empty_parentheses(tokens);
     LexicalAnalyzer::check_locations_of_operators_and_leafs(tokens);
 
@@ -558,7 +558,7 @@ std::vector<Token> LexicalAnalyzer::create_tokens_from_token_words(
  *
  * @param tokens Tokens of the inputted expression.
  */
-void LexicalAnalyzer::check_parenthesis_opening_closings(const std::vector<Token> &tokens) {
+void LexicalAnalyzer::check_parenthesis_balance(const std::vector<Token> &tokens) {
     size_t token_count = tokens.size();
     int64_t hierarchy = 0; // Increases at "(" and decreases at ")".
 
