@@ -1318,7 +1318,7 @@ namespace Rinearn.ExevalatorCS
             if (token.Type == TokenType.NumberLiteral)
             {
                 double literalValue = System.Double.NaN;
-                if (!System.Double.TryParse(token.Word, NumberStyles.Number, CultureInfo.InvariantCulture, out literalValue))
+                if (!System.Double.TryParse(token.Word, NumberStyles.Float, CultureInfo.InvariantCulture, out literalValue))
                 {
                     throw new ExevalatorException("Invalid number literal: " + token.Word);
                 }

@@ -1164,7 +1164,7 @@ Namespace Rinearn.ExevalatorVB
             Dim token As Token = ast.Token
             If token.Type = TokenType.NumberLiteral Then
                 Dim literalValue As Double = Double.NaN
-                If Not Double.TryParse(token.Word, NumberStyles.Number, CultureInfo.InvariantCulture, literalValue) Then
+                If Not Double.TryParse(token.Word, NumberStyles.Float, CultureInfo.InvariantCulture, literalValue) Then
                     Throw new ExevalatorException("Invalid number literal: " + token.Word)
                 End If
                 Return New Evaluator.NumberLiteralEvaluatorNode(literalValue)
