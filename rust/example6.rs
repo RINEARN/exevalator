@@ -10,16 +10,23 @@ fn main() {
     println!("");
 
     // Get the expression from the standard-input
-    println!("f(x) = ?               (example: 3*x+1)");
+    println!("f(x) = ?               (default: 3*x*x + 2*x + 1)");
     let mut expression_string: String = String::new();
     io::stdin().read_line(&mut expression_string).expect("I/O error occurred for receiving the expression.");
-    let expression_str = expression_string.trim();
+    let mut expression_str: &str = expression_string.trim();
+    if expression_str.is_empty() {
+        expression_str = "3*x*x + 2*x + 1";
+    }
 
     // Get the value of x from the standard-input
-    println!("x = ?                  (example: 2)");
+    println!("x = ?                  (default: 1)");
     let mut x_string: String = String::new();
     io::stdin().read_line(&mut x_string).expect("I/O error occurred for receiving the x value.");
-    let x_value: f64 = x_string.trim().parse::<f64>().expect("Invalid x value.");
+    let mut x_str: &str = x_string.trim();
+    if x_str.is_empty() {
+        x_str = "1";
+    }
+    let x_value: f64 = x_str.parse::<f64>().expect("Invalid x value.");
 
     // Create an instance of Exevalator Engine
     let mut exevalator = Exevalator::new();

@@ -13,22 +13,33 @@ fn main() {
     println!("");
 
     // Get the expression from the standard-input
-    println!("f(x) = ?               (example: 3*x+1)");
+    println!("f(x) = ?               (default: 3*x*x + 2*x + 1)");
     let mut expression_string: String = String::new();
     io::stdin().read_line(&mut expression_string).expect("I/O error occurred for receiving the expression.");
-    let expression_str: &str = expression_string.trim();
+    let mut expression_str: &str = expression_string.trim();
+    if expression_str.is_empty() {
+        expression_str = "3*x*x + 2*x + 1";
+    }
 
     // Get the value of lower-limit from the standard-input
-    println!("lower-limit = ?                  (example: 1)");
+    println!("lower-limit = ?                  (default: 0)");
     let mut lower_limit_string: String = String::new();
     io::stdin().read_line(&mut lower_limit_string).expect("I/O error occurred for receiving the lower-limit value.");
-    let lower_limit_value: f64 = lower_limit_string.trim().parse::<f64>().expect("Invalid lower-limit value.");
+    let mut lower_limit_str: &str = lower_limit_string.trim();
+    if lower_limit_str.is_empty() {
+        lower_limit_str = "0";
+    }
+    let lower_limit_value: f64 = lower_limit_str.parse::<f64>().expect("Invalid lower-limit value.");
 
     // Get the value of upper-limit from the standard-input
-    println!("upper-limit = ?                  (example: 2)");
+    println!("upper-limit = ?                  (default: 1)");
     let mut upper_limit_string: String = String::new();
     io::stdin().read_line(&mut upper_limit_string).expect("I/O error occurred for receiving the upper-limit value.");
-    let upper_limit_value: f64 = upper_limit_string.trim().parse::<f64>().expect("Invalid upper-limit value.");
+    let mut upper_limit_str: &str = upper_limit_string.trim();
+    if upper_limit_str.is_empty() {
+        upper_limit_str = "1";
+    }
+    let upper_limit_value: f64 = upper_limit_str.parse::<f64>().expect("Invalid upper-limit value.");
 
     // Other numerical integration parameters
     let number_of_steps: i64 = 65536;
