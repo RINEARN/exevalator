@@ -20,7 +20,7 @@ public class Example6 {
             expression = "3*x*x + 2*x + 1";
         }
 
-        // Get the value of x from the standard-input
+        // Get the value of the x from the standard-input
         System.out.println("x = ?                  (default: 1)");
         double xValue = 0.0;
         String xValueStr = scanner.nextLine();

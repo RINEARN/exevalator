@@ -5,7 +5,10 @@
 #include "exevalator.cpp"
 
 /**
- * An example to compute the value of the inputted expression f(x) at the inputted x.
+ * An example to compute the numerical integration value of the inputted expression f(x).
+ * For details of the numerical integration algorithm used in this code, see:
+ *   https://www.vcssl.org/en-us/code/archive/0001/7800-vnano-integral-output/   (English)
+ *   https://www.vcssl.org/ja-jp/code/archive/0001/7800-vnano-integral-output/   (Japanese)
  */
 int main() {
 
@@ -27,6 +30,7 @@ int main() {
     std::cout << "upper-limit = ?                  (example: 2)" << std::endl;
     std::cin >> upper_limit;
 
+    // Other numerical integration parameters
     long number_of_steps = 65536;
     double delta = (upper_limit - lower_limit) / number_of_steps;
     double result = 0.0;

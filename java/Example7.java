@@ -50,6 +50,7 @@ public class Example7 {
         }
         scanner.close();
 
+        // Other numerical integration parameters
         int numberOfSteps = 65536;
         double delta = (upperLimit - lowerLimit) / numberOfSteps;
         double result = 0.0;
