@@ -23,6 +23,8 @@ jobs:
         javac Example3.java
         javac Example4.java
         javac Example5.java
+        javac Example6.java
+        javac Example7.java
       working-directory: ./java
 
     - name: Run Example Code
@@ -32,6 +34,8 @@ jobs:
         java Example3
         java Example4
         java Example5
+        yes "" | java Example6
+        yes "" | java Example7
       working-directory: ./java
 
     - name: Compile Test Code
@@ -61,6 +65,8 @@ jobs:
         clang++ -std=c++17 -Wall -o example3 example3.cpp
         clang++ -std=c++17 -Wall -o example4 example4.cpp
         clang++ -std=c++17 -Wall -o example5 example5.cpp
+        clang++ -std=c++17 -Wall -o example6 example6.cpp
+        clang++ -std=c++17 -Wall -o example7 example7.cpp
       working-directory: ./cpp
 
     - name: Run Example Code
@@ -70,6 +76,8 @@ jobs:
         ./example3
         ./example4
         ./example5
+        yes "" | ./example6
+        yes "" | ./example7
       working-directory: ./cpp
 
     - name: Compile Test Code
@@ -105,6 +113,10 @@ jobs:
         dotnet run --project ./Examples
         cp -f ./Example5.cs ./Examples/Program.cs
         dotnet run --project ./Examples
+        cp -f ./Example6.cs ./Examples/Program.cs
+        yes "" | dotnet run --project ./Examples
+        cp -f ./Example7.cs ./Examples/Program.cs
+        yes "" | dotnet run --project ./Examples
       working-directory: ./csharp
 
     - name: Run Test Code
@@ -145,6 +157,12 @@ jobs:
         cp -f ./Example5.vb ./Examples/Program.vb
         sed -i -e "s@Imports Rinearn\.ExevalatorVB@Imports Examples\.Rinearn\.ExevalatorVB@g" ./Examples/Program.vb
         dotnet run --project ./Examples
+        cp -f ./Example6.vb ./Examples/Program.vb
+        sed -i -e "s@Imports Rinearn\.ExevalatorVB@Imports Examples\.Rinearn\.ExevalatorVB@g" ./Examples/Program.vb
+        yes "" | dotnet run --project ./Examples
+        cp -f ./Example7.vb ./Examples/Program.vb
+        sed -i -e "s@Imports Rinearn\.ExevalatorVB@Imports Examples\.Rinearn\.ExevalatorVB@g" ./Examples/Program.vb
+        yes "" | dotnet run --project ./Examples
       working-directory: ./vb
 
     - name: Run Test Code
@@ -157,4 +175,51 @@ jobs:
         dotnet run --project ./Test
       working-directory: ./vb
 
+
+  test-for-typescript:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set-up Environment (Node)
+      uses: actions/setup-node@v4
+      with:
+        node-version: '16'
+
+    - name: Set-up Environment (Other tools)
+      run: |
+        npm install typescript @types/node
+        npm install esbuild
+
+    - name: Compile Exevalator
+      run: npx tsc exevalator.ts
+      working-directory: ./typescript
+
+    - name: Compile Example Code
+      run: |
+        npx tsc example1.ts
+        npx tsc example2.ts
+        npx tsc example3.ts
+        npx tsc example4.ts
+        npx tsc example5.ts
+        npx esbuild example6.ts --bundle --outfile=example6.bundle.js
+        npx esbuild example7.ts --bundle --outfile=example7.bundle.js
+      working-directory: ./typescript
+
+    - name: Run Example Code
+      run: |
+        node example1.js
+        node example2.js
+        node example3.js
+        node example4.js
+        node example5.js
+      working-directory: ./typescript
+
+    - name: Compile Test Code
+      run: npx tsc test.ts
+      working-directory: ./typescript
+
+    - name: Run Test Code
+      run: node test.js
+      working-directory: ./typescript
 
