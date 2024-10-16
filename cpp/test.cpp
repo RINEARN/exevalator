@@ -858,14 +858,6 @@ void test_tokenizations() {
         1.0 + 2.0 * 3.0 - 4.0 / 5.0
     );
 
-    // !!!!! Bug about handling "\r" !!!!!
-    try {
-        std::cout << "|" << "1+\n2*3\r\n-4/5" << "|" << std::endl;
-        exevalator.eval("1+\n2*3\r\n-4/5");
-    } catch (ExevalatorException &error) {
-        std::cout << error.what() << std::endl;
-    }
-
     check(
         "Test of Tokenization 7",
         exevalator.eval("1+\n2*3\r\n-4/5"),

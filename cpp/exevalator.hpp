@@ -203,6 +203,9 @@ struct Settings {
     /** Set storing characters at which an expression will be splitted into tokens. */
     std::set<char> token_splitter_character_set;
 
+    /** Set storing characters which are equivalent to white spaces. */
+    std::set<char> space_equivalent_character_set;
+
     /** Escaped representation of number literals, used in lexical analysis. */
     std::string escaped_number_literal;
 
@@ -249,6 +252,9 @@ struct Settings {
         this->token_splitter_character_set.insert('(');
         this->token_splitter_character_set.insert(')');
         this->token_splitter_character_set.insert(',');
+        this->space_equivalent_character_set.insert('\n');
+        this->space_equivalent_character_set.insert('\r');
+        this->space_equivalent_character_set.insert('\t');
         this->escaped_number_literal = std::string { "@NUMBER_LITERAL@" };
     }
 

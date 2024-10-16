@@ -389,6 +389,7 @@ impl LexicalAnalyzer {
 
             let token_begin: bool = ichar == 0
                 || chars[ichar-1] == ' '
+                || settings.space_equivalents.contains(&chars[ichar-1])
                 || settings.token_splitters.contains(&chars[ichar-1]);
 
             // Numbers (0,1,2, ... 9)
@@ -421,6 +422,9 @@ impl LexicalAnalyzer {
         for splitter in &settings.token_splitters {
             let spaced_splitter: String = format!("{}{}{}", SPACE, splitter, SPACE);
             spaced_expression = spaced_expression.replace(&splitter.to_string(), &spaced_splitter);
+        }
+        for space_equiv_char in &settings.space_equivalents {
+            spaced_expression = spaced_expression.replace(&space_equiv_char.to_string(), SPACE);
         }
 
         let splitteds: Vec<&str> = (spaced_expression.split_whitespace()).collect();
@@ -1523,6 +1527,9 @@ struct Settings {
     /// Vec instance storing words at which an expression will be splitted into tokens.
     token_splitters: Vec<char>,
 
+    /// Vec instance storing words which are equivalent to white spaces.
+    space_equivalents: Vec<char>,
+
     /// Escaped representation of number literals, used in lexical analysis.
     escaped_number_literal: String,
 }
@@ -1544,6 +1551,7 @@ impl Settings {
             unary_prefix_symbol_operator_map: HashMap::new(),
             call_symbol_operator_map: HashMap::new(),
             token_splitters: Vec::new(),
+            space_equivalents: Vec::new(),
             escaped_number_literal: "@NUMBER_LITERAL@".to_string(),
         };
         let addition_operator: Operator       = Operator::new(OperatorType::Binary,      '+', 400);
@@ -1573,6 +1581,9 @@ impl Settings {
         settings.token_splitters.push('(');
         settings.token_splitters.push(')');
         settings.token_splitters.push(',');
+        settings.space_equivalents.push('\n');
+        settings.space_equivalents.push('\r');
+        settings.space_equivalents.push('\t');
         return settings;
     }
 }

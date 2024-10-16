@@ -379,6 +379,7 @@ std::string LexicalAnalyzer::escape_number_literals(
 
         bool token_begin = ichar == 0
             || expression.at(ichar-1) == ' '
+            || settings.space_equivalent_character_set.find(expression.at(ichar-1)) != settings.space_equivalent_character_set.end()
             || settings.token_splitter_character_set.find(expression.at(ichar-1)) != settings.token_splitter_character_set.end();
 
         // Numbers (0,1,2, ... 9)
@@ -392,7 +393,6 @@ std::string LexicalAnalyzer::escape_number_literals(
             escaped_expression.push_back(ch);
         }
     }
-
     return escaped_expression;
 }
 
@@ -415,6 +415,8 @@ std::vector<std::string> LexicalAnalyzer::split_expression_into_token_words(
         if (settings.token_splitter_character_set.find(ch) != settings.token_splitter_character_set.end()) {
             spaced_expression.push_back(' ');
             spaced_expression.push_back(ch);
+            spaced_expression.push_back(' ');
+        } else if (settings.space_equivalent_character_set.find(ch) != settings.space_equivalent_character_set.end()) {
             spaced_expression.push_back(' ');
         } else {
             spaced_expression.push_back(ch);
