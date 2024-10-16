@@ -606,8 +606,8 @@ namespace Rinearn.ExevalatorCS
                     if (token.Operator?.Type == OperatorType.UnaryPrefix)
                     {
 
-                        // Only leafs, open parentheses, and unary-prefix operators can be operands.
-                        if (!(nextIsLeaf || nextIsOpenParenthesis || nextIsPrefixOperator))
+                        // Only leafs, open parentheses, unary-prefix and function-call operators can be an operand.
+                        if (!(nextIsLeaf || nextIsOpenParenthesis || nextIsPrefixOperator || nextIsFunctionIdentifier))
                         {
                             throw new ExevalatorException("An operand is required at the right of: \"" + token.Word + "\"");
                         }
@@ -617,7 +617,7 @@ namespace Rinearn.ExevalatorCS
                     if (token.Operator?.Type == OperatorType.Binary || token.Word == ",")
                     {
 
-                        // Only leaf elements, open parenthesis, and unary-prefix operator can be a right-operand.
+                        // Only leafs, open parentheses, unary-prefix and function-call operators can be a right-operands.
                         if (!(nextIsLeaf || nextIsOpenParenthesis || nextIsPrefixOperator || nextIsFunctionIdentifier))
                         {
                             throw new ExevalatorException("An operand is required at the right of: \"" + token.Word + "\"");

@@ -567,8 +567,8 @@ final class LexicalAnalyzer {
                 // Cases of unary-prefix operators
                 if (token.operator.type == OperatorType.UNARY_PREFIX) {
 
-                    // Only leafs, open parentheses, and unary-prefix operators can be operands.
-                    if ( !(  nextIsLeaf || nextIsOpenParenthesis || nextIsPrefixOperator  ) ) {
+                    // Only leafs, open parentheses, unary-prefix and function-call operators can be an operand.
+                    if ( !(  nextIsLeaf || nextIsOpenParenthesis || nextIsPrefixOperator || nextIsFunctionIdentifier ) ) {
                         throw new Exevalator.Exception("An operand is required at the right of: \"" + token.word + "\"");
                     }
                 } // Cases of unary-prefix operators
@@ -576,7 +576,7 @@ final class LexicalAnalyzer {
                 // Cases of binary operators or a separator of partial expressions
                 if (token.operator.type == OperatorType.BINARY || token.word.equals(",")) {
 
-                    // Only leaf elements, open parenthesis, and unary-prefix operator can be a right-operand.
+                    // Only leafs, open parentheses, unary-prefix and function-call operators can be a right-operands.
                     if( !(  nextIsLeaf || nextIsOpenParenthesis || nextIsPrefixOperator || nextIsFunctionIdentifier ) ) {
                         throw new Exevalator.Exception("An operand is required at the right of: \"" + token.word + "\"");
                     }

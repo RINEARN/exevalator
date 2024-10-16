@@ -517,8 +517,8 @@ Namespace Rinearn.ExevalatorVB
                     ' Cases of unary-prefix operators
                     If token.OperatorInfo?.Type = OperatorType.UnaryPrefix Then
 
-                        ' Only leafs, open parentheses, and unary-prefix operators can be operands.
-                        If Not (nextIsLeaf OrElse nextIsOpenParenthesis OrElse nextIsPrefixOperator) Then
+                        'Only leafs, open parentheses, unary-prefix and function-call operators can be an operand.
+                        If Not (nextIsLeaf OrElse nextIsOpenParenthesis OrElse nextIsPrefixOperator orElse nextIsFunctionIdentifier) Then
                             Throw New ExevalatorException("An operand is required at the right of: """ + token.Word.ToString() + """")
                         End If
 
@@ -527,7 +527,7 @@ Namespace Rinearn.ExevalatorVB
                     ' Cases of binary operators or a separator of partial expressions
                     If token.OperatorInfo?.Type = OperatorType.Binary OrElse String.Equals(token.Word, ",") Then
 
-                        ' Only leaf elements, open parenthesis, and unary-prefix operator can be a right-operand.
+                        ' Only leafs, open parentheses, unary-prefix and function-call operators can be a right-operands.
                         If Not (nextIsLeaf OrElse nextIsOpenParenthesis OrElse nextIsPrefixOperator OrElse nextIsFunctionIdentifier) Then
                             Throw New ExevalatorException("An operand is required at the right of: """ + token.Word.ToString + """")
                         End If

@@ -633,8 +633,8 @@ impl LexicalAnalyzer {
                 // Cases of unary-prefix operators
                 if *operator_type == OperatorType::UnaryPrefix {
 
-                    // Only leafs, open parentheses, and unary-prefix operators can be operands.
-                    if !(next_is_leaf || next_is_open_parenthesis || next_is_prefix_operator) {
+                    // Only leafs, open parentheses, unary-prefix and function-call operators can be an operand.
+                    if !(next_is_leaf || next_is_open_parenthesis || next_is_prefix_operator || next_is_function_identifier) {
                         return Err(ExevalatorError::new(
                             &format!("An operand is required at the right of: \"{}\"", token.word)
                         ));

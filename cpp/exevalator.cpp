@@ -650,8 +650,8 @@ void LexicalAnalyzer::check_locations_of_operators_and_leafs(const std::vector<T
             // Cases of unary-prefix operators
             if (optype == OperatorType::UNARY_PREFIX) {
 
-                // Only leafs, open parentheses, and unary-prefix operators can be operands.
-                if ( !(next_is_leaf || next_is_open_parenthesis || next_is_prefix_operator) ) {
+                // Only leafs, open parentheses, unary-prefix and function-call operators can be an operand.
+                if ( !(next_is_leaf || next_is_open_parenthesis || next_is_prefix_operator || next_is_function_identifier) ) {
                     std::string error_message = std::string { "An operand is required at the right of: \"{}\"" } + token.word;
                     throw ExevalatorException { error_message.c_str() };
                 }

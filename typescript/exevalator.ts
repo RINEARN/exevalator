@@ -571,8 +571,8 @@ class LexicalAnalyzer {
                 // Cases of unary-prefix operators
                 if (token.operator?.type === OperatorType.UNARY_PREFIX) {
 
-                    // Only leafs, open parentheses, and unary-prefix operators can be operands.
-                    if ( !(nextIsLeaf || nextIsOpenParenthesis || nextIsPrefixOperator) ) {
+                    // Only leafs, open parentheses, unary-prefix and function-call operators can be an operand.
+                    if ( !(nextIsLeaf || nextIsOpenParenthesis || nextIsPrefixOperator || nextIsFunctionIdentifier) ) {
                         throw new ExevalatorError(ErrorMessages.RIGHT_OPERAND_REQUIRED.replace("$0", token.word));
                     }
                 } // Cases of unary-prefix operators
