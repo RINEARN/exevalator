@@ -14,6 +14,44 @@ Imports System.Globalization
 Namespace Rinearn.ExevalatorVB
 
     ''' <summary>
+    ''' Error messages of ExevalatorException,
+    ''' which is thrown by Exevalator if the input expression is syntactically incorrect, or uses undeclared variables/functions.
+    ''' You can customize the error message of Exevalator by modifying the values of the properties of this class.
+    ''' </summary>
+    Public Structure ErrorMessages
+        Public Const EMPTY_EXPRESSION As String = "The inputted expression is empty."
+        Public Const TOO_MANY_TOKENS As String = "The number of tokens exceeds the limit (StaticSettings.MaxTokenCount: '$0')"
+        Public Const DEFICIENT_OPEN_PARENTHESIS As String = "The number of open parentheses '(' is deficient."
+        Public Const DEFICIENT_CLOSED_PARENTHESIS As String = "The number of closed parentheses ')' is deficient."
+        Public Const EMPTY_PARENTHESIS As String = "The content of parentheses '()' should not be empty."
+        Public Const RIGHT_OPERAND_REQUIRED As String = "An operand is required at the right of: '$0'"
+        Public Const LEFT_OPERAND_REQUIRED As String = "An operand is required at the left of: '$0'"
+        Public Const RIGHT_OPERATOR_REQUIRED As String = "An operator is required at the right of: '$0'"
+        Public Const LEFT_OPERATOR_REQUIRED As String = "An operator is required at the left of: '$0'"
+        Public Const UNKNOWN_UNARY_PREFIX_OPERATOR As String = "Unknown unary-prefix operator: '$0'"
+        Public Const UNKNOWN_BINARY_OPERATOR As String = "Unknown binary operator: '$0'"
+        Public Const UNKNOWN_OPERATOR_SYNTAX As String = "Unknown operator syntax: '$0'"
+        Public Const EXCEEDS_MAX_AST_DEPTH As String = "The depth of the AST exceeds the limit (StaticSettings.MaxAstDepth: '$0')"
+        Public Const UNEXPECTED_PARTIAL_EXPRESSION As String = "Unexpected end of a partial expression"
+        Public Const INVALID_NUMBER_LITERAL As String = "Invalid number literal: '$0'"
+        Public Const INVALID_MEMORY_ADDRESS As String = "Invalid memory address: '$0'"
+        Public Const FUNCTION_ERROR As String = "Function Error ('$0'): $1"
+        Public Const VARIABLE_NOT_FOUND As String = "Variable not found: '$0'"
+        Public Const FUNCTION_NOT_FOUND As String = "Function not found: '$0'"
+        Public Const UNEXPECTED_OPERATOR As String = "Unexpected operator: '$0'"
+        Public Const UNEXPECTED_TOKEN As String = "Unexpected token: '$0'"
+        Public Const TOO_LONG_EXPRESSION As String = "The length of the expression exceeds the limit (StaticSettings.MaxExpressionCharCount: '$0')"
+        Public Const UNEXPECTED_ERROR As String = "Unexpected error occurred: $0"
+        Public Const REEVAL_NOT_AVAILABLE As String = """reeval"" is not available before using ""eval"""
+        Public Const TOO_LONG_VARIABLE_NAME As String = "The length of the variable name exceeds the limit (StaticSettings.MaxNameCharCount: '$0')"
+        Public Const TOO_LONG_FUNCTION_NAME As String = "The length of the function name exceeds the limit (StaticSettings.MaxNameCharCount: '$0')"
+        Public Const VARIABLE_ALREADY_DECLARED As String = "The variable '$0' is already declared"
+        Public Const FUNCTION_ALREADY_CONNECTED As String = "The function '$0' is already connected"
+        Public Const INVALID_VARIABLE_ADDRESS As String = "Invalid memory address: '$0'"
+    End Structure
+
+
+    ''' <summary>
     ''' Interpreter Engine of Exevalator.
     ''' </summary>
     Public Class Exevalator
@@ -55,9 +93,7 @@ Namespace Rinearn.ExevalatorVB
             End If
             if StaticSettings.MaxExpressionCharCount < expression.Length Then
                 Throw New ExevalatorException( _
-                    "The length of the expression exceeds the limit " _
-                    + "(StaticSettings.MaxExpressionCharCount: " _
-                    + StaticSettings.MaxExpressionCharCount.ToString() + ")" _
+                    ErrorMessages.TOO_LONG_EXPRESSION.Replace("$0", StaticSettings.MaxExpressionCharCount.ToString()) _
                 )
             End If
 
@@ -94,7 +130,7 @@ Namespace Rinearn.ExevalatorVB
                 If TypeOf e Is ExevalatorException Then
                     Throw
                 Else
-                    Throw New ExevalatorException("Unexpected exception/error occurred", e)
+                    Throw New ExevalatorException(ErrorMessages.UNEXPECTED_ERROR.replace("$0", e.Message), e)
                 End If
             End Try
         End Function
@@ -111,7 +147,7 @@ Namespace Rinearn.ExevalatorVB
                 Dim evaluatedValue As Double = Me.Evaluator.Evaluate(Me.Memory)
                 Return evaluatedValue
             Else
-                Throw New ExevalatorException("""Reeval"" is not available before using ""Eval""")
+                Throw New ExevalatorException(ErrorMessages.REEVAL_NOT_AVAILABLE)
             End If
         End Function
 
@@ -130,8 +166,7 @@ Namespace Rinearn.ExevalatorVB
             End If
             If StaticSettings.MaxNameCharCount < name.Length Then
                 Throw New ExevalatorException( _
-                    "The length of the variable name exceeds the limit (StaticSettings.MaxNameCharCount: " _
-                    + StaticSettings.MaxNameCharCount.ToString() + ")" _
+                    ErrorMessages.TOO_LONG_VARIABLE_NAME.Replace("$0", StaticSettings.MaxNameCharCount.ToString()) _
                 )
             End If
             Dim address As Integer = Me.Memory.Count
@@ -150,7 +185,7 @@ Namespace Rinearn.ExevalatorVB
                 Throw New NullReferenceException()
             End If
             If StaticSettings.MaxNameCharCount < name.Length OrElse Not Me.VariableTable.ContainsKey(name) Then
-                Throw New ExevalatorException("Variable not found: " + name)
+                Throw New ExevalatorException(ErrorMessages.VARIABLE_NOT_FOUND.Replace("$0", name))
             End If
             Dim address As Integer = Me.VariableTable(name)
             Me.WriteVariableAt(address, value)
@@ -164,7 +199,7 @@ Namespace Rinearn.ExevalatorVB
         ''' <param name="value">The new value of the variable</param>
         Public Sub WriteVariableAt(address As Integer, value As Double)
             If address < 0 OrElse Me.Memory.Count <= address Then
-                Throw New ExevalatorException("Invalid variable address: " + address.ToString())
+                Throw New ExevalatorException(ErrorMessages.INVALID_VARIABLE_ADDRESS.Replace("$0", address.ToString()))
             End If
             Me.Memory(address) = value
         End Sub
@@ -179,7 +214,7 @@ Namespace Rinearn.ExevalatorVB
                 Throw New NullReferenceException()
             End If
             If StaticSettings.MaxNameCharCount < name.Length OrElse Not Me.VariableTable.ContainsKey(name) Then
-                Throw New ExevalatorException("Variable not found: " + name)
+                Throw New ExevalatorException(ErrorMessages.VARIABLE_NOT_FOUND.Replace("$0", name))
             End If
             Dim address As Integer = Me.VariableTable(name)
             Return Me.ReadVariableAt(address)
@@ -193,7 +228,7 @@ Namespace Rinearn.ExevalatorVB
         ''' <returns>The current value of the variable</returns>
         Public Function ReadVariableAt(address As Integer) As Double
             If address < 0 OrElse Me.Memory.Count <= address Then
-                Throw New ExevalatorException("Invalid variable address: " + address.ToString())
+                Throw New ExevalatorException(ErrorMessages.INVALID_VARIABLE_ADDRESS.Replace("$0", address.ToString()))
             End If
             Return Me.Memory(address)
         End Function
@@ -209,8 +244,7 @@ Namespace Rinearn.ExevalatorVB
             End If
             If StaticSettings.MaxNameCharCount < name.Length Then
                 Throw New ExevalatorException( _
-                    "The length of the function name exceeds the limit (StaticSettings.MaxNameCharCount: " _
-                    + StaticSettings.MaxNameCharCount + ")" _
+                    ErrorMessages.TOO_LONG_FUNCTION_NAME.Replace("$0", StaticSettings.MaxNameCharCount.ToString()) _
                 )
             End If
             Me.FunctionTable(name) = functionImpl
@@ -263,14 +297,13 @@ Namespace Rinearn.ExevalatorVB
             ' For an empty expression (containing no tokens), the above returns { "" }, not { }.
             ' So we should detect/handle it as follows.
             If tokenWords.Length = 1 AndAlso tokenWords(0).Length = 0 Then
-                Throw New ExevalatorException("The inputted expression is empty")
+                Throw New ExevalatorException(ErrorMessages.EMPTY_EXPRESSION)
             End If
 
             ' Checks the total number of tokens.
             If StaticSettings.MaxTokenCount < tokenWords.Length Then
                 Throw new ExevalatorException( _
-                    "The number of tokens exceeds the limit (StaticSettings.MaxTokenCount: " _
-                    + StaticSettings.MaxTokenCount.ToString() + ")" _
+                    ErrorMessages.TOO_MANY_TOKENS.Replace("$0", StaticSettings.MaxTokenCount.ToString()) _
                 )
             End If
 
@@ -377,7 +410,7 @@ Namespace Rinearn.ExevalatorVB
                         If StaticSettings.UnaryPrefixSymbolOperatorDict.ContainsKey(word(0)) Then
                             op = StaticSettings.UnaryPrefixSymbolOperatorDict(word(0))
                         Else
-                            Throw New ExevalatorException("Unknown unary-prefix operator: " + word)
+                            Throw New ExevalatorException(ErrorMessages.UNKNOWN_UNARY_PREFIX_OPERATOR.Replace("$0", word))
                         End If
 
                     Else If String.Equals(lastToken?.Word, ")") _
@@ -387,11 +420,11 @@ Namespace Rinearn.ExevalatorVB
                         If StaticSettings.BinarySymbolOperatorDict.ContainsKey(word(0)) Then
                             op = StaticSettings.BinarySymbolOperatorDict(word(0))
                         Else
-                            Throw New ExevalatorException("Unknown binary operator: " + word)
+                            Throw New ExevalatorException(ErrorMessages.UNKNOWN_BINARY_OPERATOR.Replace("$0", word))
                         End If
 
                     Else
-                        Throw New ExevalatorException("Unexpected operator syntax: " + word)
+                        Throw New ExevalatorException(ErrorMessages.UNKNOWN_OPERATOR_SYNTAX.Replace("$0", word))
                     End If
 
                     tokens(itoken) = New Token(TokenType.OperatorToken, word, op.Value)
@@ -439,18 +472,14 @@ Namespace Rinearn.ExevalatorVB
 
                 ' If the value of hierarchy is negative, the open parenthesis is deficient.
                 If hierarchy < 0 Then
-                    Throw New ExevalatorException( _
-                        "The number of open parenthesis ""("" is deficient." _
-                    )
+                    Throw New ExevalatorException(ErrorMessages.DEFICIENT_OPEN_PARENTHESIS)
                 End If
             Next
 
             ' If the value of hierarchy is not zero at the end of the expression,
             ' the closed parentheses ")" is deficient.
             If hierarchy > 0 Then
-                Throw New ExevalatorException( _
-                    "The number of closed parenthesis "")"" is deficient." _
-                )
+                Throw New ExevalatorException(ErrorMessages.DEFICIENT_CLOSED_PARENTHESIS)
             End If
         End Sub
 
@@ -472,11 +501,9 @@ Namespace Rinearn.ExevalatorVB
                         contentCounter = 0
                     Else If String.Equals(token.Word, ")") Then
                         If contentCounter = 0 Then
-                            Throw New ExevalatorException( _
-                                "The content parentheses ""()"" should not be empty (excluding function calls)." _
-                            )
+                            Throw New ExevalatorException(ErrorMessages.EMPTY_PARENTHESIS)
                         End If
-                    End If                
+                    End If
                 Else
                     contentCounter += 1
                 End If
@@ -521,7 +548,7 @@ Namespace Rinearn.ExevalatorVB
 
                         'Only leafs, open parentheses, unary-prefix and function-call operators can be an operand.
                         If Not (nextIsLeaf OrElse nextIsOpenParenthesis OrElse nextIsPrefixOperator orElse nextIsFunctionIdentifier) Then
-                            Throw New ExevalatorException("An operand is required at the right of: """ + token.Word.ToString() + """")
+                            Throw New ExevalatorException(ErrorMessages.RIGHT_OPERAND_REQUIRED.Replace("$0", token.Word))
                         End If
 
                     End If ' Cases of unary-prefix operators
@@ -531,12 +558,12 @@ Namespace Rinearn.ExevalatorVB
 
                         ' Only leafs, open parentheses, unary-prefix and function-call operators can be a right-operands.
                         If Not (nextIsLeaf OrElse nextIsOpenParenthesis OrElse nextIsPrefixOperator OrElse nextIsFunctionIdentifier) Then
-                            Throw New ExevalatorException("An operand is required at the right of: """ + token.Word.ToString + """")
+                            Throw New ExevalatorException(ErrorMessages.RIGHT_OPERAND_REQUIRED.Replace("$0", token.Word))
                         End If
 
                         ' Only leaf elements and closed parenthesis can be a right-operand.
                         If Not (prevIsLeaf OrElse prevIsCloseParenthesis) Then
-                            Throw New ExevalatorException("An operand is required at the left of: """ + token.Word.ToString() + """")
+                            Throw New ExevalatorException(ErrorMessages.LEFT_OPERAND_REQUIRED.Replace("$0", token.Word))
                         End If
 
                     End If ' Cases of binary operators or a separator of partial expressions
@@ -548,12 +575,12 @@ Namespace Rinearn.ExevalatorVB
 
                     ' An other leaf element or an open parenthesis can not be at the right of an leaf element.
                     If Not nextIsFunctionCallBegin AndAlso (nextIsOpenParenthesis OrElse nextIsLeaf) Then
-                        Throw New ExevalatorException("An operator is required at the right of: """ + token.Word.ToString() + """")
+                        Throw New ExevalatorException(ErrorMessages.RIGHT_OPERATOR_REQUIRED.Replace("$0", token.Word))
                     End If
 
                     ' An other leaf element or a closed parenthesis can not be at the left of an leaf element.
                     If prevIsCloseParenthesis OrElse prevIsLeaf then
-                        Throw New ExevalatorException("An operator is required at the left of: """ + token.Word.ToString() + """")
+                        Throw New ExevalatorException(ErrorMessages.LEFT_OPERATOR_REQUIRED.Replace("$0", token.Word))
                     End If
 
                 End If ' Case of leaf elements
@@ -723,7 +750,7 @@ Namespace Rinearn.ExevalatorVB
         ''' <returns>Root nodes of ASTs of partial expressions</returns>
         Private Shared Function PopPartialExprNodes(stack As Stack(Of AstNode), endStackLidToken As Token) As AstNode()
             If stack.Count = 0 Then
-                Throw new ExevalatorException("Unexpected end of a partial expression")
+                Throw new ExevalatorException(ErrorMessages.UNEXPECTED_PARTIAL_EXPRESSION)
             End If
 
             Dim partialExprNodeList As List(Of AstNode) = New List(Of AstNode)()
@@ -1034,8 +1061,7 @@ Namespace Rinearn.ExevalatorVB
         Public Sub CheckDepth(depthOfThisNode As Integer, maxAstDepth As Integer)
             If maxAstDepth < depthOfThisNode Then
                 Throw New ExevalatorException( _
-                    "The depth of the AST exceeds the limit (StaticSettings.MaxAstDepth: " _
-                    + StaticSettings.MaxAstDepth.ToString() + ")" _
+                    ErrorMessages.EXCEEDS_MAX_AST_DEPTH.replace("$0", StaticSettings.MaxAstDepth.ToString()) _
                 )
             End If
 
@@ -1167,13 +1193,13 @@ Namespace Rinearn.ExevalatorVB
             If token.Type = TokenType.NumberLiteral Then
                 Dim literalValue As Double = Double.NaN
                 If Not Double.TryParse(token.Word, NumberStyles.Float, CultureInfo.InvariantCulture, literalValue) Then
-                    Throw new ExevalatorException("Invalid number literal: " + token.Word)
+                    Throw new ExevalatorException(ErrorMessages.INVALID_NUMBER_LITERAL.Replace("$0", token.Word))
                 End If
                 Return New Evaluator.NumberLiteralEvaluatorNode(literalValue)
 
             Else If token.Type = TokenType.VariableIdentifier Then
                 If Not variableTable.ContainsKey(token.Word) Then
-                    Throw new ExevalatorException("Variable not found: " + token.Word)
+                    Throw new ExevalatorException(ErrorMessages.VARIABLE_NOT_FOUND.Replace("$0", token.Word))
                 End If
                 Dim address As Integer = variableTable(token.Word)
                 Return New Evaluator.VariableEvaluatorNode(address)
@@ -1202,7 +1228,7 @@ Namespace Rinearn.ExevalatorVB
                 Else If op.Type = OperatorType.FunctionCall AndAlso Char.Equals(op.Symbol, "("c) Then
                     Dim identifier As String = childNodeList(0).Token.Word
                     If Not functionTable.ContainsKey(identifier) Then
-                        Throw new ExevalatorException("Function not found: " + identifier)
+                        Throw new ExevalatorException(ErrorMessages.FUNCTION_NOT_FOUND.Replace("$0", identifier))
                     End If
 
                     Dim functionImpl As IExevalatorFunction = functionTable(identifier)
@@ -1214,11 +1240,11 @@ Namespace Rinearn.ExevalatorVB
                     Return New Evaluator.FunctionEvaluatorNode(functionImpl, argNodes)
 
                 Else
-                    Throw New ExevalatorException("Unexpected operator: " + op.ToString())
+                    Throw New ExevalatorException(ErrorMessages.UNEXPECTED_OPERATOR.replace("$0", op.Symbol.ToString()))
                 End If
 
             Else
-                Throw new ExevalatorException("Unexpected token type: " + token.Type.ToString())
+                Throw new ExevalatorException(ErrorMessages.UNEXPECTED_TOKEN.replace("$0", token.Type.ToString()))
             End If
         End Function
 
@@ -1436,7 +1462,7 @@ Namespace Rinearn.ExevalatorVB
             ''' <returns>The value of the variable</returns>
             Public Overrides Function Evaluate(memory As List(Of Double)) As Double
                 If Me.Address < 0 OrElse memory.Count <= Me.Address Then
-                    Throw New ExevalatorException("Invalid variable address: " + Me.Address.ToString())
+                    Throw New ExevalatorException(ErrorMessages.INVALID_VARIABLE_ADDRESS.Replace("$0", Me.Address.ToString()))
                 End If
                 Return memory(Me.Address)
             End Function
