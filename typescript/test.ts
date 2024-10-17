@@ -20,6 +20,7 @@ function main(): void {
     testEmptyExpressions();
     testReeval();
     testTokenizations();
+    testAddressFiltering();
 
     console.log("All tests have completed successfully.");
 }
@@ -957,5 +958,43 @@ function testTokenizations() {
         3.0 * (-(1.0 + 2.0) + 2.0)
     );
 }
+
+
+function testAddressFiltering() {
+    const maxMemoryLength = 2147483647 + 1; // max "signed" int32 value + 1
+
+    for (let rawAddress: number = -1000000; rawAddress < 0; rawAddress++) {
+        const filteredAddress = ((rawAddress | 0) & ~(rawAddress >> 31)) & ((maxMemoryLength - 1) | 0);
+        if (filteredAddress !== 0) {
+            throw new ExevalatorTestError(`Address filtering failed: ${rawAddress} filtered to ${filteredAddress}`);
+        }
+    }
+    console.log("Test of Address Filtering 1: OK");
+
+    for (let rawAddress: number = maxMemoryLength; rawAddress < maxMemoryLength + 1000000; rawAddress++) {
+        const filteredAddress = ((rawAddress | 0) & ~(rawAddress >> 31)) & ((maxMemoryLength - 1) | 0);
+        if (filteredAddress !== 0) {
+            throw new ExevalatorTestError(`Address filtering failed: ${rawAddress} filtered to ${filteredAddress}`);
+        }
+    }
+    console.log("Test of Address Filtering 2: OK");
+
+    for (let rawAddress: number = 0; rawAddress < 1000000; rawAddress++) {
+        const filteredAddress = ((rawAddress | 0) & ~(rawAddress >> 31)) & ((maxMemoryLength - 1) | 0);
+        if (rawAddress !== filteredAddress) {
+            throw new ExevalatorTestError(`Address filtering failed: ${rawAddress} filtered to ${filteredAddress}`);
+        }
+    }
+    console.log("Test of Address Filtering 3: OK");
+
+    for (let rawAddress: number = maxMemoryLength - 1000000; rawAddress < maxMemoryLength; rawAddress++) {
+        const filteredAddress = ((rawAddress | 0) & ~(rawAddress >> 31)) & ((maxMemoryLength - 1) | 0);
+        if (rawAddress !== filteredAddress) {
+            throw new ExevalatorTestError(`Address filtering failed: ${rawAddress} filtered to ${filteredAddress}`);
+        }
+    }
+    console.log("Test of Address Filtering 4: OK");
+}
+
 
 main();
