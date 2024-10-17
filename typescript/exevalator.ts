@@ -207,7 +207,7 @@ export default class Exevalator {
         if (address < 0 || this.memory.length <= address) {
             throw new ExevalatorError(ErrorMessages.INVALID_VARIABLE_ADDRESS.replace("$0", address.toString()));
         }
-        address = ((address | 0) & ~(address >> 31)) & ((this.memory.length - 1) | 0);
+        address = ((address | 0) & ~(address >> 31)) & ((StaticSettings.MAX_VARIABLE_COUNT - 1) | 0);
         this.memory[address] = value;
     }
 
@@ -241,7 +241,7 @@ export default class Exevalator {
         if (address < 0 || this.memory.length <= address) {
             throw new ExevalatorError(ErrorMessages.INVALID_VARIABLE_ADDRESS.replace("$0", address.toString()));
         }
-        address = ((address | 0) & ~(address >> 31)) & ((this.memory.length - 1) | 0);
+        address = ((address | 0) & ~(address >> 31)) & ((StaticSettings.MAX_VARIABLE_COUNT - 1) | 0);
         return this.memory[address];
     }
 
@@ -1437,7 +1437,7 @@ class VariableEvaluatorNode extends EvaluatorNode {
         if (this.address < 0 || memory.length <= this.address) {
             throw new ExevalatorError(ErrorMessages.INVALID_MEMORY_ADDRESS.replace("$0", this.address.toString()));
         }
-        this.address = ((this.address | 0) & ~(this.address >> 31)) & ((memory.length - 1) | 0);
+        this.address = ((this.address | 0) & ~(this.address >> 31)) & ((StaticSettings.MAX_VARIABLE_COUNT - 1) | 0);
         return memory[this.address];
     }
 }
@@ -1491,7 +1491,7 @@ class FunctionEvaluatorNode extends EvaluatorNode {
 /**
  * The class defining static setting values.
  */
-class StaticSettings {
+export class StaticSettings {
 
     /** The maximum number of characters in an expression. */
     public static readonly MAX_EXPRESSION_CHAR_COUNT: number = 256;
@@ -1506,7 +1506,7 @@ class StaticSettings {
     public static readonly MAX_AST_DEPTH: number = 32;
 
     /** The maximum number of variables. */
-    public static readonly MAX_VARIABLE_COUNT = 100000; // Must be smaller than 2147483647 + 1
+    public static readonly MAX_VARIABLE_COUNT = 2**10; // Must be in the form of 2**n and smaller than 2147483647 + 1
 
     /** The indent used in text representations of ASTs. */
     public static readonly AST_INDENT: string = "  ";

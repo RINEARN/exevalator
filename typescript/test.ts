@@ -1,4 +1,4 @@
-import Exevalator, { ExevalatorFunctionInterface, ExevalatorError } from "./exevalator";
+import Exevalator, { ExevalatorFunctionInterface, ExevalatorError, StaticSettings } from "./exevalator";
 
 /** The minimum error between two double-type values to regard them almost equal. */
 const ALLOWABLE_ERROR: number = 1.0E-12;
@@ -961,39 +961,70 @@ function testTokenizations() {
 
 
 function testAddressFiltering() {
-    const maxMemoryLength = 2147483647 + 1; // max "signed" int32 value + 1
+    const maxVarCount = StaticSettings.MAX_VARIABLE_COUNT;
 
+    // Negative addresses must be mapped to 0.
     for (let rawAddress: number = -1000000; rawAddress < 0; rawAddress++) {
-        const filteredAddress = ((rawAddress | 0) & ~(rawAddress >> 31)) & ((maxMemoryLength - 1) | 0);
+        const filteredAddress = ((rawAddress | 0) & ~(rawAddress >> 31)) & ((maxVarCount - 1) | 0);
         if (filteredAddress !== 0) {
             throw new ExevalatorTestError(`Address filtering failed: ${rawAddress} filtered to ${filteredAddress}`);
         }
     }
     console.log("Test of Address Filtering 1: OK");
 
-    for (let rawAddress: number = maxMemoryLength; rawAddress < maxMemoryLength + 1000000; rawAddress++) {
-        const filteredAddress = ((rawAddress | 0) & ~(rawAddress >> 31)) & ((maxMemoryLength - 1) | 0);
-        if (filteredAddress !== 0) {
-            throw new ExevalatorTestError(`Address filtering failed: ${rawAddress} filtered to ${filteredAddress}`);
+    // Addresses exceeding maxVarCount must be pushed into the range [0, maxVarCount-1].
+    for (let rawAddress: number = maxVarCount; rawAddress < maxVarCount + 1000000; rawAddress++) {
+        const filteredAddress = ((rawAddress | 0) & ~(rawAddress >> 31)) & ((maxVarCount - 1) | 0);
+        if (filteredAddress < 0 || maxVarCount <= filteredAddress) {
+            console.log(`Address filtering failed: ${rawAddress} filtered to ${filteredAddress}`);
         }
     }
     console.log("Test of Address Filtering 2: OK");
 
-    for (let rawAddress: number = 0; rawAddress < 1000000; rawAddress++) {
-        const filteredAddress = ((rawAddress | 0) & ~(rawAddress >> 31)) & ((maxMemoryLength - 1) | 0);
+    // Addresses in the range [0, maxVarCount-1] must not be modified change.
+    for (let rawAddress: number = 0; rawAddress < maxVarCount; rawAddress++) {
+        const filteredAddress = ((rawAddress | 0) & ~(rawAddress >> 31)) & ((maxVarCount - 1) | 0);
         if (rawAddress !== filteredAddress) {
             throw new ExevalatorTestError(`Address filtering failed: ${rawAddress} filtered to ${filteredAddress}`);
         }
     }
     console.log("Test of Address Filtering 3: OK");
 
-    for (let rawAddress: number = maxMemoryLength - 1000000; rawAddress < maxMemoryLength; rawAddress++) {
-        const filteredAddress = ((rawAddress | 0) & ~(rawAddress >> 31)) & ((maxMemoryLength - 1) | 0);
-        if (rawAddress !== filteredAddress) {
+
+    // Theoretical upper limit for these bit-mask operations
+    const theoreticalMaxMemoryLength = 2**31;
+
+    for (let rawAddress: number = -1000000; rawAddress < 0; rawAddress++) {
+        const filteredAddress = ((rawAddress | 0) & ~(rawAddress >> 31)) & ((theoreticalMaxMemoryLength - 1) | 0);
+        if (filteredAddress !== 0) {
             throw new ExevalatorTestError(`Address filtering failed: ${rawAddress} filtered to ${filteredAddress}`);
         }
     }
     console.log("Test of Address Filtering 4: OK");
+
+    for (let rawAddress: number = theoreticalMaxMemoryLength; rawAddress < theoreticalMaxMemoryLength + 1000000; rawAddress++) {
+        const filteredAddress = ((rawAddress | 0) & ~(rawAddress >> 31)) & ((theoreticalMaxMemoryLength - 1) | 0);
+        if (filteredAddress !== 0) {
+            throw new ExevalatorTestError(`Address filtering failed: ${rawAddress} filtered to ${filteredAddress}`);
+        }
+    }
+    console.log("Test of Address Filtering 5: OK");
+
+    for (let rawAddress: number = 0; rawAddress < 1000000; rawAddress++) {
+        const filteredAddress = ((rawAddress | 0) & ~(rawAddress >> 31)) & ((theoreticalMaxMemoryLength - 1) | 0);
+        if (rawAddress !== filteredAddress) {
+            throw new ExevalatorTestError(`Address filtering failed: ${rawAddress} filtered to ${filteredAddress}`);
+        }
+    }
+    console.log("Test of Address Filtering 6: OK");
+
+    for (let rawAddress: number = theoreticalMaxMemoryLength - 1000000; rawAddress < theoreticalMaxMemoryLength; rawAddress++) {
+        const filteredAddress = ((rawAddress | 0) & ~(rawAddress >> 31)) & ((theoreticalMaxMemoryLength - 1) | 0);
+        if (rawAddress !== filteredAddress) {
+            throw new ExevalatorTestError(`Address filtering failed: ${rawAddress} filtered to ${filteredAddress}`);
+        }
+    }
+    console.log("Test of Address Filtering 7: OK");
 }
 
 
