@@ -2,7 +2,7 @@
 
 ![logo](logo.png)
 
-Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムやアプリ内に組み込んで、式の値の計算に使うための、コンパクトで高速なインタープリタです。複数言語対応で、Java&trade;言語、Rust、C#、C++、Visual Basic&reg;製のプログラムに組み込んで使用できます。
+Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムやアプリ内に組み込んで、式の値の計算に使うための、コンパクトで高速なインタープリタです。複数言語対応で、Java&trade;言語、Rust、C#、C++、Visual Basic&reg;, TypeScript 製のプログラムに組み込んで使用できます。
 
 &raquo; [English README](./README.md)
 
@@ -21,6 +21,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 	- <a href="#how-to-use-csharp">C#での使用方法</a>
 	- <a href="#how-to-use-cpp">C++での使用方法</a>
 	- <a href="#how-to-use-vb">Visual Basic での使用方法</a>
+	- <a href="#how-to-use-typescript">TypeScript での使用方法</a>
 - <a href="#performance">処理速度</a>
 - <a href="#about-us">開発元について</a>
 - <a href="#references">参考情報</a>
@@ -39,7 +40,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 
 大抵のコンパイラ型の（スクリプト言語ではない）言語では、そのような機能は、標準ではサポートされていません。そのため、計算処理を自力で実装するか、そのような機能を提供するライブラリを使用する必要があります。
 
-Exevalator は、 そのような機能を提供する、非常にコンパクトなライブラリです。多言語に対応していて、現在は Java / Rust / C# / C++ / Visual Basic 製のソフトウェア開発で使用できます。
+Exevalator は、 そのような機能を提供する、非常にコンパクトなライブラリです。多言語に対応していて、現在は Java / Rust / C# / C++ / Visual Basic / TypeScript 製のソフトウェア開発で使用できます。
 
 
 <a id="license"></a>
@@ -189,6 +190,33 @@ Exevalator は、 そのような機能を提供する、非常にコンパク�
 より詳しい解説や機能一覧については [Visual Basic 用README](./vb/README_JAPANESE.md) をご参照ください。
 
 
+<a id="how-to-use-typescript"></a>
+### TypeScript での使用方法
+
+「 typescript 」フォルダ内に、Typescript実装版の Exevalator と用例サンプルコード類、および [TypeScript 用README](./typescript/README_JAPANESE.md) があります。
+最もシンプルな用例は「 example1.ts 」で、以下のように単純な式「 1.2 + 3.4 」を計算する内容になっています：
+
+	(in typescript/example1.ts)
+
+	let exevalator: Exevalator = new Exevalator();
+	const result: number = exevalator.eval("1.2 + 3.4");
+	console.log(`result: ${result}`);
+
+このコードをコンパイルして実行するには：
+
+	npx tsc example1.ts
+	node example1.js
+
+結果は以下の通りです：
+
+	result: 4.6
+
+Webブラウザ上で動作させる場合は、esbuild 等のバンドラツールで一枚の JavaScript ファイルにビルドした上で、HTMLファイルから簡単に読み込んで使えます（例: example6 & 7）。
+
+より詳しい解説や機能一覧については [TypeScript 用README](./typescript/README_JAPANESE.md) をご参照ください。
+
+
+
 <a id="performance"></a>
 ## 処理速度
 
@@ -270,13 +298,15 @@ Exevalator についての情報をもっと知りたい場合は、以下のウ
 <a id="credits"></a>
 ## 本文中の商標など
 
-- OracleとJavaは、Oracle Corporation 及びその子会社、関連会社の米国及びその他の国における登録商標です。文中の社名、商品名等は各社の商標または登録商標である場合があります。 
+- OracleとJava、JavaScriptは、Oracle Corporation 及びその子会社、関連会社の米国及びその他の国における登録商標です。文中の社名、商品名等は各社の商標または登録商標である場合があります。 
 
 - Rustは、Mozilla Foundation の米国及びその他の国における登録商標です。 
 
 - Windows、C#、Visual Basic、.NET、Visual Studio は米国 Microsoft Corporation の米国およびその他の国における登録商標です。
 
 - Linux は、Linus Torvalds 氏の米国およびその他の国における商標または登録商標です。
+
+- Node.js は、OpenJS Foundation による米国またはその他の国における商標または登録商標です。
 
 - ChatGPT は、米国 OpenAI OpCo, LLC による米国またはその他の国における商標または登録商標です。
 

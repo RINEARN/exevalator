@@ -2,7 +2,7 @@
 
 ![logo](logo.png)
 
-Exevalator, an abbreviation for "**Ex**pression-**Eval**u**ator**," is a compact and high-speed interpreter that can be embedded in your programs or apps for computing the values of expressions. Exevalator is currently available for programs and apps written in Java&trade;, Rust, C#, C++, and Visual Basic&reg;.
+Exevalator, an abbreviation for "**Ex**pression-**Eval**u**ator**," is a compact and high-speed interpreter that can be embedded in your programs or apps for computing the values of expressions. Exevalator is currently available for programs and apps written in Java&trade;, Rust, C#, C++, Visual Basic&reg;, and TypeScript.
 
 
 &raquo; [Japanese README](./README_JAPANESE.md)
@@ -22,6 +22,7 @@ Exevalator, an abbreviation for "**Ex**pression-**Eval**u**ator**," is a compact
 	- <a href="#how-to-use-csharp">How to Use in C#</a>
 	- <a href="#how-to-use-cpp">How to Use in C++</a>
 	- <a href="#how-to-use-vb">How to Use in Visual Basic</a>
+	- <a href="#how-to-use-typescript">How to Use in TypeScript</a>
 - <a href="#performance">Performance</a>
 - <a href="#about-us">About Us</a>
 - <a href="#references">References</a>
@@ -38,7 +39,7 @@ Are you developing software and need to calculate the value of a numerical expre
 
 Most compiled languages, as opposed to scripting languages, do not support this feature by default. You are usually required to implement your own calculation routine or use a library that provides this capability.
 
-Exevalator is a very compact library designed to offer this functionality in Java, Rust, C#, C++, and Visual Basic programs.
+Exevalator is a very compact library designed to offer this functionality in Java, Rust, C#, C++, Visual Basic, and TypeScript programs.
 
 
 <a id="license"></a>
@@ -185,6 +186,32 @@ The result is:
 For more details, see the [README for using in Visual Basic](./vb/README.md).
 
 
+<a id="how-to-use-typescript"></a>
+### How to Use in TypeScript
+
+In the "typescript" folder, you'll find the TypeScript implementation of Exevalator, along with code examples and a [README for TypeScript](./typescript/README.md). The simplest example is 'example1.ts', which evaluates a basic expression "1.2 + 3.4" as follows:
+
+	(in typescript/example1.ts)
+
+	let exevalator: Exevalator = new Exevalator();
+	const result: number = exevalator.eval("1.2 + 3.4");
+	console.log(`result: ${result}`);
+
+To compile and run this code:
+
+	npx tsc example1.ts
+	node example1.js
+
+The result is:
+
+	result: 4.6
+
+If you want to run it in a web browser, you can easily bundle the code into a single JavaScript file using a bundler tool like esbuild and load it from an HTML file (e.g., 'example6.ts' &amp; 'example7.ts').
+
+For more detailed explanations and a list of features, please refer to the [README for TypeScript](./typescript/README.md).
+
+
+
 
 <a id="performance"></a>
 ## Performance
@@ -270,13 +297,15 @@ The following webpages may be useful if you need more information about Exevalat
 <a id="credits"></a>
 ## Credits
 
-- Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+- Oracle, Java, and JavaScript are registered trademarks of Oracle and/or its affiliates. 
 
 - Rust is registered trademarks of Mozilla Foundation and/or its affiliates. 
 
 - Microsoft Windows, C#, Visual Basic, .NET, and Visual Studio are either a registered trademarks or trademarks of Microsoft Corporation in the United States and/or other countries.
 
 - Linux is a trademark of linus torvalds in the United States and/or other countries.
+
+- Node.js is a trademark or a registered trademark of OpenJS Foundation in the United States and other countries.
 
 - ChatGPT is a trademark or a registered trademark of OpenAI OpCo, LLC in the United States and other countries.
 
