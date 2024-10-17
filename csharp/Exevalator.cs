@@ -20,6 +20,44 @@ namespace Rinearn.ExevalatorCS
 #nullable enable
 
     /// <summary>
+    /// Error messages of ExevalatorException,
+    /// which is thrown by Exevalator if the input expression is syntactically incorrect, or uses undeclared variables/functions.
+    /// You can customize the error message of Exevalator by modifying the values of the properties of this class.
+    /// </summary>
+    public struct ErrorMessages
+    {
+        public static readonly string EMPTY_EXPRESSION = "The inputted expression is empty.";
+        public static readonly string TOO_MANY_TOKENS = "The number of tokens exceeds the limit (StaticSettings.MaxTokenCount: '$0')";
+        public static readonly string DEFICIENT_OPEN_PARENTHESIS = "The number of open parentheses '(' is deficient.";
+        public static readonly string DEFICIENT_CLOSED_PARENTHESIS = "The number of closed parentheses ')' is deficient.";
+        public static readonly string EMPTY_PARENTHESIS = "The content of parentheses '()' should not be empty.";
+        public static readonly string RIGHT_OPERAND_REQUIRED = "An operand is required at the right of: '$0'";
+        public static readonly string LEFT_OPERAND_REQUIRED = "An operand is required at the left of: '$0'";
+        public static readonly string RIGHT_OPERATOR_REQUIRED = "An operator is required at the right of: '$0'";
+        public static readonly string LEFT_OPERATOR_REQUIRED = "An operator is required at the left of: '$0'";
+        public static readonly string UNKNOWN_UNARY_PREFIX_OPERATOR = "Unknown unary-prefix operator: '$0'";
+        public static readonly string UNKNOWN_BINARY_OPERATOR = "Unknown binary operator: '$0'";
+        public static readonly string UNKNOWN_OPERATOR_SYNTAX = "Unknown operator syntax: '$0'";
+        public static readonly string EXCEEDS_MAX_AST_DEPTH = "The depth of the AST exceeds the limit (StaticSettings.MaxAstDepth: '$0')";
+        public static readonly string UNEXPECTED_PARTIAL_EXPRESSION = "Unexpected end of a partial expression";
+        public static readonly string INVALID_NUMBER_LITERAL = "Invalid number literal: '$0'";
+        public static readonly string INVALID_MEMORY_ADDRESS = "Invalid memory address: '$0'";
+        public static readonly string FUNCTION_ERROR = "Function Error ('$0'): $1";
+        public static readonly string VARIABLE_NOT_FOUND = "Variable not found: '$0'";
+        public static readonly string FUNCTION_NOT_FOUND = "Function not found: '$0'";
+        public static readonly string UNEXPECTED_OPERATOR = "Unexpected operator: '$0'";
+        public static readonly string UNEXPECTED_TOKEN = "Unexpected token: '$0'";
+        public static readonly string TOO_LONG_EXPRESSION = "The length of the expression exceeds the limit (StaticSettings.MaxExpressionCharCount: '$0')";
+        public static readonly string UNEXPECTED_ERROR = "Unexpected error occurred: $0";
+        public static readonly string REEVAL_NOT_AVAILABLE = "\"reeval\" is not available before using \"eval\"";
+        public static readonly string TOO_LONG_VARIABLE_NAME = "The length of the variable name exceeds the limit (StaticSettings.MaxNameCharCount: '$0')";
+        public static readonly string TOO_LONG_FUNCTION_NAME = "The length of the function name exceeds the limit (StaticSettings.MaxNameCharCount: '$0')";
+        public static readonly string VARIABLE_ALREADY_DECLARED = "The variable '$0' is already declared";
+        public static readonly string FUNCTION_ALREADY_CONNECTED = "The function '$0' is already connected";
+        public static readonly string INVALID_VARIABLE_ADDRESS = "Invalid memory address: '$0'";
+    }
+
+    /// <summary>
     /// Interpreter Engine of Exevalator.
     /// </summary>
     class Exevalator
@@ -66,9 +104,7 @@ namespace Rinearn.ExevalatorCS
             if (StaticSettings.MaxExpressionCharCount < expression.Length)
             {
                 throw new ExevalatorException(
-                    "The length of the expression exceeds the limit "
-                    + "(StaticSettings.MaxExpressionCharCount: "
-                    + StaticSettings.MaxExpressionCharCount + ")"
+                    ErrorMessages.TOO_LONG_EXPRESSION.Replace("$0", StaticSettings.MaxExpressionCharCount.ToString())
                 );
             }
 
@@ -116,7 +152,7 @@ namespace Rinearn.ExevalatorCS
                 else
                 {
                     // Wrap an unexpected exception by Exevalator.Exception and rethrow it.
-                    throw new ExevalatorException("Unexpected exception/error occurred", e);
+                    throw new ExevalatorException(ErrorMessages.UNEXPECTED_ERROR.Replace("$0", e.Message), e);
                 }
             }
         }
@@ -134,7 +170,7 @@ namespace Rinearn.ExevalatorCS
                 double evaluatedValue = this.Evaluator.Evaluate(this.Memory);
                 return evaluatedValue;
             } else {
-                throw new ExevalatorException("\"Reeval\" is not available before using \"Eval\"");
+                throw new ExevalatorException(ErrorMessages.REEVAL_NOT_AVAILABLE);
             }
         }
 
@@ -156,8 +192,7 @@ namespace Rinearn.ExevalatorCS
             if (StaticSettings.MaxNameCharCount < name.Length)
             {
                 throw new ExevalatorException(
-                    "The length of the variable name exceeds the limit (StaticSettings.MaxNameCharCount: "
-                    + StaticSettings.MaxNameCharCount + ")"
+                    ErrorMessages.TOO_LONG_VARIABLE_NAME.Replace("$0", StaticSettings.MaxNameCharCount.ToString())
                 );
             }
             int address = this.Memory.Count;
@@ -179,7 +214,7 @@ namespace Rinearn.ExevalatorCS
             }
             if (StaticSettings.MaxNameCharCount < name.Length || !this.VariableTable.ContainsKey(name))
             {
-                throw new ExevalatorException("Variable not found: " + name);
+                throw new ExevalatorException(ErrorMessages.VARIABLE_NOT_FOUND.Replace("$0", name));
             }
             int address = this.VariableTable[name];
             this.WriteVariableAt(address, value);
@@ -195,7 +230,7 @@ namespace Rinearn.ExevalatorCS
         {
             if (address < 0 || this.Memory.Count <= address)
             {
-                throw new ExevalatorException("Invalid variable address: " + address);
+                throw new ExevalatorException(ErrorMessages.INVALID_VARIABLE_ADDRESS.Replace("$0", address.ToString()));
             }
             this.Memory[address] = value;
         }
@@ -213,7 +248,7 @@ namespace Rinearn.ExevalatorCS
             }
             if (StaticSettings.MaxNameCharCount < name.Length || !this.VariableTable.ContainsKey(name))
             {
-                throw new ExevalatorException("Variable not found: " + name);
+                throw new ExevalatorException(ErrorMessages.VARIABLE_NOT_FOUND.Replace("$0", name));
             }
             int address = this.VariableTable[name];
             return this.ReadVariableAt(address);
@@ -229,7 +264,7 @@ namespace Rinearn.ExevalatorCS
         {
             if (address < 0 || this.Memory.Count <= address)
             {
-                throw new ExevalatorException("Invalid variable address: " + address);
+                throw new ExevalatorException(ErrorMessages.INVALID_VARIABLE_ADDRESS.Replace("$0", address.ToString()));
             }
             return this.Memory[address];
         }
@@ -248,8 +283,7 @@ namespace Rinearn.ExevalatorCS
             if (StaticSettings.MaxNameCharCount < name.Length)
             {
                 throw new ExevalatorException(
-                    "The length of the function name exceeds the limit (StaticSettings.MaxNameCharCount: "
-                    + StaticSettings.MaxNameCharCount + ")"
+                    ErrorMessages.TOO_LONG_FUNCTION_NAME.Replace("$0", StaticSettings.MaxNameCharCount.ToString())
                 );
             }
             this.FunctionTable[name] = function;
@@ -305,15 +339,14 @@ namespace Rinearn.ExevalatorCS
             // So we should detect/handle it as follows.
             if (tokenWords.Length == 1 && tokenWords[0].Length == 0)
             {
-                throw new ExevalatorException("The inputted expression is empty");
+                throw new ExevalatorException(ErrorMessages.EMPTY_EXPRESSION);
             }
 
             // Checks the total number of tokens.
             if (StaticSettings.MaxTokenCount < tokenWords.Length)
             {
                 throw new ExevalatorException(
-                    "The number of tokens exceeds the limit (StaticSettings.MaxTokenCount: "
-                    + StaticSettings.MaxTokenCount + ")"
+                    ErrorMessages.TOO_MANY_TOKENS.Replace("$0", StaticSettings.MaxTokenCount.ToString())
                 );
             }
 
@@ -436,7 +469,7 @@ namespace Rinearn.ExevalatorCS
                         }
                         else
                         {
-                            throw new ExevalatorException("Unknown unary-prefix operator: " + word);
+                            throw new ExevalatorException(ErrorMessages.UNKNOWN_UNARY_PREFIX_OPERATOR.Replace("$0", word));
                         }
 
                     }
@@ -451,13 +484,13 @@ namespace Rinearn.ExevalatorCS
                         }
                         else
                         {
-                            throw new ExevalatorException("Unknown binary operator: " + word);
+                            throw new ExevalatorException(ErrorMessages.UNKNOWN_BINARY_OPERATOR.Replace("$0", word));
                         }
 
                     }
                     else
                     {
-                        throw new ExevalatorException("Unexpected operator syntax: " + word);
+                        throw new ExevalatorException(ErrorMessages.UNKNOWN_OPERATOR_SYNTAX.Replace("$0", word));
                     }
                     tokens[itoken] = new Token(TokenType.Operator, word, op.Value);
 
@@ -516,9 +549,7 @@ namespace Rinearn.ExevalatorCS
                 // If the value of hierarchy is negative, the open parenthesis is deficient.
                 if (hierarchy < 0)
                 {
-                    throw new ExevalatorException(
-                        "The number of open parenthesis \"(\" is deficient."
-                    );
+                    throw new ExevalatorException(ErrorMessages.DEFICIENT_OPEN_PARENTHESIS);
                 }
             }
 
@@ -526,9 +557,7 @@ namespace Rinearn.ExevalatorCS
             // the closed parentheses ")" is deficient.
             if (hierarchy > 0)
             {
-                throw new ExevalatorException(
-                    "The number of closed parenthesis \")\" is deficient."
-                );
+                throw new ExevalatorException(ErrorMessages.DEFICIENT_CLOSED_PARENTHESIS);
             }
         }
 
@@ -555,9 +584,7 @@ namespace Rinearn.ExevalatorCS
                     {
                         if (contentCounter == 0)
                         {
-                            throw new ExevalatorException(
-                                "The content parentheses \"()\" should not be empty (excluding function calls)."
-                            );
+                            throw new ExevalatorException(ErrorMessages.EMPTY_PARENTHESIS);
                         }
                     }
                 }
@@ -611,7 +638,7 @@ namespace Rinearn.ExevalatorCS
                         // Only leafs, open parentheses, unary-prefix and function-call operators can be an operand.
                         if (!(nextIsLeaf || nextIsOpenParenthesis || nextIsPrefixOperator || nextIsFunctionIdentifier))
                         {
-                            throw new ExevalatorException("An operand is required at the right of: \"" + token.Word + "\"");
+                            throw new ExevalatorException(ErrorMessages.RIGHT_OPERAND_REQUIRED.Replace("$0", token.Word));
                         }
                     } // Cases of unary-prefix operators
 
@@ -622,12 +649,12 @@ namespace Rinearn.ExevalatorCS
                         // Only leafs, open parentheses, unary-prefix and function-call operators can be a right-operands.
                         if (!(nextIsLeaf || nextIsOpenParenthesis || nextIsPrefixOperator || nextIsFunctionIdentifier))
                         {
-                            throw new ExevalatorException("An operand is required at the right of: \"" + token.Word + "\"");
+                            throw new ExevalatorException(ErrorMessages.RIGHT_OPERAND_REQUIRED.Replace("$0", token.Word));
                         }
                         // Only leaf elements and closed parenthesis can be a right-operand.
                         if (!(prevIsLeaf || prevIsCloseParenthesis))
                         {
-                            throw new ExevalatorException("An operand is required at the left of: \"" + token.Word + "\"");
+                            throw new ExevalatorException(ErrorMessages.LEFT_OPERAND_REQUIRED.Replace("$0", token.Word));
                         }
                     } // Cases of binary operators or a separator of partial expressions
 
@@ -640,13 +667,13 @@ namespace Rinearn.ExevalatorCS
                     // An other leaf element or an open parenthesis can not be at the right of an leaf element.
                     if (!nextIsFunctionCallBegin && (nextIsOpenParenthesis || nextIsLeaf))
                     {
-                        throw new ExevalatorException("An operator is required at the right of: \"" + token.Word + "\"");
+                        throw new ExevalatorException(ErrorMessages.RIGHT_OPERATOR_REQUIRED.Replace("$0", token.Word));
                     }
 
                     // An other leaf element or a closed parenthesis can not be at the left of an leaf element.
                     if (prevIsCloseParenthesis || prevIsLeaf)
                     {
-                        throw new ExevalatorException("An operator is required at the left of: \"" + token.Word + "\"");
+                        throw new ExevalatorException(ErrorMessages.LEFT_OPERATOR_REQUIRED.Replace("$0", token.Word));
                     }
                 } // Case of leaf elements
             } // Loops for each token
@@ -838,7 +865,7 @@ namespace Rinearn.ExevalatorCS
         {
             if (stack.Count == 0)
             {
-                throw new ExevalatorException("Unexpected end of a partial expression");
+                throw new ExevalatorException(ErrorMessages.UNEXPECTED_PARTIAL_EXPRESSION);
             }
             List<AstNode> partialExprNodeList = new List<AstNode>();
             while (stack.Count != 0)
@@ -1178,8 +1205,7 @@ namespace Rinearn.ExevalatorCS
             if (maxAstDepth < depthOfThisNode)
             {
                 throw new ExevalatorException(
-                    "The depth of the AST exceeds the limit (StaticSettings.MaxAstDepth: "
-                    + StaticSettings.MaxAstDepth + ")"
+                    ErrorMessages.EXCEEDS_MAX_AST_DEPTH.Replace("$0", StaticSettings.MaxAstDepth.ToString())
                 );
             }
             foreach (AstNode childNode in this.ChildNodeList)
@@ -1322,7 +1348,7 @@ namespace Rinearn.ExevalatorCS
                 double literalValue = System.Double.NaN;
                 if (!System.Double.TryParse(token.Word, NumberStyles.Float, CultureInfo.InvariantCulture, out literalValue))
                 {
-                    throw new ExevalatorException("Invalid number literal: " + token.Word);
+                    throw new ExevalatorException(ErrorMessages.INVALID_NUMBER_LITERAL.Replace("$0", token.Word));
                 }
                 return new Evaluator.NumberLiteralEvaluatorNode(literalValue);
 
@@ -1331,7 +1357,7 @@ namespace Rinearn.ExevalatorCS
             {
                 if (!variableTable.ContainsKey(token.Word))
                 {
-                    throw new ExevalatorException("Variable not found: " + token.Word);
+                    throw new ExevalatorException(ErrorMessages.VARIABLE_NOT_FOUND.Replace("$0", token.Word));
                 }
                 int address = variableTable[token.Word];
                 return new Evaluator.VariableEvaluatorNode(address);
@@ -1369,7 +1395,7 @@ namespace Rinearn.ExevalatorCS
                     String identifier = childNodeList[0].Token.Word;
                     if (!functionTable.ContainsKey(identifier))
                     {
-                        throw new ExevalatorException("Function not found: " + identifier);
+                        throw new ExevalatorException(ErrorMessages.FUNCTION_NOT_FOUND.Replace("$0", identifier));
                     }
                     IExevalatorFunction function = functionTable[identifier];
                     Evaluator.EvaluatorNode[] argNodes = new Evaluator.EvaluatorNode[childCount - 1];
@@ -1381,12 +1407,12 @@ namespace Rinearn.ExevalatorCS
                 }
                 else
                 {
-                    throw new ExevalatorException("Unexpected operator: " + op);
+                    throw new ExevalatorException(ErrorMessages.UNEXPECTED_OPERATOR.Replace("$0", op.Symbol.ToString()));
                 }
             }
             else
             {
-                throw new ExevalatorException("Unexpected token type: " + token.Type);
+                throw new ExevalatorException(ErrorMessages.UNEXPECTED_TOKEN.Replace("$0", token.Type.ToString()));
             }
         }
 
@@ -1614,7 +1640,7 @@ namespace Rinearn.ExevalatorCS
             {
                 if (this.Address < 0 || memory.Count <= this.Address)
                 {
-                    throw new ExevalatorException("Invalid variable address: " + this.Address);
+                    throw new ExevalatorException(ErrorMessages.INVALID_VARIABLE_ADDRESS.Replace("$0", this.Address.ToString()));
                 }
                 return memory[this.Address];
             }
