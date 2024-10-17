@@ -10,6 +10,43 @@ use std::collections::VecDeque;
 use std::fmt;
 
 
+/// Error messages of ExevalatorException,
+/// which is thrown by Exevalator if the input expression is syntactically incorrect, or uses undeclared variables/functions.
+/// You can customize the error message of Exevalator by modifying the values of the properties of this class.
+struct ErrorMessages;
+impl ErrorMessages {
+    pub const EMPTY_EXPRESSION: &'static str = "The inputted expression is empty.";
+    pub const TOO_MANY_TOKENS: &'static str = "The number of tokens exceeds the limit (StaticSettings.MAX_TOKEN_COUNT: '$0')";
+    pub const DEFICIENT_OPEN_PARENTHESIS: &'static str = "The number of open parentheses '(' is deficient.";
+    pub const DEFICIENT_CLOSED_PARENTHESIS: &'static str = "The number of closed parentheses ')' is deficient.";
+    pub const EMPTY_PARENTHESIS: &'static str = "The content of parentheses '()' should not be empty.";
+    pub const RIGHT_OPERAND_REQUIRED: &'static str = "An operand is required at the right of: '$0'";
+    pub const LEFT_OPERAND_REQUIRED: &'static str = "An operand is required at the left of: '$0'";
+    pub const RIGHT_OPERATOR_REQUIRED: &'static str = "An operator is required at the right of: '$0'";
+    pub const LEFT_OPERATOR_REQUIRED: &'static str = "An operator is required at the left of: '$0'";
+    pub const UNKNOWN_UNARY_PREFIX_OPERATOR: &'static str = "Unknown unary-prefix operator: '$0'";
+    pub const UNKNOWN_BINARY_OPERATOR: &'static str = "Unknown binary operator: '$0'";
+    // pub const UNKNOWN_OPERATOR_SYNTAX: &'static str = "Unknown operator syntax: '$0'";
+    pub const EXCEEDS_MAX_AST_DEPTH: &'static str = "The depth of the AST exceeds the limit (StaticSettings.MAX_AST_DEPTH: '$0')";
+    pub const UNEXPECTED_PARTIAL_EXPRESSION: &'static str = "Unexpected end of a partial expression";
+    pub const INVALID_NUMBER_LITERAL: &'static str = "Invalid number literal: '$0'";
+    // pub const INVALID_MEMORY_ADDRESS: &'static str = "Invalid memory address: '$0'";
+    pub const FUNCTION_ERROR: &'static str = "Function Error ('$0'): $1";
+    pub const VARIABLE_NOT_FOUND: &'static str = "Variable not found: '$0'";
+    pub const FUNCTION_NOT_FOUND: &'static str = "Function not found: '$0'";
+    // pub const UNEXPECTED_OPERATOR: &'static str = "Unexpected operator: '$0'";
+    // pub const UNEXPECTED_TOKEN: &'static str = "Unexpected token: '$0'";
+    pub const TOO_LONG_EXPRESSION: &'static str = "The length of the expression exceeds the limit (StaticSettings.MAX_EXPRESSION_CHAR_COUNT: '$0')";
+    // pub const UNEXPECTED_ERROR: &'static str = "Unexpected error occurred: $0";
+    pub const REEVAL_NOT_AVAILABLE: &'static str = "\"reeval\" is not available before using \"eval\"";
+    pub const TOO_LONG_VARIABLE_NAME: &'static str = "The length of the variable name exceeds the limit (StaticSettings.MAX_NAME_CHAR_COUNT: '$0')";
+    pub const TOO_LONG_FUNCTION_NAME: &'static str = "The length of the function name exceeds the limit (StaticSettings.MAX_NAME_CHAR_COUNT: '$0')";
+    pub const VARIABLE_ALREADY_DECLARED: &'static str = "The variable '$0' is already declared";
+    // pub const FUNCTION_ALREADY_CONNECTED: &'static str = "The function '$0' is already connected";
+    pub const INVALID_VARIABLE_ADDRESS: &'static str = "Invalid memory address: '$0'";
+}
+
+
 /// Interpreter Engine of Exevalator.
 pub struct Exevalator<'exvlife> {
 
@@ -58,10 +95,9 @@ impl<'exvlife> Exevalator<'exvlife> {
     #[allow(dead_code)]
     pub fn eval(&mut self, expression: &'exvlife str) -> Result<f64,ExevalatorError> {
         if self.settings.max_expression_char_count < expression.len() {
-            return Err(ExevalatorError::new(&format!(
-                "The length of the expression exceeds the limit (Settings.max_expression_char_count: {})",
-                self.settings.max_expression_char_count
-            )));
+            return Err(ExevalatorError::new(
+                &ErrorMessages::TOO_LONG_EXPRESSION.replace("$0", &self.settings.max_expression_char_count.to_string())
+            ));
         }
 
         // If the expression changed from the last-evaluated expression, re-parsing is necessary.
@@ -110,7 +146,7 @@ impl<'exvlife> Exevalator<'exvlife> {
                 Err(evaluation_error) => return Err(evaluation_error),
             };
         } else {
-            return Err(ExevalatorError::new("\"reeval\" is not available before using \"eval\""));
+            return Err(ExevalatorError::new(ErrorMessages::REEVAL_NOT_AVAILABLE));
         }
     }
 
@@ -124,10 +160,12 @@ impl<'exvlife> Exevalator<'exvlife> {
     #[allow(dead_code)]
     pub fn declare_variable(&mut self, name: &str) -> Result<usize, ExevalatorError> {
         if self.settings.max_name_char_count < name.len() {
-            return Err(ExevalatorError::new(&format!(
-                "The length of the variable name exceeds the limit (Settings.max_name_char_count: {})",
-                self.settings.max_name_char_count
-            )));
+            return Err(ExevalatorError::new(
+                &ErrorMessages::TOO_LONG_VARIABLE_NAME.replace("$0", &self.settings.max_name_char_count.to_string())
+            ));
+        }
+        if self.variable_table.get(name) != None {
+            return Err(ExevalatorError::new(&ErrorMessages::VARIABLE_ALREADY_DECLARED.replace("$0", name)));
         }
         let address: usize = self.memory.len();
         self.memory.push(0.0);
@@ -144,7 +182,7 @@ impl<'exvlife> Exevalator<'exvlife> {
     #[allow(dead_code)]
     pub fn write_variable(&mut self, name: &str, value: f64) -> Result<(), ExevalatorError> {
         if self.settings.max_name_char_count < name.len() || !self.variable_table.contains_key(name) {
-            return Err(ExevalatorError::new(&format!("Variable not found: {}", name)));
+            return Err(ExevalatorError::new(&ErrorMessages::VARIABLE_NOT_FOUND.replace("$0", &name)));
         }
         let address: usize = *self.variable_table.get(name).unwrap();
         return self.write_variable_at(address, value);
@@ -160,7 +198,7 @@ impl<'exvlife> Exevalator<'exvlife> {
     #[allow(dead_code)]
     pub fn write_variable_at(&mut self, address: usize, value: f64) -> Result<(), ExevalatorError> {
         if self.memory.len() <= address  {
-            return Err(ExevalatorError::new(&format!("Invalid variable address: {}", address)));
+            return Err(ExevalatorError::new(&ErrorMessages::INVALID_VARIABLE_ADDRESS.replace("$0", &address.to_string())));
         }
         self.memory[address] = value;
         return Ok(());
@@ -174,7 +212,7 @@ impl<'exvlife> Exevalator<'exvlife> {
     #[allow(dead_code)]
     pub fn read_variable(&self, name: &str) -> Result<f64, ExevalatorError> {
         if self.settings.max_name_char_count < name.len() || !self.variable_table.contains_key(name) {
-            return Err(ExevalatorError::new(&format!("Variable not found: {}", name)));
+            return Err(ExevalatorError::new(&ErrorMessages::VARIABLE_NOT_FOUND.replace("$0", name)));
         }
         let address: usize = *self.variable_table.get(name).unwrap();
         return self.read_variable_at(address);
@@ -189,7 +227,7 @@ impl<'exvlife> Exevalator<'exvlife> {
     #[allow(dead_code)]
     pub fn read_variable_at(&self, address: usize) -> Result<f64, ExevalatorError> {
         if self.memory.len() <= address  {
-            return Err(ExevalatorError::new(&format!("Invalid variable address: {}", address)));
+            return Err(ExevalatorError::new(&ErrorMessages::INVALID_VARIABLE_ADDRESS.replace("$0", &address.to_string())));
         }
         return Ok(self.memory[address]);
     }
@@ -204,10 +242,9 @@ impl<'exvlife> Exevalator<'exvlife> {
     pub fn connect_function(&mut self, name: &str, function_pointer: fn(Vec<f64>)->Result<f64,ExevalatorError>)
             -> Result<usize, ExevalatorError> {
         if self.settings.max_name_char_count < name.len() {
-            return Err(ExevalatorError::new(&format!(
-                "The length of the function name exceeds the limit (Settings.max_name_char_count: {})",
-                self.settings.max_name_char_count
-            )));
+            return Err(ExevalatorError::new(
+                &ErrorMessages::TOO_LONG_FUNCTION_NAME.replace("$0", &self.settings.max_name_char_count.to_string())
+            ));
         }
         let address = self.function_table.len();
         self.function_table.insert(name.to_string(), function_pointer);
@@ -271,12 +308,12 @@ impl LexicalAnalyzer {
 
         // Checks the total number of tokens.
         if token_words.len() == 0 {
-            return Err(ExevalatorError::new("The inputted expression is empty"));
+            return Err(ExevalatorError::new(ErrorMessages::EMPTY_EXPRESSION));
         }
         if settings.max_token_count < token_words.len() {
-            return Err(ExevalatorError::new(&format!(
-                "The number of tokens exceeds the limit (Settings.max_token_count: {})", settings.max_token_count
-            )));
+            return Err(ExevalatorError::new(
+                &ErrorMessages::TOO_MANY_TOKENS.replace("$0", &settings.max_token_count.to_string())
+            ));
         }
  
         // Create Token structs.
@@ -503,7 +540,7 @@ impl LexicalAnalyzer {
 
                     token.operator = match settings.unary_prefix_symbol_operator_map.get(&operator_symbol_char) {
                         Some(unary_prefix_operator) => Some(unary_prefix_operator.clone()),
-                        None => return Err(ExevalatorError::new(&format!("Unknown unary-prefix operator: {}", word))),
+                        None => return Err(ExevalatorError::new(&ErrorMessages::UNKNOWN_UNARY_PREFIX_OPERATOR.replace("$0", word))),
                     };
                     last_operator_type = Some(&OperatorType::UnaryPrefix);
 
@@ -514,7 +551,7 @@ impl LexicalAnalyzer {
 
                     token.operator = match settings.binary_symbol_operator_map.get(&operator_symbol_char) {
                         Some(binary_operator) => Some(binary_operator.clone()),
-                        None => return Err(ExevalatorError::new(&format!("Unknown binary operator: {}", word))),
+                        None => return Err(ExevalatorError::new(&ErrorMessages::UNKNOWN_BINARY_OPERATOR.replace("$0", word))),
                     };
                     last_operator_type = Some(&OperatorType::Binary);
                 }
@@ -559,18 +596,14 @@ impl LexicalAnalyzer {
 
             // If the value of hierarchy is negative, the open parenthesis is deficient.
             if hierarchy < 0 {
-                return Err(ExevalatorError::new(
-                    "The number of open parenthesis \"(\" is deficient."
-                ));
+                return Err(ExevalatorError::new(ErrorMessages::DEFICIENT_OPEN_PARENTHESIS));
             }
         }
 
         // If the value of hierarchy is not zero at the end of the expression,
         // the closed parentheses ")" is deficient.
         if hierarchy > 0 {
-            return Err(ExevalatorError::new(
-                "The number of closed parenthesis \")\" is deficient."
-            ));
+            return Err(ExevalatorError::new(ErrorMessages::DEFICIENT_CLOSED_PARENTHESIS));
         }
         return Ok(());
     }
@@ -591,9 +624,7 @@ impl LexicalAnalyzer {
                     content_counter = 0;
                 } else if token.word.eq(")") {
                     if content_counter == 0 {
-                        return Err(ExevalatorError::new(
-                            "The content parentheses \"()\" should not be empty (excluding function calls)."
-                        ));
+                        return Err(ExevalatorError::new(ErrorMessages::EMPTY_PARENTHESIS));
                     }
                 }
             } else {
@@ -641,9 +672,7 @@ impl LexicalAnalyzer {
 
                     // Only leafs, open parentheses, unary-prefix and function-call operators can be an operand.
                     if !(next_is_leaf || next_is_open_parenthesis || next_is_prefix_operator || next_is_function_identifier) {
-                        return Err(ExevalatorError::new(
-                            &format!("An operand is required at the right of: \"{}\"", token.word)
-                        ));
+                        return Err(ExevalatorError::new(&ErrorMessages::RIGHT_OPERAND_REQUIRED.replace("$0", &token.word)));
                     }
                 } // Cases of unary-prefix operators
 
@@ -652,15 +681,11 @@ impl LexicalAnalyzer {
 
                     // Only leaf elements, open parenthesis, and unary-prefix operator can be a right-operand.
                     if !(next_is_leaf || next_is_open_parenthesis || next_is_prefix_operator || next_is_function_identifier) {
-                        return Err(ExevalatorError::new(
-                            &format!("An operand is required at the right of: \"{}\"", token.word)
-                        ));
+                        return Err(ExevalatorError::new(&ErrorMessages::RIGHT_OPERAND_REQUIRED.replace("$0", &token.word)));
                     }
                     // Only leaf elements and closed parenthesis can be a right-operand.
                     if !(prev_is_leaf || prev_is_close_parenthesis) {
-                        return Err(ExevalatorError::new(
-                            &format!("An operand is required at the left of: \"{}\"", token.word)
-                        ));
+                        return Err(ExevalatorError::new(&ErrorMessages::LEFT_OPERAND_REQUIRED.replace("$0", &token.word)));
                     }
                 } // Cases of binary operators or a separator of partial expressions
 
@@ -671,16 +696,12 @@ impl LexicalAnalyzer {
 
                 // An other leaf element or an open parenthesis can not be at the right of an leaf element.
                 if !next_is_function_call_begin && (next_is_open_parenthesis || next_is_leaf) {
-                    return Err(ExevalatorError::new(
-                        &format!("An operator is required at the right of: \"{}\"", token.word)
-                    ));
+                    return Err(ExevalatorError::new(&ErrorMessages::RIGHT_OPERATOR_REQUIRED.replace("$0", &token.word)));
                 }
 
                 // An other leaf element or a closed parenthesis can not be at the left of an leaf element.
                 if prev_is_close_parenthesis || prev_is_leaf {
-                    return Err(ExevalatorError::new(
-                        &format!("An operator is required at the left of: \"{}\"", token.word)
-                    ));
+                    return Err(ExevalatorError::new(&ErrorMessages::LEFT_OPERATOR_REQUIRED.replace("$0", &token.word)));
                 }
             } // Case of leaf elements
         } // Loops for each token
@@ -867,7 +888,7 @@ impl Parser {
             -> Result<Vec<AstNode>, ExevalatorError> {
 
         if stack.len() == 0 {
-            return Err(ExevalatorError::new("Unexpected end of a partial expression"));
+            return Err(ExevalatorError::new(ErrorMessages::UNEXPECTED_PARTIAL_EXPRESSION));
         }
         let mut partial_expr_nodes: Vec<AstNode> = Vec::new();
 
@@ -1077,10 +1098,9 @@ impl AstNode {
     ///
     fn check_depth(&self, depth_of_this_node: u64, max_ast_depth: u64) -> Result<(), ExevalatorError> {
         if max_ast_depth < depth_of_this_node {
-            return Err(ExevalatorError::new(&format!(
-                "The depth of the AST exceeds the limit (Settings.max_ast_depth: {})",
-                max_ast_depth
-            )));
+            return Err(ExevalatorError::new(
+                &ErrorMessages::EXCEEDS_MAX_AST_DEPTH.replace("$0", &max_ast_depth.to_string())
+            ));
         }
         for child_node in &self.child_nodes {
             if let Err(depth_error) = child_node.check_depth(depth_of_this_node + 1, max_ast_depth) {
@@ -1225,7 +1245,7 @@ impl Evaluator {
             let literal_value: f64 = match ast.token.word.parse() {
                 Ok(parse_result) => parse_result,
                 Err(_parse_error) => return Err(ExevalatorError::new(
-                    &format!("Invalid number literal: {}", ast.token.word)
+                    &ErrorMessages::INVALID_NUMBER_LITERAL.replace("$0", &ast.token.word)
                 )),
             };
             return Ok(Box::new(NumberLiteralEvaluatorNode {
@@ -1296,7 +1316,7 @@ impl Evaluator {
                 let identifier: String = ast.child_nodes[0].token.word.clone();
                 if !function_table.contains_key(&identifier) {
                     return Err(ExevalatorError::new(
-                        &format!("Function not found: {}", identifier)
+                        &ErrorMessages::FUNCTION_NOT_FOUND.replace("$0", &identifier)
                     ));
                 }
                 let function_pointer: fn(Vec<f64>) -> Result<f64,ExevalatorError> = *function_table.get(&identifier).unwrap();
@@ -1322,7 +1342,7 @@ impl Evaluator {
         } else if *token_type == TokenType::VariableIdentifier {
             if !variable_table.contains_key(&ast.token.word) {
                 return Err(ExevalatorError::new(
-                    &format!("Variable not found: {}", ast.token.word)
+                    &ErrorMessages::VARIABLE_NOT_FOUND.replace("$0", &ast.token.word)
                 ));
             }
             let address: usize = *variable_table.get(&ast.token.word).unwrap();
@@ -1488,8 +1508,8 @@ impl EvaluatorNode for FunctionEvaluatorNode {
         match (self.function_pointer)(arg_evaluated_values) {
             Ok(evaluated_value) => return Ok(evaluated_value),
             Err(evaluation_error) => {
-                let mut error_message: String = format!("Function error (\"{}\"): ", self.identifier);
-                error_message.push_str(&evaluation_error.error_message);
+                let error_message: String = ErrorMessages::FUNCTION_ERROR
+                    .replace("$0", &self.identifier).replace("$1", &evaluation_error.error_message);
                 return Err(ExevalatorError::new(&error_message))
             }
         }
