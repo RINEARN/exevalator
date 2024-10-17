@@ -48,6 +48,9 @@ export default class Exevalator {
     /** The array used as as a virtual memory storing values of variables. */
     private memory: number[];
 
+    /** The current usage (max used index + 1) of the memory. */
+    private memoryUsage: number;
+
     /** The object evaluating the value of the expression. */
     private evaluator: Evaluator;
 
@@ -64,7 +67,8 @@ export default class Exevalator {
      * Creates a new interpreter of Exevalator.
      */
     constructor() {        
-        this.memory = [];
+        this.memory = new Array(StaticSettings.MAX_VARIABLE_COUNT);
+        this.memoryUsage = 0;
         this.evaluator = new Evaluator();
         this.variableTable = new Map<string, number>();
         this.functionTable = new Map<string, ExevalatorFunctionInterface>();
@@ -165,15 +169,16 @@ export default class Exevalator {
         if (this.variableTable.has(name)) {
             throw new ExevalatorError(ErrorMessages.VARIABLE_ALREADY_DECLARED.replace("$0", name));
         }
-        if (StaticSettings.MAX_VARIABLE_COUNT <= this.memory.length) {
+        if (StaticSettings.MAX_VARIABLE_COUNT <= this.memoryUsage) {
             throw new ExevalatorError(ErrorMessages.VARIABLE_COUNT_EXCEEDED_LIMIT.replace("$0", ErrorMessages.VARIABLE_COUNT_EXCEEDED_LIMIT.toString()));
         }
         if (2147483647 + 1 <= this.memory.length) { // The theoretical limit for correctly filtering the address.
             throw new ExevalatorError(ErrorMessages.VARIABLE_COUNT_EXCEEDED_LIMIT.replace("$0", (2147483647 + 1).toString()));
         }
-        const address = this.memory.length;
-        this.memory.push(0.0);
+        const address = this.memoryUsage;
+        this.memory[address] = 0.0;
         this.variableTable.set(name, address);
+        this.memoryUsage++;
         return address;
     }
 
