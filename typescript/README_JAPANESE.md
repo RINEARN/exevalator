@@ -12,16 +12,14 @@
 - [主な機能](#features)
 - [メソッド仕様一覧](#methods)
 	- [コンストラクタ](#methods-constructor)
-	- [double eval(String expression)](#methods-eval)
-	- [double reeval()](#methods-reeval)
-	- [int declareVariable(String name)](#methods-declare-variable)
-	- [void writeVariable(String name, double value)](#methods-write-variable)
-	- [void writeVariableAt(int address, double value)](#methods-write-variable-at)
-	- [double readVariable(String name)](#methods-read-variable)
-	- [double readVariableAt(int address)](#methods-read-variable-at)
-	- [void connectFunction(String name, FunctionInterface function)](#methods-connect-function)
-- [もっと機能が必要な場合は: Vnano](#vnano)
-
+	- [eval(expression: string): number](#methods-eval)
+	- [reeval(): number](#methods-reeval)
+	- [declareVariable(name: string): number](#methods-declare-variable)
+	- [writeVariable(name: string, value: number): void](#methods-write-variable)
+	- [writeVariableAt(address: number, value: number): void](#methods-write-variable-at)
+	- [readVariable(name: string): number](#methods-read-variable)
+	- [readVariableAt(address: number): number](#methods-read-variable-at)
+	- [connectFunction(name: string, function: ExevalatorFunctionInterface): void](#methods-connect-function)
 
 
 
@@ -54,7 +52,9 @@ Exevalator のインタープリタは、単一のファイル「 typescript/exe
 
 ### 1. 使用したいプロジェクトのソースコードフォルダ内に配置
 
-まず「 typescript/exevalator.ts 」を、使用したいプロジェクトのソースコードフォルダ内の、好きな場所に配置します。ここでは単純に、Exevalator を呼び出して使うコードと同じフォルダ内に配置したとします。
+まず「 typescript/exevalator.ts 」を、使用したいプロジェクトのソースコードフォルダ内の、好きな場所に配置します。
+
+ここでは単純に、Exevalator を呼び出して使うコードと同じフォルダ内に配置したとします。
 
 ### 2. 使用したいコードから import
 
@@ -86,7 +86,11 @@ Exevalator のインタープリタは、単一のファイル「 typescript/exe
 
 	} catch (error) {
 		if (error instanceof ExevalatorError) {
-			// ここでエラー処理
+    		// Errors that are typically expected
+			// (e.g., syntax errors in the expression)
+		} else {
+    		// Unexpected errors
+			// (e.g., bugs)
 		}
 	}
 
@@ -138,7 +142,7 @@ example7 も上記と同様にビルドし、Webブラウザで実行してく�
 	const result: number = exevalator.eval("(-(1.2 + 3.4) * 5) / 2");
 	// result: -11.5
 
-	(参照: typescript/example2.ts)
+(参照: typescript/example2.ts)
 
 上記のように、"+" (足し算)、 "-" (引き算や数値のマイナス化)、"\*" (掛け算)、"/" (割り算) の演算を行えます。なお、掛け算と割り算は、足し算と引き算よりも、順序的に優先されます。
 
@@ -155,7 +159,7 @@ example7 も上記と同様にビルドし、Webブラウザで実行してく�
 	const result: number = exevalator.eval("x + 1");
 	// result: 2.25
 
-	(参照: typescript/example3.ts)
+(参照: typescript/example3.ts)
 
 変数の値を非常に頻繁に書き変えるような用途では、書き変え対象の変数を、以下のようにアドレスによって指定する事も有用です：
 
@@ -163,7 +167,7 @@ example7 も上記と同様にビルドし、Webブラウザで実行してく�
 	exevalator.writeVariableAt(address, 1.25);
 	...
 
-	(参照: typescript/example4.ts)
+(参照: typescript/example4.ts)
 
 この方法は、書き変え対象変数を名前で指定するよりも高速です。
 
@@ -198,7 +202,7 @@ example7 も上記と同様にビルドし、Webブラウザで実行してく�
 	const result: number = exevalator.eval("fun(1.2, 3.4)");
 	// result: 4.6
 
-	(参照: typescript/example4.ts)
+(参照: typescript/example5.ts)
 
 
 
