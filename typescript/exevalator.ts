@@ -37,6 +37,7 @@ class ErrorMessages {
     public static readonly VARIABLE_ALREADY_DECLARED = "The variable '$0' is already declared";
     public static readonly FUNCTION_ALREADY_CONNECTED = "The function '$0' is already connected";
     public static readonly INVALID_VARIABLE_ADDRESS = "Invalid memory address: '$0'";
+    public static readonly VARIABLE_COUNT_EXCEEDED_LIMIT = "The number of variables has exceeded the limit of: '$0'";
 }
 
 /**
@@ -163,6 +164,12 @@ export default class Exevalator {
         }
         if (this.variableTable.has(name)) {
             throw new ExevalatorError(ErrorMessages.VARIABLE_ALREADY_DECLARED.replace("$0", name));
+        }
+        if (StaticSettings.MAX_VARIABLE_COUNT <= this.memory.length) {
+            throw new ExevalatorError(ErrorMessages.VARIABLE_COUNT_EXCEEDED_LIMIT.replace("$0", ErrorMessages.VARIABLE_COUNT_EXCEEDED_LIMIT.toString()));
+        }
+        if (2147483647 + 1 <= this.memory.length) { // The theoretical limit for correctly filtering the address.
+            throw new ExevalatorError(ErrorMessages.VARIABLE_COUNT_EXCEEDED_LIMIT.replace("$0", (2147483647 + 1).toString()));
         }
         const address = this.memory.length;
         this.memory.push(0.0);
@@ -1497,6 +1504,9 @@ class StaticSettings {
 
     /** The maximum depth of an Abstract Syntax Tree (AST). */
     public static readonly MAX_AST_DEPTH: number = 32;
+
+    /** The maximum number of variables. */
+    public static readonly MAX_VARIABLE_COUNT = 100000; // Must be smaller than 2147483647 + 1
 
     /** The indent used in text representations of ASTs. */
     public static readonly AST_INDENT: string = "  ";
