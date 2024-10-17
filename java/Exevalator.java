@@ -23,6 +23,44 @@ import java.util.regex.Pattern;
 
 
 /**
+ * Error messages of ExevalatorException,
+ * which is thrown by Exevalator if the input expression is syntactically incorrect, or uses undeclared variables/functions.
+ * You can customize the error message of Exevalator by modifying the values of the properties of this class.
+ */
+final class ErrorMessages {
+    public static final String EMPTY_EXPRESSION = "The inputted expression is empty.";
+    public static final String TOO_MANY_TOKENS = "The number of tokens exceeds the limit (StaticSettings.MAX_TOKEN_COUNT: '$0')";
+    public static final String DEFICIENT_OPEN_PARENTHESIS = "The number of open parentheses '(' is deficient.";
+    public static final String DEFICIENT_CLOSED_PARENTHESIS = "The number of closed parentheses ')' is deficient.";
+    public static final String EMPTY_PARENTHESIS = "The content of parentheses '()' should not be empty.";
+    public static final String RIGHT_OPERAND_REQUIRED = "An operand is required at the right of: '$0'";
+    public static final String LEFT_OPERAND_REQUIRED = "An operand is required at the left of: '$0'";
+    public static final String RIGHT_OPERATOR_REQUIRED = "An operator is required at the right of: '$0'";
+    public static final String LEFT_OPERATOR_REQUIRED = "An operator is required at the left of: '$0'";
+    public static final String UNKNOWN_UNARY_PREFIX_OPERATOR = "Unknown unary-prefix operator: '$0'";
+    public static final String UNKNOWN_BINARY_OPERATOR = "Unknown binary operator: '$0'";
+    public static final String UNKNOWN_OPERATOR_SYNTAX = "Unknown operator syntax: '$0'";
+    public static final String EXCEEDS_MAX_AST_DEPTH = "The depth of the AST exceeds the limit (StaticSettings.MAX_AST_DEPTH: '$0')";
+    public static final String UNEXPECTED_PARTIAL_EXPRESSION = "Unexpected end of a partial expression";
+    public static final String INVALID_NUMBER_LITERAL = "Invalid number literal: '$0'";
+    public static final String INVALID_MEMORY_ADDRESS = "Invalid memory address: '$0'";
+    public static final String FUNCTION_ERROR = "Function Error ('$0'): $1";
+    public static final String VARIABLE_NOT_FOUND = "Variable not found: '$0'";
+    public static final String FUNCTION_NOT_FOUND = "Function not found: '$0'";
+    public static final String UNEXPECTED_OPERATOR = "Unexpected operator: '$0'";
+    public static final String UNEXPECTED_TOKEN = "Unexpected token: '$0'";
+    public static final String TOO_LONG_EXPRESSION = "The length of the expression exceeds the limit (StaticSettings.MAX_EXPRESSION_CHAR_COUNT: '$0')";
+    public static final String UNEXPECTED_ERROR = "Unexpected error occurred: $0";
+    public static final String REEVAL_NOT_AVAILABLE = "\"reeval\" is not available before using \"eval\"";
+    public static final String TOO_LONG_VARIABLE_NAME = "The length of the variable name exceeds the limit (StaticSettings.MAX_NAME_CHAR_COUNT: '$0')";
+    public static final String TOO_LONG_FUNCTION_NAME = "The length of the function name exceeds the limit (StaticSettings.MAX_NAME_CHAR_COUNT: '$0')";
+    public static final String VARIABLE_ALREADY_DECLARED = "The variable '$0' is already declared";
+    public static final String FUNCTION_ALREADY_CONNECTED = "The function '$0' is already connected";
+    public static final String INVALID_VARIABLE_ADDRESS = "Invalid memory address: '$0'";
+}
+
+
+/**
  * Interpreter Engine of Exevalator.
  */
 public final class Exevalator {
@@ -69,9 +107,7 @@ public final class Exevalator {
         }
         if (StaticSettings.MAX_EXPRESSION_CHAR_COUNT < expression.length()) {
             throw new Exevalator.Exception(
-                "The length of the expression exceeds the limit "
-                + "(StaticSettings.MAX_EXPRESSION_CHAR_COUNT: "
-                + StaticSettings.MAX_EXPRESSION_CHAR_COUNT + ")"
+                ErrorMessages.TOO_LONG_EXPRESSION.replace("$0", Integer.toString(StaticSettings.MAX_EXPRESSION_CHAR_COUNT))
             );
         }
 
@@ -115,7 +151,7 @@ public final class Exevalator {
 
         // Wrap an unexpected exception by Exevalator.Exception and rethrow it.
         } catch (java.lang.Exception e) {
-            throw new Exevalator.Exception("Unexpected exception/error occurred", e);
+            throw new Exevalator.Exception(ErrorMessages.UNEXPECTED_ERROR.replace("$0", e.getMessage()), e);
         }
     }
 
@@ -132,7 +168,7 @@ public final class Exevalator {
             double evaluatedValue = this.evaluator.evaluate(this.memory);
             return evaluatedValue;
         } else {
-            throw new Exevalator.Exception("\"reeval\" is not available before using \"eval\"");
+            throw new Exevalator.Exception(ErrorMessages.REEVAL_NOT_AVAILABLE);
         }
     }
 
@@ -150,9 +186,11 @@ public final class Exevalator {
         }
         if (StaticSettings.MAX_NAME_CHAR_COUNT < name.length()) {
             throw new Exevalator.Exception(
-                "The length of the variable name exceeds the limit (StaticSettings.MAX_NAME_CHAR_COUNT: "
-                + StaticSettings.MAX_NAME_CHAR_COUNT + ")"
+                ErrorMessages.TOO_LONG_VARIABLE_NAME.replace("$0", Integer.toString(StaticSettings.MAX_NAME_CHAR_COUNT))
             );
+        }
+        if (this.variableTable.containsKey(name)) {
+            throw new Exevalator.Exception(ErrorMessages.VARIABLE_ALREADY_DECLARED.replace("$0", name));
         }
 
         // If the memory is full, expand the memory size.
@@ -182,7 +220,7 @@ public final class Exevalator {
             throw new NullPointerException();
         }
         if (StaticSettings.MAX_NAME_CHAR_COUNT < name.length() || !this.variableTable.containsKey(name)) {
-            throw new Exevalator.Exception("Variable not found: " + name);
+            throw new Exevalator.Exception(ErrorMessages.VARIABLE_NOT_FOUND.replace("$0", name));
         }
         int address = this.variableTable.get(name);
         this.writeVariableAt(address, value);
@@ -197,7 +235,7 @@ public final class Exevalator {
      */
     public synchronized void writeVariableAt(int address, double value) {
         if (address < 0 || this.memoryUsage <= address) {
-            throw new Exevalator.Exception("Invalid variable address: " + address);
+            throw new Exevalator.Exception(ErrorMessages.INVALID_VARIABLE_ADDRESS.replace("$0", Integer.toString(address)));
         }
         this.memory[address] = value;
     }
@@ -213,7 +251,7 @@ public final class Exevalator {
             throw new NullPointerException();
         }
         if (StaticSettings.MAX_NAME_CHAR_COUNT < name.length() || !this.variableTable.containsKey(name)) {
-            throw new Exevalator.Exception("Variable not found: " + name);
+            throw new Exevalator.Exception(ErrorMessages.VARIABLE_NOT_FOUND.replace("$0", name));
         }
         int address = this.variableTable.get(name);
         return this.readVariableAt(address);
@@ -228,7 +266,7 @@ public final class Exevalator {
      */
     public synchronized double readVariableAt(int address) {
         if (address < 0 || this.memoryUsage <= address) {
-            throw new Exevalator.Exception("Invalid variable address: " + address);
+            throw new Exevalator.Exception(ErrorMessages.INVALID_VARIABLE_ADDRESS.replace("$0", Integer.toString(address)));
         }
         return this.memory[address];
     }
@@ -245,8 +283,7 @@ public final class Exevalator {
         }
         if (StaticSettings.MAX_NAME_CHAR_COUNT < name.length()) {
             throw new Exevalator.Exception(
-                "The length of the variable name exceeds the limit (StaticSettings.MAX_NAME_CHAR_COUNT: "
-                + StaticSettings.MAX_NAME_CHAR_COUNT + ")"
+                ErrorMessages.TOO_LONG_FUNCTION_NAME.replace("$0", Integer.toString(StaticSettings.MAX_NAME_CHAR_COUNT))
             );
         }
         this.functionTable.put(name, function);
@@ -322,15 +359,12 @@ final class LexicalAnalyzer {
         // For an empty expression (containing no tokens), the above returns { "" }, not { }.
         // So we should detect/handle it as follows.
         if (tokenWords.length == 1 && tokenWords[0].length() == 0) {
-            throw new Exevalator.Exception("The inputted expression is empty");
+            throw new Exevalator.Exception(ErrorMessages.EMPTY_EXPRESSION);
         }
 
         // Checks the total number of tokens.
         if (StaticSettings.MAX_TOKEN_COUNT < tokenWords.length) {
-            throw new Exevalator.Exception(
-                "The number of tokens exceeds the limit (StaticSettings.MAX_TOKEN_COUNT: "
-                + StaticSettings.MAX_TOKEN_COUNT + ")"
-            );
+            throw new Exevalator.Exception(ErrorMessages.TOO_MANY_TOKENS.replace("$0", Integer.toString(StaticSettings.MAX_TOKEN_COUNT)));
         }
 
         // Create Token instances.
@@ -401,7 +435,7 @@ final class LexicalAnalyzer {
                         || (lastToken.type == TokenType.OPERATOR && lastToken.operator.type != OperatorType.CALL) ) {
 
                     if (!StaticSettings.UNARY_PREFIX_OPERATOR_SYMBOL_MAP.containsKey(word.charAt(0))) {
-                        throw new Exevalator.Exception("Unknown unary-prefix operator: " + word);
+                        throw new Exevalator.Exception(ErrorMessages.UNKNOWN_UNARY_PREFIX_OPERATOR.replace("$0", word));
                     }
                     op = StaticSettings.UNARY_PREFIX_OPERATOR_SYMBOL_MAP.get(word.charAt(0));
 
@@ -411,12 +445,12 @@ final class LexicalAnalyzer {
                         || lastToken.type == TokenType.VARIABLE_IDENTIFIER) {
 
                     if (!StaticSettings.BINARY_OPERATOR_SYMBOL_MAP.containsKey(word.charAt(0))) {
-                        throw new Exevalator.Exception("Unknown binary operator: " + word);
+                        throw new Exevalator.Exception(ErrorMessages.UNKNOWN_BINARY_OPERATOR.replace("$0", word));
                     }
                     op = StaticSettings.BINARY_OPERATOR_SYMBOL_MAP.get(word.charAt(0));
 
                 } else {
-                    throw new Exevalator.Exception("Unexpected operator syntax: " + word);
+                    throw new Exevalator.Exception(ErrorMessages.UNKNOWN_OPERATOR_SYNTAX.replace("$0", word));
                 }
                 tokens[itoken] = new Token(TokenType.OPERATOR, word, op);
 
@@ -488,18 +522,14 @@ final class LexicalAnalyzer {
 
             // If the value of hierarchy is negative, the open parenthesis is deficient.
             if (hierarchy < 0) {
-                throw new Exevalator.Exception(
-                    "The number of open parenthesis \"(\" is deficient."
-                );
+                throw new Exevalator.Exception(ErrorMessages.DEFICIENT_OPEN_PARENTHESIS);
             }
         }
 
         // If the value of hierarchy is not zero at the end of the expression,
         // the closed parentheses ")" is deficient.
         if (hierarchy > 0) {
-            throw new Exevalator.Exception(
-                "The number of closed parenthesis \")\" is deficient."
-            );
+            throw new Exevalator.Exception(ErrorMessages.DEFICIENT_CLOSED_PARENTHESIS);
         }
     }
 
@@ -520,9 +550,7 @@ final class LexicalAnalyzer {
                     contentCounter = 0;
                 } else if (token.word.equals(")")) {
                     if (contentCounter == 0) {
-                        throw new Exevalator.Exception(
-                            "The content parentheses \"()\" should not be empty (excluding function calls)."
-                        );
+                        throw new Exevalator.Exception(ErrorMessages.EMPTY_PARENTHESIS);
                     }
                 }
             } else {
@@ -570,7 +598,7 @@ final class LexicalAnalyzer {
 
                     // Only leafs, open parentheses, unary-prefix and function-call operators can be an operand.
                     if ( !(  nextIsLeaf || nextIsOpenParenthesis || nextIsPrefixOperator || nextIsFunctionIdentifier ) ) {
-                        throw new Exevalator.Exception("An operand is required at the right of: \"" + token.word + "\"");
+                        throw new Exevalator.Exception(ErrorMessages.RIGHT_OPERAND_REQUIRED.replace("$0", token.word));
                     }
                 } // Cases of unary-prefix operators
 
@@ -579,11 +607,11 @@ final class LexicalAnalyzer {
 
                     // Only leafs, open parentheses, unary-prefix and function-call operators can be a right-operands.
                     if( !(  nextIsLeaf || nextIsOpenParenthesis || nextIsPrefixOperator || nextIsFunctionIdentifier ) ) {
-                        throw new Exevalator.Exception("An operand is required at the right of: \"" + token.word + "\"");
+                        throw new Exevalator.Exception(ErrorMessages.RIGHT_OPERAND_REQUIRED.replace("$0", token.word));
                     }
                     // Only leaf elements and closed parenthesis can be a right-operand.
                     if( !(  prevIsLeaf || prevIsCloseParenthesis  ) ) {
-                        throw new Exevalator.Exception("An operand is required at the left of: \"" + token.word + "\"");
+                        throw new Exevalator.Exception(ErrorMessages.LEFT_OPERAND_REQUIRED.replace("$0", token.word));
                     }
                 } // Cases of binary operators or a separator of partial expressions
 
@@ -594,12 +622,12 @@ final class LexicalAnalyzer {
 
                 // An other leaf element or an open parenthesis can not be at the right of an leaf element.
                 if (!nextIsFunctionCallBegin && (nextIsOpenParenthesis || nextIsLeaf)) {
-                    throw new Exevalator.Exception("An operator is required at the right of: \"" + token.word + "\"");
+                    throw new Exevalator.Exception(ErrorMessages.RIGHT_OPERATOR_REQUIRED.replace("$0", token.word));
                 }
 
                 // An other leaf element or a closed parenthesis can not be at the left of an leaf element.
                 if (prevIsCloseParenthesis || prevIsLeaf) {
-                    throw new Exevalator.Exception("An operator is required at the left of: \"" + token.word + "\"");
+                    throw new Exevalator.Exception(ErrorMessages.LEFT_OPERATOR_REQUIRED.replace("$0", token.word));
                 }
             } // Case of leaf elements
         } // Loops for each token
@@ -766,7 +794,7 @@ final class Parser {
      */
     private static AstNode[] popPartialExprNodes(Deque<AstNode> stack, AstNode endStackLidNode) {
         if (stack.size() == 0) {
-            throw new Exevalator.Exception("Unexpected end of a partial expression");
+            throw new Exevalator.Exception(ErrorMessages.UNEXPECTED_PARTIAL_EXPRESSION);
         }
         List<AstNode> partialExprNodeList = new ArrayList<AstNode>();
         while(stack.size() != 0) {
@@ -989,8 +1017,7 @@ final class AstNode {
     public void checkDepth(int depthOfThisNode, int maxAstDepth) {
         if (maxAstDepth < depthOfThisNode) {
             throw new Exevalator.Exception(
-                "The depth of the AST exceeds the limit (StaticSettings.MAX_AST_DEPTH: "
-                + StaticSettings.MAX_AST_DEPTH + ")"
+                ErrorMessages.EXCEEDS_MAX_AST_DEPTH.replace("$0", Integer.toString(StaticSettings.MAX_AST_DEPTH))
             );
         }
         for (AstNode childNode: this.childNodeList) {
@@ -1124,7 +1151,7 @@ final class Evaluator {
             return new Evaluator.NumberLiteralEvaluatorNode(token.word);
         } else if (token.type == TokenType.VARIABLE_IDENTIFIER) {
             if (!variableTable.containsKey(token.word)) {
-                throw new Exevalator.Exception("Variable not found: " + token.word);
+                throw new Exevalator.Exception(ErrorMessages.VARIABLE_NOT_FOUND.replace("$0", token.word));
             }
             int address = variableTable.get(token.word);
             return new Evaluator.VariableEvaluatorNode(address);
@@ -1146,7 +1173,7 @@ final class Evaluator {
             } else if (op.type == OperatorType.CALL && op.symbol == '(') {
                 String identifier = childNodeList.get(0).token.word;
                 if (!functionTable.containsKey(identifier)) {
-                    throw new Exevalator.Exception("Function not found: " + identifier);
+                    throw new Exevalator.Exception(ErrorMessages.FUNCTION_NOT_FOUND.replace("$0", identifier));
                 }
                 Exevalator.FunctionInterface function = functionTable.get(identifier);
                 int argCount = childCount - 1;
@@ -1156,10 +1183,10 @@ final class Evaluator {
                 }
                 return new Evaluator.FunctionEvaluatorNode(function, identifier, argNodes);
             } else {
-                throw new Exevalator.Exception("Unexpected operator: " + op);
+                throw new Exevalator.Exception(ErrorMessages.UNEXPECTED_OPERATOR.replace("$0", Character.toString(op.symbol)));
             }
         } else {
-            throw new Exevalator.Exception("Unexpected token type: " + token.type);
+            throw new Exevalator.Exception(ErrorMessages.UNEXPECTED_TOKEN.replace("$0", token.type.toString()));
         }
     }
 
@@ -1354,7 +1381,7 @@ final class Evaluator {
             try {
                 this.value = Double.parseDouble(literal);
             } catch (NumberFormatException nfe) {
-                throw new Exevalator.Exception("Invalid number literal: " + literal);
+                throw new Exevalator.Exception(ErrorMessages.INVALID_NUMBER_LITERAL.replace("$0", literal));
             }
         }
 
@@ -1396,7 +1423,7 @@ final class Evaluator {
         @Override
         public double evaluate(double[] memory) {
             if (address < 0 || memory.length <= address) {
-                throw new Exevalator.Exception("Invalid memory address: " + address);
+                throw new Exevalator.Exception(ErrorMessages.INVALID_MEMORY_ADDRESS.replace("$0", Integer.toString(this.address)));
             }
             return memory[this.address];
         }
@@ -1450,7 +1477,7 @@ final class Evaluator {
             try {
                 return this.function.invoke(this.argumentArrayBuffer);
             } catch (Exception e) {
-                throw new Exevalator.Exception("Function error (" + this.functionName + ")", e);
+                throw new Exevalator.Exception(ErrorMessages.FUNCTION_ERROR.replace("$0", this.functionName).replace("$1", e.getMessage()), e);
             }
         }
     }
