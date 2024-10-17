@@ -248,8 +248,7 @@ This section provides a list and detailed specifications of the methods offered 
 |:---|:---|
 | Description | Declares a new variable to be used within expressions. |
 | Parameters | name: The name of the variable. |
-| Return | The virtual address assigned to the declared variable
-(can be used with the 'writeVariableAt' and 'readVariableAt' methods for faster read/write operations). |
+| Return | The virtual address assigned to the declared variable (can be used with the 'writeVariableAt' and 'readVariableAt' methods for faster read/write operations). |
 | Exception | ExevalatorError is thrown if an invalid variable name is specified. |
 
 
@@ -265,8 +264,7 @@ This section provides a list and detailed specifications of the methods offered 
 <a id="methods-write-variable-at"></a>
 | Signature | writeVariableAt(address: number, value: number): void |
 |:---|:---|
-| Description | Writes a value to the variable located at the specified virtual address.
-This method is faster than using the 'writeVariable' method. |
+| Description | Writes a value to the variable located at the specified virtual address. This method is faster than using the 'writeVariable' method. |
 | Parameters | address: The virtual address of the variable to write to.<br>value: The value to write. |
 | Return | None |
 | Exception | ExevalatorError is thrown if an invalid address is specified. |
