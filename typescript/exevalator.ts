@@ -1512,6 +1512,8 @@ export class StaticSettings {
 
     /** The maximum number of variables. */
     public static readonly MAX_VARIABLE_COUNT = 2**10; // Must be in the form of 2**n and smaller than 2147483647 + 1
+    // !!!!! IMPORTANT !!!!!
+    // When you modified the above value, you should run "test.rs".
 
     /** The indent used in text representations of ASTs. */
     public static readonly AST_INDENT: string = "  ";
