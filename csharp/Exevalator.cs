@@ -1689,7 +1689,15 @@ namespace Rinearn.ExevalatorCS
                 {
                     this.ArgumentArrayBuffer[iarg] = this.ArgumentEvalNodes[iarg].Evaluate(memory);
                 }
-                return this.Function.Invoke(this.ArgumentArrayBuffer);
+
+                try
+                {
+                    return this.Function.Invoke(this.ArgumentArrayBuffer);
+                }
+                catch (Exception e)
+                {
+                    throw new ExevalatorException(ErrorMessages.FUNCTION_ERROR, e);
+                }
             }
         }
 

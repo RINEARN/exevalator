@@ -1509,7 +1509,13 @@ Namespace Rinearn.ExevalatorVB
                 For iarg As Integer = 0 To Me.ArgumentEvalNodes.Length - 1
                     Me.ArgumentArrayBuffer(iarg) = Me.ArgumentEvalNodes(iarg).Evaluate(memory)
                 Next
-                Return Me.FunctionImpl.Invoke(Me.ArgumentArrayBuffer)
+                
+                Try
+                    Return Me.FunctionImpl.Invoke(Me.ArgumentArrayBuffer)
+                Catch e as Exception
+                    Throw New ExevalatorException(ErrorMessages.FUNCTION_ERROR, e)
+                End Try
+
             End Function
         End Class
 
