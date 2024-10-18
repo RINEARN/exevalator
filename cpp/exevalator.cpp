@@ -215,7 +215,7 @@ void Exevalator::connect_function(const std::string &name, const std::shared_ptr
     if (!function_ptr) {
         throw ExevalatorException { ErrorMessages::INVALID_FUNCTION_POINTER };
     }
-    if (this->function_table.count(name) && !overwrite) {
+    if (this->function_table.count(name)) {
         throw ExevalatorException(ErrorMessages::FUNCTION_ALREADY_CONNECTED, name);
     }
     this->function_table[name] = function_ptr;
