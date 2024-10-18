@@ -124,6 +124,8 @@ This will generate 'example6.bundle.js'. Then, open the HTML file 'example6.html
 
 Similarly, you can build and run 'example7' in the browser. This time, you'll be prompted to input the contents of the expression f(x) along with the lower and upper bounds for integration. After entering the values, numerical integration will be performed using Exevalator in the browser, and the result will be displayed.
 
+Additionally, a benchmark script "ts/benchmark.ts" for measuring the processing speed of Exevalator is also included in this repository. You can compile and run it in the same way as 'example1.ts'.
+
 
 <a id="features"></a>
 ## Features
