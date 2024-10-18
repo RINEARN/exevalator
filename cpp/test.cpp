@@ -20,6 +20,7 @@ void test_functions();
 void test_empty_expressions();
 void test_reeval();
 void test_tokenizations();
+void test_error_message_generations();
 
 /// The minimum error between two double-type values to regard them almost equal.
 const double ALLOWABLE_ERROR = 1.0E-12;
@@ -38,6 +39,7 @@ int main() {
         test_empty_expressions();
         test_reeval();
         test_tokenizations();
+        test_error_message_generations();
 
         std::cout << "All tests have completed successfully." << std::endl;
         return EXIT_SUCCESS;
@@ -895,6 +897,58 @@ void test_tokenizations() {
         exevalator.eval("3*(-funC(1,2)+2)"),
         3.0 * (-(1.0 + 2.0) + 2.0)
     );
+}
+
+
+void test_error_message_generations() {
+
+    ExevalatorException exception1("testErrorMessage");
+    if (std::string{exception1.what()} == "testErrorMessage") {
+        std::cout << "Test of Error Message Generation 1: OK" << std::endl;
+    } else {
+        std::cerr << "Incorrect error message detected: " << exception1.what() << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    ExevalatorException exception2("test$0ErrorMessage", "_KEYWORD0_");
+    if (std::string{exception2.what()} == "test_KEYWORD0_ErrorMessage") {
+        std::cout << "Test of Error Message Generation 2: OK" << std::endl;
+    } else {
+        std::cerr << "Incorrect error message detected: " << exception2.what() << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    ExevalatorException exception3("test$0Error$0Message", "_KEYWORD0_");
+    if (std::string{exception3.what()} == "test_KEYWORD0_Error_KEYWORD0_Message") {
+        std::cout << "Test of Error Message Generation 3: OK" << std::endl;
+    } else {
+        std::cerr << "Incorrect error message detected: " << exception3.what() << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    ExevalatorException exception4("test$0Error$1Message", "_KEYWORD0_", "_KEYWORD1_");
+    if (std::string{exception4.what()} == "test_KEYWORD0_Error_KEYWORD1_Message") {
+        std::cout << "Test of Error Message Generation 4: OK" << std::endl;
+    } else {
+        std::cerr << "Incorrect error message detected: " << exception4.what() << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    ExevalatorException exception5("test$1Error$0Message", "_KEYWORD0_", "_KEYWORD1_");
+    if (std::string{exception5.what()} == "test_KEYWORD1_Error_KEYWORD0_Message") {
+        std::cout << "Test of Error Message Generation 5: OK" << std::endl;
+    } else {
+        std::cerr << "Incorrect error message detected: " << exception5.what() << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    ExevalatorException exception6("test$1Error$1Message", "_KEYWORD0_", "_KEYWORD1_");
+    if (std::string{exception6.what()} == "test_KEYWORD1_Error_KEYWORD1_Message") {
+        std::cout << "Test of Error Message Generation 6: OK" << std::endl;
+    } else {
+        std::cerr << "Incorrect error message detected: " << exception6.what() << std::endl;
+        exit(EXIT_FAILURE);
+    }
 }
 
 

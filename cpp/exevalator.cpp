@@ -18,6 +18,7 @@
 #include <cstdlib>
 #include <stdexcept>
 #include <algorithm>
+#include <string_view>
 
 #include "exevalator.hpp"
 
@@ -53,10 +54,9 @@ Exevalator::~Exevalator() {
  */
 double Exevalator::eval(const std::string &expression) {
     if (this->settings.max_expression_char_count <= expression.length()) {
-        throw new ExevalatorException(
-            std::string { "The length of the expression exceeds the limit: Settings.max_expression_char_count: " }
-            + std::to_string(settings.max_expression_char_count)
-        );
+        throw ExevalatorException {
+            ErrorMessages::TOO_LONG_EXPRESSION, std::to_string(settings.max_expression_char_count)
+        };
     }
 
     try {
@@ -98,7 +98,7 @@ double Exevalator::eval(const std::string &expression) {
 
     // Wrap an unexpected exception by Exevalator.Exception and rethrow it.
     } catch (...) {
-        throw ExevalatorException { "Unexpected exception/error occurred" };
+        throw ExevalatorException { ErrorMessages::UNEXPECTED_ERROR };
     }
 }
 
@@ -115,7 +115,7 @@ double Exevalator::reeval() {
         double evaluated_value = this->evaluator.evaluate(this->memory);
         return evaluated_value;
     } else {
-        throw new ExevalatorException("\"reeval\" is not available before using \"eval\"");
+        throw ExevalatorException { ErrorMessages::REEVAL_NOT_AVAILABLE };
     }
 }
 
@@ -129,9 +129,8 @@ double Exevalator::reeval() {
  */
 size_t Exevalator::declare_variable(const std::string &name) {
     if (this->settings.max_name_char_count <= name.length()) {
-        throw new ExevalatorException(
-            std::string { "The length of the variable name exceeds the limit: Settings.max_name_char_count: " }
-            + std::to_string(settings.max_name_char_count)
+        throw ExevalatorException(
+            ErrorMessages::TOO_LONG_VARIABLE_NAME, std::to_string(settings.max_name_char_count)
         );
     }
     size_t address = this->memory.size();
@@ -149,7 +148,7 @@ size_t Exevalator::declare_variable(const std::string &name) {
 void Exevalator::write_variable(const std::string &name, double value) {
     if (this->settings.max_name_char_count <= name.length()
             || this->variable_table.find(name) == this->variable_table.end()) {
-        throw ExevalatorException((std::string { "Variable not found: " } + name).c_str());
+        throw ExevalatorException { ErrorMessages::VARIABLE_NOT_FOUND, name };
     }
     size_t address = this->variable_table[name];
     this->memory[address] = value;
@@ -164,7 +163,7 @@ void Exevalator::write_variable(const std::string &name, double value) {
  */
 void Exevalator::write_variable_at(size_t address, double value) {
     if (this->memory.size() <= address) {
-        throw ExevalatorException((std::string { "Invalid variable address: " } + std::to_string(address)).c_str());
+        throw ExevalatorException { ErrorMessages::INVALID_MEMORY_ADDRESS, std::to_string(address) };
     }
     this->memory[address] = value;
 }
@@ -178,7 +177,7 @@ void Exevalator::write_variable_at(size_t address, double value) {
 double Exevalator::read_variable(const std::string &name) {
     if (this->settings.max_name_char_count <= name.length()
             || this->variable_table.find(name) == this->variable_table.end()) {
-        throw ExevalatorException((std::string { "Variable not found: " } + name).c_str());
+        throw ExevalatorException { ErrorMessages::VARIABLE_NOT_FOUND, name };
     }
     size_t address = this->variable_table[name];
     return this->memory[address];
@@ -193,7 +192,7 @@ double Exevalator::read_variable(const std::string &name) {
  */
 double Exevalator::read_variable_at(size_t address) {
     if (this->memory.size() <= address) {
-        throw ExevalatorException((std::string { "Invalid variable address: " } + std::to_string(address)).c_str());
+        throw ExevalatorException { ErrorMessages::INVALID_MEMORY_ADDRESS, std::to_string(address) };
     }
     return this->memory[address];
 }
@@ -206,15 +205,12 @@ double Exevalator::read_variable_at(size_t address) {
  */
 void Exevalator::connect_function(const std::string &name, const std::shared_ptr<ExevalatorFunctionInterface> &function_ptr) {
     if (this->settings.max_name_char_count <= name.length()) {
-        throw new ExevalatorException(
-            std::string { "The length of the variable name exceeds the limit: Settings.max_name_char_count: " }
-            + std::to_string(settings.max_name_char_count)
+        throw ExevalatorException(
+            ErrorMessages::TOO_LONG_VARIABLE_NAME, std::to_string(settings.max_name_char_count)
         );
     }
     if (!function_ptr) {
-        throw new ExevalatorException(
-            std::string { "A null/empty function pointer has been connected." }
-        );
+        throw ExevalatorException { ErrorMessages::INVALID_FUNCTION_POINTER };
     }
     this->function_table[name] = function_ptr;
 }
@@ -230,13 +226,62 @@ ExevalatorFunctionInterface::~ExevalatorFunctionInterface() {
  * 
  * @param error_message The error message
  */
-ExevalatorException::ExevalatorException(std::string error_message): std::exception {} {
-    this->error_message = error_message;
+ExevalatorException::ExevalatorException(std::string_view error_message): std::exception {} {
+    this->error_message = std::string { error_message };
 };
+
+/**
+ * Creates an new Exception having the specified error message.
+ * 
+ * @param error_message The error message
+ * @param keyword0 The keyword to be embedded at '$0' in the error message.
+ */
+ExevalatorException::ExevalatorException(std::string_view error_message, std::string_view keyword0): std::exception {} {
+    std::string buffer { error_message };
+    size_t ibegin;
+    while ((ibegin = buffer.find("$")) != std::string::npos) {
+        if (buffer[ibegin + 1] == '0') {
+            buffer.replace(ibegin, 2, keyword0);
+        } else {
+            buffer[ibegin + 1] = '#';
+        }
+    }
+    this->error_message = buffer;
+};
+
+/**
+ * Creates an new Exception having the specified error message.
+ * 
+ * @param error_message The error message
+ * @param keyword0 The keyword to be embedded at '$0' in the error message.
+ * @param keyword1 The keyword to be embedded at '$1' in the error message.
+ */
+ExevalatorException::ExevalatorException(std::string_view error_message, std::string_view keyword0, std::string_view keyword1): std::exception {} {
+    std::string buffer { error_message };
+    size_t ibegin;
+    while ((ibegin = buffer.find("$")) != std::string::npos) {
+        if (buffer[ibegin + 1] == '0') {
+            buffer.replace(ibegin, 2, keyword0);
+        } else if (buffer[ibegin + 1] == '1') {
+            buffer.replace(ibegin, 2, keyword1);
+        } else {
+            buffer[ibegin + 1] = '#';
+        }
+    }
+    this->error_message = buffer;
+};
+
+/**
+ * Destructor.
+ */
 ExevalatorException::~ExevalatorException() {
     this->error_message.clear();
     this->error_message.shrink_to_fit();
 };
+
+/**
+ * Returns the error message.
+ */
 const char* ExevalatorException::what() const noexcept {
     return this->error_message.c_str();
 }
@@ -264,13 +309,10 @@ std::vector<Token> LexicalAnalyzer::analyze(const std::string &expression, const
 
     // Checks the total number of tokens.
     if (token_words.size() == 0) {
-        throw ExevalatorException("The inputted expression is empty.");
+        throw ExevalatorException(ErrorMessages::EMPTY_EXPRESSION);
     }
     if (settings.max_token_count < token_words.size()) {
-        throw new ExevalatorException(
-            std::string { "The number of tokens exceeds the limit: Settings.max_token_count: " }
-            + std::to_string(settings.max_token_count)
-        );
+        throw ExevalatorException(ErrorMessages::TOO_MANY_TOKENS, std::to_string(settings.max_token_count));
     }
 
     // Create Token structs.
@@ -343,14 +385,14 @@ size_t LexicalAnalyzer::detect_end_of_num_literal(const std::string &expression,
             // Note that, '-' of "-1.23" is a unary minus operator, not contained in the number literal.
             if (!is_exponent_part || (expression.at(ichar - 1) != 'e' && expression.at(ichar - 1) != 'E')) {
                 if (ichar == 0)  {
-                    throw ExevalatorException("Incorrect beggining of number literal.");
+                    throw ExevalatorException { ErrorMessages::INVALID_NUMBER_LITERAL }; // Incorrect beggining of number literal.
                 }
                 return ichar - 1;
             }
 
         } else {
             if (ichar == 0)  {
-                throw ExevalatorException("Incorrect beggining of number literal.");
+                throw ExevalatorException { ErrorMessages::INVALID_NUMBER_LITERAL }; // Incorrect beggining of number literal.
             }
             return ichar - 1;
         }
@@ -514,7 +556,7 @@ std::vector<Token> LexicalAnalyzer::create_tokens_from_token_words(
                 if (settings.unary_prefix_symbol_operator_map.find(word[0]) != settings.unary_prefix_symbol_operator_map.end()) {
                     opinfo = settings.unary_prefix_symbol_operator_map.at(word[0]);
                 } else {
-                    throw ExevalatorException(std::string { "No such unary-prefix operator: " } + word );
+                    throw ExevalatorException(ErrorMessages::UNKNOWN_UNARY_PREFIX_OPERATOR, word);
                 }
 
             } else if (last_token.word == ")"
@@ -524,12 +566,11 @@ std::vector<Token> LexicalAnalyzer::create_tokens_from_token_words(
                 if (settings.binary_symbol_operator_map.find(word[0]) != settings.binary_symbol_operator_map.end()) {
                     opinfo = settings.binary_symbol_operator_map.at(word[0]);
                 } else {
-                    throw ExevalatorException(std::string { "No such binary operator: " } + word );
+                    throw ExevalatorException{ ErrorMessages::UNKNOWN_BINARY_OPERATOR, word };
                 }
 
             } else {
-                std::string error_message = "Unexpected operator syntax: " + word;
-                throw ExevalatorException { error_message.c_str() };
+                throw ExevalatorException{ ErrorMessages::UNKNOWN_OPERATOR_SYNTAX };
             }
             tokens.push_back(Token{ TokenType::OPERATOR, word, opinfo });
 
@@ -576,14 +617,14 @@ void LexicalAnalyzer::check_parenthesis_balance(const std::vector<Token> &tokens
 
         // If the value of hierarchy is negative, the open parenthesis is deficient.
         if (hierarchy < 0) {
-            throw ExevalatorException { "The number of open parenthesis \"(\" is deficient." };
+            throw ExevalatorException { ErrorMessages::DEFICIENT_OPEN_PARENTHESIS };
         }
     }
 
     // If the value of hierarchy is not zero at the end of the expression,
     // the closed parentheses ")" is deficient.
     if (hierarchy > 0) {
-        throw ExevalatorException { "The number of open parenthesis \")\" is deficient." };
+        throw ExevalatorException { ErrorMessages::DEFICIENT_CLOSED_PARENTHESIS };
     }
 }
 
@@ -605,9 +646,7 @@ void LexicalAnalyzer::check_empty_parentheses(const std::vector<Token> &tokens) 
                 content_counter = 0;
             } else if (token.word == ")") {
                 if (content_counter == 0) {
-                    throw ExevalatorException {
-                        "The content parentheses \"()\" should not be empty (excluding function calls)."
-                    };
+                    throw ExevalatorException { ErrorMessages::EMPTY_PARENTHESIS };
                 }
             }
         } else {
@@ -656,8 +695,7 @@ void LexicalAnalyzer::check_locations_of_operators_and_leafs(const std::vector<T
 
                 // Only leafs, open parentheses, unary-prefix and function-call operators can be an operand.
                 if ( !(next_is_leaf || next_is_open_parenthesis || next_is_prefix_operator || next_is_function_identifier) ) {
-                    std::string error_message = std::string { "An operand is required at the right of: \"{}\"" } + token.word;
-                    throw ExevalatorException { error_message.c_str() };
+                    throw ExevalatorException { ErrorMessages::RIGHT_OPERAND_REQUIRED, token.word };
                 }
             } // Cases of unary-prefix operators
 
@@ -666,13 +704,11 @@ void LexicalAnalyzer::check_locations_of_operators_and_leafs(const std::vector<T
 
                 // Only leaf elements, open parenthesis, and unary-prefix operator can be a right-operand.
                 if ( !(next_is_leaf || next_is_open_parenthesis || next_is_prefix_operator || next_is_function_identifier) ) {
-                    std::string error_message = std::string { "An operand is required at the right of: \"{}\"" } + token.word;
-                    throw ExevalatorException { error_message.c_str() };
-                }
+                    throw ExevalatorException { ErrorMessages::RIGHT_OPERAND_REQUIRED, token.word };                }
+
                 // Only leaf elements and closed parenthesis can be a right-operand.
                 if ( !(prev_is_leaf || prev_is_close_parenthesis) ) {
-                    std::string error_message = std::string { "An operand is required at the left of: \"{}\"" } + token.word;
-                    throw ExevalatorException { error_message.c_str() };
+                    throw ExevalatorException { ErrorMessages::LEFT_OPERAND_REQUIRED, token.word };
                 }
             } // Cases of binary operators or a separator of partial expressions
 
@@ -683,15 +719,14 @@ void LexicalAnalyzer::check_locations_of_operators_and_leafs(const std::vector<T
 
             // An other leaf element or an open parenthesis can not be at the right of an leaf element.
             if (!next_is_function_call_begin && (next_is_open_parenthesis || next_is_leaf)) {
-                std::string error_message = std::string { "An operand is required at the right of: \"{}\"" } + token.word;
-                throw ExevalatorException { error_message.c_str() };
+                throw ExevalatorException { ErrorMessages::RIGHT_OPERATOR_REQUIRED, token.word };
             }
 
             // An other leaf element or a closed parenthesis can not be at the left of an leaf element.
             if (prev_is_close_parenthesis || prev_is_leaf) {
-                std::string error_message = std::string { "An operand is required at the left of: \"{}\"" } + token.word;
-                throw ExevalatorException { error_message.c_str() };
+                throw ExevalatorException { ErrorMessages::LEFT_OPERATOR_REQUIRED, token.word };
             }
+
         } // Case of leaf elements
     } // Loops for each token
 }
@@ -862,7 +897,7 @@ void Parser::pop_partial_expr_nodes(
         const Token &end_stack_lid_node_token) {
 
     if (stack.size() == 0) {
-        throw ExevalatorException("Unexpected end of a partial expression");
+        throw ExevalatorException { ErrorMessages::UNEXPECTED_PARTIAL_EXPRESSION };
     }
 
     while (stack.size() != 0) {
@@ -977,10 +1012,7 @@ std::string AstNode::to_markupped_text(uint64_t indent_stage) {
  */
 void AstNode::check_depth(uint64_t depth_of_this_node, uint64_t max_ast_depth) const {
     if (max_ast_depth < depth_of_this_node) {
-        throw new ExevalatorException(
-            std::string { "The depth of the AST exceeds the limit: Settings.max_ast_depth: " }
-            + std::to_string(max_ast_depth)
-        );
+        throw ExevalatorException { ErrorMessages::EXCEEDS_MAX_AST_DEPTH };
     }
     for (const std::unique_ptr<AstNode> &child_node: this->child_nodes) {
         child_node->check_depth(depth_of_this_node + 1, max_ast_depth);
@@ -1049,8 +1081,7 @@ std::unique_ptr<Evaluator::EvaluatorNode> Evaluator::create_evaluator_node_tree(
         try {
             literal_value = stod(ast->token.word);
         } catch (...) {
-            std::string error_message = std::string { "Invalid number literal: " } + ast->token.word;
-            throw ExevalatorException { error_message.c_str() };
+            throw ExevalatorException { ErrorMessages::INVALID_NUMBER_LITERAL, ast->token.word };
         }
         return std::make_unique<Evaluator::NumberLiteralEvaluatorNode>(literal_value);
 
@@ -1096,7 +1127,7 @@ std::unique_ptr<Evaluator::EvaluatorNode> Evaluator::create_evaluator_node_tree(
             size_t child_count = ast->child_nodes.size();
             std::string identifier = ast->child_nodes[0]->token.word;
             if (function_table.find(identifier) == function_table.end()) {
-                throw ExevalatorException(("Function not found: " + identifier).c_str());
+                throw ExevalatorException { ErrorMessages::FUNCTION_NOT_FOUND, identifier };
             }
             std::shared_ptr<ExevalatorFunctionInterface> function_ptr = function_table.at(identifier);
             std::vector<std::unique_ptr<Evaluator::EvaluatorNode>> arguments;
@@ -1109,21 +1140,20 @@ std::unique_ptr<Evaluator::EvaluatorNode> Evaluator::create_evaluator_node_tree(
                 function_ptr, identifier, arguments
             );
         } else {
-            std::string error_message = std::string { "Unexpected operator: " } + ast->token.opinfo.symbol;
-            throw ExevalatorException { error_message.c_str() };
+            throw ExevalatorException { ErrorMessages::UNEXPECTED_OPERATOR, std::to_string(ast->token.opinfo.symbol) };
         }
 
     // Create an node for evaluating the value of a variable.
     } else if (ast->token.type == TokenType::VARIABLE_IDENTIFIER) {
         std::string identifier = ast->token.word;
         if (variable_table.find(identifier) == variable_table.end()) {
-            throw ExevalatorException(("Variable not found: " + identifier).c_str());
+            throw ExevalatorException { ErrorMessages::VARIABLE_NOT_FOUND, identifier };
         }
         size_t address = variable_table.at(identifier);
         return std::make_unique<Evaluator::VariableEvaluatorNode>(address);
 
     } else {
-        throw ExevalatorException(std::string("Unexpected token type: ").append(token_type_name(ast->token.type)).c_str());
+        throw ExevalatorException { ErrorMessages::UNEXPECTED_TOKEN, token_type_name(ast->token.type) };
     }
 }
 
@@ -1317,8 +1347,7 @@ double Evaluator::FunctionEvaluatorNode::evaluate(const std::vector<double> &mem
         double return_value = (*this->function_ptr)(arg_evaluated_values);
         return return_value;
     } catch (...) {
-        std::string error_message = std::string { "Function error: "} + this->identifier;
-        throw ExevalatorException { error_message.c_str() };
+        throw ExevalatorException { ErrorMessages::FUNCTION_ERROR, this->identifier };
     }
 }
 
