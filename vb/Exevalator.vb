@@ -169,6 +169,9 @@ Namespace Rinearn.ExevalatorVB
                     ErrorMessages.TOO_LONG_VARIABLE_NAME.Replace("$0", StaticSettings.MaxNameCharCount.ToString()) _
                 )
             End If
+            If Me.VariableTable.ContainsKey(name) Then
+                Throw New ExevalatorException(ErrorMessages.VARIABLE_ALREADY_DECLARED.Replace("$0", name))
+            End If
             Dim address As Integer = Me.Memory.Count
             Me.Memory.Add(0.0)
             Me.VariableTable(name) = address
@@ -246,6 +249,9 @@ Namespace Rinearn.ExevalatorVB
                 Throw New ExevalatorException( _
                     ErrorMessages.TOO_LONG_FUNCTION_NAME.Replace("$0", StaticSettings.MaxNameCharCount.ToString()) _
                 )
+            End If
+            If Me.FunctionTable.ContainsKey(name) Then
+                Throw New ExevalatorException(ErrorMessages.FUNCTION_ALREADY_CONNECTED.Replace("$0", name))
             End If
             Me.FunctionTable(name) = functionImpl
         End Sub
