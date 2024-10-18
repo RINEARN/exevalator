@@ -33,7 +33,7 @@
 まず PC に Node.js をインストールした上で、以下のように残りを導入します：
 
 	cd <作業フォルダ>
-	npm init
+	npm init    # "package.json" がまだ初期化されていない場合のみ
 	npm install --save-dev typescript
 	npm install --save-dev @types/node 
 	npm install --save-dev esbuild

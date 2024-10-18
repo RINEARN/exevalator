@@ -33,7 +33,7 @@
 First, install Node.js on your PC, and then set up the remaining tools by running the following commands:
 
 	cd <working_folder>
-	npm init
+	npm init    # Only when "package.json" is not initialized yet
 	npm install --save-dev typescript
 	npm install --save-dev @types/node 
 	npm install --save-dev esbuild
