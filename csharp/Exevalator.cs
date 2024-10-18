@@ -195,6 +195,9 @@ namespace Rinearn.ExevalatorCS
                     ErrorMessages.TOO_LONG_VARIABLE_NAME.Replace("$0", StaticSettings.MaxNameCharCount.ToString())
                 );
             }
+            if (this.VariableTable.ContainsKey(name)) {
+                throw new ExevalatorException(ErrorMessages.VARIABLE_ALREADY_DECLARED.Replace("$0", name));
+            }
             int address = this.Memory.Count;
             this.Memory.Add(0.0);
             this.VariableTable[name] = address;
@@ -285,6 +288,9 @@ namespace Rinearn.ExevalatorCS
                 throw new ExevalatorException(
                     ErrorMessages.TOO_LONG_FUNCTION_NAME.Replace("$0", StaticSettings.MaxNameCharCount.ToString())
                 );
+            }
+            if (this.FunctionTable.ContainsKey(name)) {
+                throw new ExevalatorException(ErrorMessages.FUNCTION_ALREADY_CONNECTED.Replace("$0", name));
             }
             this.FunctionTable[name] = function;
         }
