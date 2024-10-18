@@ -286,6 +286,9 @@ public final class Exevalator {
                 ErrorMessages.TOO_LONG_FUNCTION_NAME.replace("$0", Integer.toString(StaticSettings.MAX_NAME_CHAR_COUNT))
             );
         }
+        if (this.functionTable.containsKey(name)) {
+            throw new Exevalator.Exception(ErrorMessages.FUNCTION_ALREADY_CONNECTED.replace("$0", name));
+        }
         this.functionTable.put(name, function);
     }
 
