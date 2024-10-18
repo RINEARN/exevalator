@@ -133,6 +133,9 @@ size_t Exevalator::declare_variable(const std::string &name) {
             ErrorMessages::TOO_LONG_VARIABLE_NAME, std::to_string(settings.max_name_char_count)
         );
     }
+    if (this->variable_table.count(name)) {
+        throw ExevalatorException(ErrorMessages::VARIABLE_ALREADY_DECLARED, name);
+    }
     size_t address = this->memory.size();
     this->memory.push_back(0.0);
     this->variable_table[name] = address;
@@ -211,6 +214,9 @@ void Exevalator::connect_function(const std::string &name, const std::shared_ptr
     }
     if (!function_ptr) {
         throw ExevalatorException { ErrorMessages::INVALID_FUNCTION_POINTER };
+    }
+    if (this->function_table.count(name) && !overwrite) {
+        throw ExevalatorException(ErrorMessages::FUNCTION_ALREADY_CONNECTED, name);
     }
     this->function_table[name] = function_ptr;
 }
