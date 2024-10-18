@@ -42,7 +42,7 @@ impl ErrorMessages {
     pub const TOO_LONG_VARIABLE_NAME: &'static str = "The length of the variable name exceeds the limit (StaticSettings.MAX_NAME_CHAR_COUNT: '$0')";
     pub const TOO_LONG_FUNCTION_NAME: &'static str = "The length of the function name exceeds the limit (StaticSettings.MAX_NAME_CHAR_COUNT: '$0')";
     pub const VARIABLE_ALREADY_DECLARED: &'static str = "The variable '$0' is already declared";
-    // pub const FUNCTION_ALREADY_CONNECTED: &'static str = "The function '$0' is already connected";
+    pub const FUNCTION_ALREADY_CONNECTED: &'static str = "The function '$0' is already connected";
     pub const INVALID_VARIABLE_ADDRESS: &'static str = "Invalid memory address: '$0'";
 }
 
@@ -245,6 +245,9 @@ impl<'exvlife> Exevalator<'exvlife> {
             return Err(ExevalatorError::new(
                 &ErrorMessages::TOO_LONG_FUNCTION_NAME.replace("$0", &self.settings.max_name_char_count.to_string())
             ));
+        }
+        if self.function_table.get(name) != None {
+            return Err(ExevalatorError::new(&ErrorMessages::FUNCTION_ALREADY_CONNECTED.replace("$0", name)));
         }
         let address = self.function_table.len();
         self.function_table.insert(name.to_string(), function_pointer);
