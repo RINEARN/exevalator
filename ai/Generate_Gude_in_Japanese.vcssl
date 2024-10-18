@@ -37,6 +37,7 @@ enqueue<Page>(pageQueue, newPage("../csharp/README_JAPANESE.md", "https://github
 enqueue<Page>(pageQueue, newPage("../cpp/README_JAPANESE.md", "https://github.com/RINEARN/exevalator/blob/main/cpp/README_JAPANESE.md", "C++ での Exevalator の使用方法", "C++でExevalatorを使う方法を詳しく解説しています。"));
 enqueue<Page>(pageQueue, newPage("../rust/README_JAPANESE.md", "https://github.com/RINEARN/exevalator/blob/main/rust/README_JAPANESE.md", "Rust での Exevalator の使用方法", "RustでExevalatorを使う方法を詳しく解説しています。"));
 enqueue<Page>(pageQueue, newPage("../vb/README_JAPANESE.md", "https://github.com/RINEARN/exevalator/blob/main/vb/README_JAPANESE.md", "Visual Basic&reg; (VB.NET) での Exevalator の使用方法", "Visual Basic&reg; (VB.NET) でExevalatorを使う方法を詳しく解説しています。"));
+enqueue<Page>(pageQueue, newPage("../typescript/README_JAPANESE.md", "https://github.com/RINEARN/exevalator/blob/main/typescript/README_JAPANESE.md", "TypeScript での Exevalator の使用方法", "TypeScript でExevalatorを使う方法を詳しく解説しています。"));
 
 
 struct Page {

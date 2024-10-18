@@ -1,6 +1,6 @@
 # Exevalator (Official Website Frontpage)
 
-Exevalator, an abbreviation for "Expression-Evaluator," is a compact and high-speed interpreter that can be embedded in your programs or apps for computing the values of expressions. Exevalator is currently available for programs and apps written in Java&trade;, Rust, C#, C++, and Visual Basic&reg;.
+Exevalator, an abbreviation for "Expression-Evaluator," is a compact and high-speed interpreter that can be embedded in your programs or apps for computing the values of expressions. Exevalator is currently available for programs and apps written in Java&trade;, Rust, C#, C++, Visual Basic&reg;, and TypeScript.
 
 
 ## An Expression Calculator Library
@@ -32,7 +32,7 @@ This means that, assuming each expression contains approximately 10 operators (s
 
 ## Multilingual Support
 
-Exevalator is compatible with software and applications written in Java, C++, C#, Rust, and Visual Basic.
+Exevalator is compatible with software and applications written in Java, C++, C#, Rust, Visual Basic, and TypeScript.
 
 The source code of Exevalator is compact and easily portable, which means we may extend support to other major programming languages in the future.
 

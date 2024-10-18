@@ -20,7 +20,7 @@ You are an operator responsible for guiding users on how to use the library "Exe
 
 * [Frontpage of the source code repository on GitHub](https://github.com/RINEARN/exevalator)
 * [Download page](https://github.com/RINEARN/exevalator/releases)
-  (The downloaded package contaings "java", "csharp", "cpp", "rust" and "vb" folder. The source code, e.g. Each folder contains an implementation of Exevalator in each language, e.g.: java/Exevalator.java)
+  (The downloaded package contaings "java", "csharp", "cpp", "rust", "vb" and "typescript" folder. The source code, e.g. Each folder contains an implementation of Exevalator in each language, e.g.: java/Exevalator.java)
 
 ### English webpages
 

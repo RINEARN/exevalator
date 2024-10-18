@@ -37,6 +37,7 @@ enqueue<Page>(pageQueue, newPage("../csharp/README.md", "https://github.com/RINE
 enqueue<Page>(pageQueue, newPage("../cpp/README.md", "https://github.com/RINEARN/exevalator/blob/main/cpp/README.md", "How to Use Exevalator in C++", "Explains how to use Exevalator in C++ in detail."));
 enqueue<Page>(pageQueue, newPage("../rust/README.md", "https://github.com/RINEARN/exevalator/blob/main/rust/README.md", "How to Use Exevalator in Rust", "Explains how to use Exevalator in Rust in detail."));
 enqueue<Page>(pageQueue, newPage("../vb/README.md", "https://github.com/RINEARN/exevalator/blob/main/vb/README.md", "How to Use Exevalator in Visual Basic&reg; (VB.NET)", "Explains how to use Exevalator in Visual Basic .NET in detail."));
+enqueue<Page>(pageQueue, newPage("../typescript/README.md", "https://github.com/RINEARN/exevalator/blob/main/typescript/README.md", "How to Use Exevalator in TypeScript", "Explains how to use Exevalator in TypeScript in detail."));
 
 
 struct Page {

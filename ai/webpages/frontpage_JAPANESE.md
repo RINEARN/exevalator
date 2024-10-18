@@ -1,6 +1,6 @@
 # Exevalator (公式サイト フロントページ)
 
-Exevalator（エグゼバレータ、Expression-Evaluator の略）は、プログラムやアプリ内に組み込んで、式の値の計算に使うための、コンパクトで高速なインタープリタです。 複数言語対応で、Java&trade;言語、C#、C++、Rust、Visual Basic&reg;製のプログラムに組み込んで使用できます。
+Exevalator（エグゼバレータ、Expression-Evaluator の略）は、プログラムやアプリ内に組み込んで、式の値の計算に使うための、コンパクトで高速なインタープリタです。 複数言語対応で、Java&trade;言語、C#、C++、Rust、Visual Basic&reg;、TypeScript 製のプログラムに組み込んで使用できます。
 
 
 ## 式の値を計算するライブラリ
@@ -29,7 +29,7 @@ Exevalator は、毎回違う式を計算する場合でも、1秒あたり数�
 さらに、変数値を変えながら、同じ式を反復計算するような場合には、1秒あたり数千万式ほどの高速計算が可能です。 より正確に、式が含む加減算などの演算単位で表すと、最大で数億回演算/秒（数百MFLOPS）程度の速度を発揮します。
 
 ## 多言語対応
-Exevalator は、複数の言語で利用できます。現在は Java&trade;、C++、C#、Rust、および Visual Basic&reg; で利用可能です。
+Exevalator は、複数の言語で利用できます。現在は Java&trade;、C++、C#、Rust、Visual Basic&reg;、および TypeScript で利用可能です。
 
 コンパクトで移植が比較的容易なので、他のメジャーな言語にも、今後対応するかもしれません。
 
