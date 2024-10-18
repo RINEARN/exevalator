@@ -259,10 +259,9 @@ export default class Exevalator {
      *
      * @param name - The name of the function used in the expression.
      * @param functionImpl - The function to be connected.
-     * @param overwrite - (The default value is false) Specify true if overwrite the function which is already connected with the same name.
      * @throws ExevalatorError - Thrown if the specified function name is invalid or already used.
      */
-    public connectFunction(name: string, functionImpl: ExevalatorFunctionInterface, overwrite: boolean = false): void {
+    public connectFunction(name: string, functionImpl: ExevalatorFunctionInterface): void {
         if (name == null || name === undefined) {
             throw new ExevalatorError(ErrorMessages.ARGS_MUST_NOT_BE_NULL_OR_UNDEFINED.replace("$0", "name"));
         }
@@ -271,7 +270,7 @@ export default class Exevalator {
                 ErrorMessages.TOO_LONG_FUNCTION_NAME.replace("$0", StaticSettings.MAX_NAME_CHAR_COUNT.toString())
             );
         }
-        if (this.functionTable.has(name) && !overwrite) {
+        if (this.functionTable.has(name)) {
             throw new ExevalatorError(ErrorMessages.FUNCTION_ALREADY_CONNECTED.replace("$0", name));
         }
         this.functionTable.set(name, functionImpl);
