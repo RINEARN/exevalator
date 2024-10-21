@@ -7,23 +7,28 @@
 </head>
 <body>
 
-	<!-- The -->
+	<!-- The form to input the expression to be calculated. -->
 	<div style="width: 300px; margin: 10px;">
 	    <label for="expression">Expression:</label>
 	    <br />
         <input type="text", id="expression" value="sin(3 * x) + cos(2 * x)" style="width:100%;">
     </div>
 
+	<!-- The form to input the value of x. -->
 	<div style="width: 300px; margin: 10px;">
 	    <label for="xValue">The value of 'x':</label>
 	    <br />
         <input type="text" id="xValue" value="1.25" style="width:100%;">
     </div>
 
+	<!-- The button to perform the calculation. -->
     <button id="calculateButton" style="width: 300px; margin: 10px;">Calculate</button>
 
+	<!-- The DIV element on which the calculation result will be displayed. -->
     <div id="result" style="width: 300px; margin: 10px; font-size: x-large;"></div>
 
+	<!-- Load the compiled code. To compile and generate it, see the comment in 'example6ex.ts'. -->
     <script src="example6ex.bundle.js"></script>
+
 </body>
 </html>
