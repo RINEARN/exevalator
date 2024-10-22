@@ -78,6 +78,6 @@ calculateButton.addEventListener("click", () => {
         resultDiv.textContent = `result: ${roundedResult}`;
     } catch (error) {
         resultDiv.textContent = "ERROR\n(See the browser's console for details.)";
-        console.log(error);
+        console.error(error);
     }
 });
