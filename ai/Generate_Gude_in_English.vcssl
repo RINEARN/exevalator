@@ -1,7 +1,7 @@
 coding UTF-8;
 
 // ================================================================================
-// Markdowns to Knowledge-JSONs Converter Ver.1.0.3
+// Markdowns to Knowledge-JSONs Converter Ver.1.1.0
 // Made by: RINEARN (Fumihiro Matsui)
 // Licence: Unlicense or CC0 (Dual License)
 // ================================================================================
@@ -16,6 +16,9 @@ import data.Queue;
 // Defines the constant parameters.
 // --------------------------------------------------------------------------------
 
+const bool WRAP_BY_JSON = true;
+
+// const string OUTPUT_FILE_PATH = "./Guide_in_English.md";
 const string OUTPUT_FILE_PATH = "./Guide_in_English.json";
 const string OUTPUT_ENCODING = "UTF-8";
 
@@ -38,6 +41,7 @@ enqueue<Page>(pageQueue, newPage("../cpp/README.md", "https://github.com/RINEARN
 enqueue<Page>(pageQueue, newPage("../rust/README.md", "https://github.com/RINEARN/exevalator/blob/main/rust/README.md", "How to Use Exevalator in Rust", "Explains how to use Exevalator in Rust in detail."));
 enqueue<Page>(pageQueue, newPage("../vb/README.md", "https://github.com/RINEARN/exevalator/blob/main/vb/README.md", "How to Use Exevalator in Visual Basic&reg; (VB.NET)", "Explains how to use Exevalator in Visual Basic .NET in detail."));
 enqueue<Page>(pageQueue, newPage("../typescript/README.md", "https://github.com/RINEARN/exevalator/blob/main/typescript/README.md", "How to Use Exevalator in TypeScript", "Explains how to use Exevalator in TypeScript in detail."));
+
 
 
 struct Page {
@@ -73,7 +77,9 @@ void main() {
 	int outputFile = open(OUTPUT_FILE_PATH, System.WRITE, OUTPUT_ENCODING);
 	int refTableFile = open(REFTABLE_OUTPUT_FILE_PATH, System.WRITE, REFTABLE_OUTPUT_ENCODING);
 	
-	writeln(outputFile, "{");
+	if (WRAP_BY_JSON) {
+		writeln(outputFile, "{");
+	}
 	
 	for (int ipage; ipage<pageCount; ipage++) {
 		
@@ -86,11 +92,19 @@ void main() {
 		
 		// Load, convert, and output the content of the page.
 		println("PROCESSING PAGE = " + absoluteFilePath);
-		processPage(
-			inputFile, outputFile,
-			ipage, (ipage == pageCount - 1),
-			page.title, page.description, page.url, page.hierarchyOffset
-		);
+		if (WRAP_BY_JSON) {
+			processPage_JSON(
+				inputFile, outputFile,
+				ipage, (ipage == pageCount - 1),
+				page.title, page.description, page.url, page.hierarchyOffset
+			);
+		} else {
+			processPage_MD(
+				inputFile, outputFile,
+				ipage, (ipage == pageCount - 1),
+				page.title, page.description, page.url, page.hierarchyOffset
+			);
+		}
 		
 		// Write a line in the reference-table.
 		writeln(refTableFile, "* [" + page.title + "](" + page.url + "): " + page.description);
@@ -100,15 +114,36 @@ void main() {
 	}
 	
 	// Close the knowledge file.
-	writeln(outputFile, "}");
+	if (WRAP_BY_JSON) {
+		writeln(outputFile, "}");
+	}
 	close(outputFile);
 	close(refTableFile);
 	
 	println("COMPLETED !");
 }
 
+void processPage_MD(int inputFile, int outputFile, int pageIndex, boolean isLast, string title, string description, string url, int hierarchyOffset) {
+	int lineCount = countln(inputFile);
+	int headerLineCount = 0;
+	
+	// Process all the lines in the input file.
+	for (int iline=0; iline<lineCount; iline++) {
+		string line = readln(inputFile);
+		line = escape(line);
+		writeln(outputFile, line);
+	}
+	
+	writeln(outputFile, "");
+	writeln(outputFile, "");
+	writeln(outputFile, "");
+	writeln(outputFile, "---");
+	writeln(outputFile, "");
+	writeln(outputFile, "");
+	writeln(outputFile, "");
+}
 
-void processPage(int inputFile, int outputFile, int pageIndex, boolean isLast, string title, string description, string url, int hierarchyOffset) {
+void processPage_JSON(int inputFile, int outputFile, int pageIndex, boolean isLast, string title, string description, string url, int hierarchyOffset) {
 	int lineCount = countln(inputFile);
 	int headerLineCount = 0;
 	
