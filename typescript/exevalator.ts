@@ -784,28 +784,26 @@ class Parser {
      */
     private static connectOperatorsInStack(stack: AstNode[], nextOperatorPrecedence: number) {
 
-        // Pop the current stack-top node. It must be an operator-type node.
-        let stackTopOperatorNode: AstNode = stack.pop()!;
-        if (stackTopOperatorNode.token.type !== TokenType.OPERATOR) {
-            throw new ExevalatorImplementationError(
-                "The top node of the stack must be an operator-type node when calling connectOperatorsInStack()."
-            );
-        }
+        // Pop the current stack-top node.
+        // Note that, it is not necessarily an operator-type node.
+        // It can be a literal, for example, 
+        // when the caller-side loop isparsing a partial expression in which only a literal (e.g.: "(1.23)").
+        let stackTopNode: AstNode = stack.pop()!;
         
         // If the updated stack-top node is an operator-type node, and it is prior to the next operator, 
         // connect the previously popped stack-top node to the current stack-top node as an operand.
         // Repeat the above while the updated stack-top node is an operator-type and prior to the next operator. 
         while (Parser.isStackTopPriorOperator(stack, nextOperatorPrecedence)) {
-            const operandOperatorNode: AstNode = stackTopOperatorNode;
-            stackTopOperatorNode = stack.pop()!;
-            if (stackTopOperatorNode.token.type !== TokenType.OPERATOR) {
+            const operandNode: AstNode = stackTopNode;
+            stackTopNode = stack.pop()!;
+            if (stackTopNode.token.type !== TokenType.OPERATOR) {
                 throw new ExevalatorImplementationError(
                     "The popped node must be an operator-type node because isRightOperandForStackTopOperator() returned true."
                 );
             }
-            stackTopOperatorNode.childNodeList.push(operandOperatorNode);
+            stackTopNode.childNodeList.push(operandNode);
         }
-        stack.push(stackTopOperatorNode!);
+        stack.push(stackTopNode!);
     }
 
     /**
