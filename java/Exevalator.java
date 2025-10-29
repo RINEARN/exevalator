@@ -652,7 +652,7 @@ final class Parser {
     public static AstNode parse(Token[] tokens) {
 
         /* In this method, we use a non-recursive algorithm for the parsing.
-        * Processing cost is maybe O(N), where N is the number of tokens. */
+         * Processing cost is maybe O(N), where N is the number of tokens. */
 
         // Number of tokens
         int tokenCount = tokens.length;
@@ -707,9 +707,9 @@ final class Parser {
                 // Case of unary-prefix operators:
                 // * Connect the node of right-token as an operand, if necessary (depending the next operator's precedence).
                 if (token.operator.type == OperatorType.UNARY_PREFIX) {
-                    if (shouldAddRightOperand(token.operator.precedence, nextOpPrecedence)) {
+                    if (shouldAddRightOperand(token.operator.associativity, token.operator.precedence, nextOpPrecedence)) {
                         operatorNode.childNodeList.add(new AstNode(tokens[itoken + 1]));
-                        itoken++;
+                        itoken++; // The next token has been looked-ahead.
                     } // else: Operand will be connected later. See the bottom of this loop.
 
                 // Case of binary operators:
@@ -717,9 +717,9 @@ final class Parser {
                 // * Connect the node of right-token as an operand, if necessary (depending the next operator's precedence).
                 } else if (token.operator.type == OperatorType.BINARY) {
                     operatorNode.childNodeList.add(stack.pop());
-                    if (shouldAddRightOperand(token.operator.precedence, nextOpPrecedence)) {
+                    if (shouldAddRightOperand(token.operator.associativity, token.operator.precedence, nextOpPrecedence)) {
                         operatorNode.childNodeList.add(new AstNode(tokens[itoken + 1]));
-                        itoken++;
+                        itoken++; // The next token has been looked-ahead.
                     } // else: Right-operand will be connected later. See the bottom of this loop.
 
                 // Case of function-call operators.
@@ -764,12 +764,25 @@ final class Parser {
     /**
      * Judges whether the right-side token should be connected directly as an operand, to the target operator.
      *
+	 * @param targetOperatorAssociativity The associativity (right/left) of the target opeartor.
      * @param targetOperatorPrecedence The precedence of the target operator (smaller value gives higher precedence).
      * @param nextOperatorPrecedence The precedence of the next operator (smaller value gives higher precedence).
      * @return Returns true if the right-side token (operand) should be connected to the target operator.
      */
-    private static boolean shouldAddRightOperand(int targetOperatorPrecedence, int nextOperatorPrecedence) {
-        return targetOperatorPrecedence <= nextOperatorPrecedence; // left is stronger
+    private static boolean shouldAddRightOperand(
+            OperatorAssociativity targetOperatorAssociativity, int targetOperatorPrecedence, int nextOperatorPrecedence) {
+
+		// If the precedence of the target operator is stronger than the next operator, return true.
+		// If the precedence of the next operator is stronger than the target operator, return false.
+		// If the precedence of both operators is the same:
+		//         Return true if the target operator is left-associative.
+		//         Return false if the target operator is right-associative.
+
+		boolean targetOpPrecedenceIsStrong = targetOperatorPrecedence < nextOperatorPrecedence; // Smaller value gives higher precedence.
+		boolean targetOpPrecedenceIsEqual = targetOperatorPrecedence == nextOperatorPrecedence; // Smaller value gives higher precedence.
+		boolean targetOpAssociativityIsLeft = targetOperatorAssociativity == OperatorAssociativity.LEFT;
+		return targetOpPrecedenceIsStrong || (targetOpPrecedenceIsEqual && targetOpAssociativityIsLeft);
+        // return targetOperatorPrecedence <= nextOperatorPrecedence;
     }
 
     /**
@@ -784,7 +797,8 @@ final class Parser {
         if (stack.size() == 0 || stack.peek().token.type != TokenType.OPERATOR) {
             return false;
         }
-        return shouldAddRightOperand(stack.peek().token.operator.precedence, nextOperatorPrecedence);
+        Operator operatorOnStackTop = stack.peek().token.operator;
+        return shouldAddRightOperand(operatorOnStackTop.associativity, operatorOnStackTop.precedence, nextOperatorPrecedence);
     }
 
     /**
@@ -869,6 +883,19 @@ enum OperatorType {
 
 
 /**
+ * The enum representing associativities of operators.
+ */
+enum OperatorAssociativity {
+
+    /** Represents left-associative. */
+    LEFT,
+
+    /** Represents right-associative. */
+    RIGHT
+}
+
+
+/**
  * The class storing information of an operator.
  */
 final class Operator {
@@ -882,17 +909,22 @@ final class Operator {
     /** The type of operator tokens. */
     public final OperatorType type;
 
+    /** The associativity of operator tokens. */
+    public final OperatorAssociativity associativity;
+
     /**
      * Create an Operator instance storing specified information.
      *
      * @param type The type of this operator.
      * @param symbol The symbol of this operator.
      * @param precedence The precedence of this operator.
+     * @param associativity The associativity of this operator.
      */
-    public Operator(OperatorType type, char symbol, int precedence) {
+    public Operator(OperatorType type, char symbol, int precedence, OperatorAssociativity associativity) {
         this.type = type;
         this.symbol = symbol;
         this.precedence = precedence;
+        this.associativity = associativity;
     }
 
     /**
@@ -900,7 +932,7 @@ final class Operator {
      */
     @Override
     public String toString() {
-        return "Operator [symbol=" + symbol + ", precedence=" + precedence + ", type=" + type + "]";
+        return "Operator [symbol=" + symbol + ", type=" + type + ", precedence=" + precedence + ", associativity=" + associativity + "]";
     }
 }
 
@@ -1137,7 +1169,6 @@ final class Evaluator {
             AstNode ast, Map<String, Integer> variableTable, Map<String, Exevalator.FunctionInterface> functionTable) {
 
         // Note: This method creates a tree of evaluator nodes by traversing each node in the AST recursively.
-
         List<AstNode> childNodeList = ast.childNodeList;
         int childCount = childNodeList.size();
 
@@ -1532,13 +1563,13 @@ final class StaticSettings {
     public static final List<Character> TOKEN_SPLITTER_SYMBOL_LIST;
 
     static {
-        Operator additionOperator       = new Operator(OperatorType.BINARY, '+', 400);
-        Operator subtractionOperator    = new Operator(OperatorType.BINARY, '-', 400);
-        Operator multiplicationOperator = new Operator(OperatorType.BINARY, '*', 300);
-        Operator divisionOperator       = new Operator(OperatorType.BINARY, '/', 300);
-        Operator minusOperator          = new Operator(OperatorType.UNARY_PREFIX, '-', 200);
-        Operator callBeginOperator      = new Operator(OperatorType.CALL, '(', 100);
-        Operator callEndOperator        = new Operator(OperatorType.CALL, ')', Integer.MAX_VALUE); // least prior
+        Operator additionOperator       = new Operator(OperatorType.BINARY, '+', 400, OperatorAssociativity.LEFT);
+        Operator subtractionOperator    = new Operator(OperatorType.BINARY, '-', 400, OperatorAssociativity.LEFT);
+        Operator multiplicationOperator = new Operator(OperatorType.BINARY, '*', 300, OperatorAssociativity.LEFT);
+        Operator divisionOperator       = new Operator(OperatorType.BINARY, '/', 300, OperatorAssociativity.LEFT);
+        Operator minusOperator          = new Operator(OperatorType.UNARY_PREFIX, '-', 200, OperatorAssociativity.RIGHT);
+        Operator callBeginOperator      = new Operator(OperatorType.CALL, '(', 100, OperatorAssociativity.LEFT);
+        Operator callEndOperator        = new Operator(OperatorType.CALL, ')', Integer.MAX_VALUE, OperatorAssociativity.LEFT); // least prior
 
         OPERATOR_SYMBOL_SET = new HashSet<Character>();
         OPERATOR_SYMBOL_SET.add('+');
