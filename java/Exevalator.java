@@ -427,7 +427,13 @@ final class LexicalAnalyzer {
                 }
                 parenthesisDepth--;
 
-            // Cases of operators.
+            // Cases of separators of function arguments:
+            // they are handled as a special operator, for the algorithm of the parser of Exevalator.
+            } else if (word.equals(",")) {
+                Operator op = StaticSettings.CALL_OPERATOR_SYMBOL_MAP.get(word.charAt(0));
+                tokens[itoken] = new Token(TokenType.OPERATOR, word, op);
+
+            // Cases of other operators.
             } else if (word.length() == 1 && StaticSettings.OPERATOR_SYMBOL_SET.contains(word.charAt(0))) {
                 Operator op = null;
 
@@ -457,12 +463,10 @@ final class LexicalAnalyzer {
                 }
                 tokens[itoken] = new Token(TokenType.OPERATOR, word, op);
 
-                // Cases of literals, and separator.
+            // Case of literals
             } else if (word.equals(StaticSettings.ESCAPED_NUMBER_LITERAL)) {
                 tokens[itoken] = new Token(TokenType.NUMBER_LITERAL, numberLiterals.get(iliteral));
                 iliteral++;
-            } else if (word.equals(",")) {
-                tokens[itoken] = new Token(TokenType.EXPRESSION_SEPARATOR, word);
 
             // Cases of variable identifier of function identifier.
             } else {
@@ -693,12 +697,6 @@ final class Parser {
                     operatorNode = popPartialExprNodes(stack, parenthesisStackLid)[0];
                 }
 
-            // Case of separator: ","
-            } else if (token.type == TokenType.EXPRESSION_SEPARATOR) {
-                stack.push(separatorStackLid);
-                itoken++;
-                continue;
-
             // Case of operators: "+", "-", etc.
             } else if (token.type == TokenType.OPERATOR) {
                 operatorNode = new AstNode(token);
@@ -730,12 +728,16 @@ final class Parser {
                         stack.push(callBeginStackLid); // The marker to correct partial expressions of args from the stack.
                         itoken++;
                         continue;
-                    } else { // Case of ")"
+                    } else if (token.word.equals(")")) {
                         AstNode[] argNodes = popPartialExprNodes(stack, callBeginStackLid);
                         operatorNode = stack.pop();
                         for (AstNode argNode: argNodes) {
                             operatorNode.childNodeList.add(argNode);
                         }
+                    } else if (token.word.equals(",")) {
+                        stack.push(separatorStackLid);
+                        itoken++;
+                        continue;
                     }
                 }
             }
@@ -947,9 +949,6 @@ enum TokenType {
 
     /** Represents operator tokens, for example: + */
     OPERATOR,
-
-    /** Represents separator tokens of partial expressions: , */
-    EXPRESSION_SEPARATOR,
 
     /** Represents parenthesis, for example: ( and ) of (1*(2+3)) */
     PARENTHESIS,
@@ -1570,6 +1569,7 @@ final class StaticSettings {
         Operator minusOperator          = new Operator(OperatorType.UNARY_PREFIX, '-', 200, OperatorAssociativity.RIGHT);
         Operator callBeginOperator      = new Operator(OperatorType.CALL, '(', 100, OperatorAssociativity.LEFT);
         Operator callEndOperator        = new Operator(OperatorType.CALL, ')', Integer.MAX_VALUE, OperatorAssociativity.LEFT); // least prior
+        Operator callSeparatorOperator  = new Operator(OperatorType.CALL, ',', Integer.MAX_VALUE, OperatorAssociativity.LEFT); // least prior
 
         OPERATOR_SYMBOL_SET = new HashSet<Character>();
         OPERATOR_SYMBOL_SET.add('+');
@@ -1591,6 +1591,7 @@ final class StaticSettings {
         CALL_OPERATOR_SYMBOL_MAP = new ConcurrentHashMap<Character, Operator>();
         CALL_OPERATOR_SYMBOL_MAP.put('(', callBeginOperator);
         CALL_OPERATOR_SYMBOL_MAP.put(')', callEndOperator);
+        CALL_OPERATOR_SYMBOL_MAP.put(',', callSeparatorOperator);
 
         TOKEN_SPLITTER_SYMBOL_LIST = new ArrayList<Character>();
         TOKEN_SPLITTER_SYMBOL_LIST.add('+');
