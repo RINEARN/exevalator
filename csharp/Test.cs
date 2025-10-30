@@ -217,6 +217,12 @@ class Test
             exevalator.Eval("1.2 + 3.4 / 5.6 * -7.8"),
             1.2 + 3.4 / 5.6 * -7.8
         );
+
+        Check(
+            "Test of Precedences of Operators 16",
+            exevalator.Eval("1.2*--3.4"),
+            1.2*(-(-3.4))
+        );
     }
 
 

@@ -550,7 +550,13 @@ std::vector<Token> LexicalAnalyzer::create_tokens_from_token_words(
             }
             parenthesis_depth--;
 
-        // Case of operators.
+        // Case of separators of function arguments:
+        // they are handled as a special operator, for the algorithm of the parser of Exevalator.
+        } else if (word == ",") {
+            OperatorInfo opinfo = settings.call_symbol_operator_map.at(word[0]);
+            tokens.push_back(Token{ TokenType::OPERATOR, word, opinfo });
+
+        // Case of other operators.
         } else if (word.length() == 1 && settings.operator_symbol_set.find(word[0]) != settings.operator_symbol_set.end()) {
 
             OperatorInfo opinfo;
@@ -580,12 +586,10 @@ std::vector<Token> LexicalAnalyzer::create_tokens_from_token_words(
             }
             tokens.push_back(Token{ TokenType::OPERATOR, word, opinfo });
 
-        // Cases if literals and separator.
+        // Case if literals.
         } else if (word == settings.escaped_number_literal) {
             tokens.push_back(Token{ TokenType::NUMBER_LITERAL, number_literals[literal_count] });
             literal_count++;
-        } else if (word == ",") {
-            tokens.push_back(Token{ TokenType::EXPRESSION_SEPARATOR, word });
 
         // Cases of variable identifier of function identifier.
         } else {
@@ -789,12 +793,6 @@ std::unique_ptr<AstNode> Parser::parse(const std::vector<Token> &tokens) {
                 operator_node = std::move(partial_expr_nodes.front());
             }
 
-        // Case of separator: ","
-        } else if (token.type == TokenType::EXPRESSION_SEPARATOR) {
-            stack.push_back(std::make_unique<AstNode>(separator_lid_token));
-            itoken++;
-            continue;
-
         // Case of operators: "+", "-", etc.
         } else if (token.type == TokenType::OPERATOR) {
             operator_node = std::make_unique<AstNode>(token);
@@ -803,9 +801,9 @@ std::unique_ptr<AstNode> Parser::parse(const std::vector<Token> &tokens) {
             // Case of unary-prefix operators:
             // * Connect the node of right-token as an operand, if necessary (depending the next operator's precedence).
             if (token.opinfo.type == OperatorType::UNARY_PREFIX) {
-                if (Parser::should_add_right_operand(token.opinfo.precedence, next_op_precedence)) {
+                if (Parser::should_add_right_operand(token.opinfo.associativity, token.opinfo.precedence, next_op_precedence)) {
                     operator_node->child_nodes.push_back( std::make_unique<AstNode>(tokens[itoken + 1]) );
-                    itoken++;
+                    itoken++; // The next token has been looked-ahead.
                 } // else: Operand will be connected later. See the bottom of this loop.
 
             // Case of binary operators:
@@ -814,9 +812,9 @@ std::unique_ptr<AstNode> Parser::parse(const std::vector<Token> &tokens) {
             } else if (token.opinfo.type == OperatorType::BINARY) {
                 operator_node->child_nodes.push_back(std::move(stack.back()));
                 stack.pop_back();
-                if (Parser::should_add_right_operand(token.opinfo.precedence, next_op_precedence)) {
+                if (Parser::should_add_right_operand(token.opinfo.associativity, token.opinfo.precedence, next_op_precedence)) {
                     operator_node->child_nodes.push_back(std::make_unique<AstNode>(tokens[itoken + 1]));
-                    itoken++;
+                    itoken++; // The next token has been looked-ahead.
                 } // else: Right-operand will be connected later. See the bottom of this loop.
 
             // Case of function-call operators.
@@ -828,7 +826,7 @@ std::unique_ptr<AstNode> Parser::parse(const std::vector<Token> &tokens) {
                     stack.push_back(std::make_unique<AstNode>(call_begin_lid_token)); // The marker to correct partial expressions of args from the stack.
                     itoken++;
                     continue;
-                } else { // Case of ")"
+                } else if (token.word == ")") {
                     std::vector<std::unique_ptr<AstNode>> arg_nodes;
                     Parser::pop_partial_expr_nodes(arg_nodes, stack, call_begin_lid_token);
                     operator_node = std::move(stack.back());
@@ -836,6 +834,10 @@ std::unique_ptr<AstNode> Parser::parse(const std::vector<Token> &tokens) {
                     for (std::unique_ptr<AstNode> &arg_node: arg_nodes) {
                         operator_node->child_nodes.push_back(std::move(arg_node));
                     }
+                } else if (token.word == ",") {
+                    stack.push_back(std::make_unique<AstNode>(separator_lid_token));
+                    itoken++;
+                    continue;
                 }
             }
         }
@@ -859,12 +861,24 @@ std::unique_ptr<AstNode> Parser::parse(const std::vector<Token> &tokens) {
 /**
  * Judges whether the right-side token should be connected directly as an operand, to the target operator.
  *
+ * @param target_operator_associativity The associativity (right/left) of the target opeartor
  * @param target_operator_precedence The precedence of the target operator (smaller value gives higher precedence)
  * @param next_operator_precedence The precedence of the next operator (smaller value gives higher precedence)
  * @return Returns true if the right-side token (operand) should be connected to the target operator
  */
-constexpr bool Parser::should_add_right_operand(uint64_t target_operator_precedence, uint64_t next_operator_precedence) {
-    return target_operator_precedence <= next_operator_precedence; // left is stronger
+constexpr bool Parser::should_add_right_operand(
+        OperatorAssociativity target_operator_associativity, uint64_t target_operator_precedence, uint64_t next_operator_precedence) {
+
+    // If the precedence of the target operator is stronger than the next operator, return true.
+    // If the precedence of the next operator is stronger than the target operator, return false.
+    // If the precedence of both operators is the same:
+    //         Return true if the target operator is left-associative.
+    //         Return false if the target operator is right-associative.
+
+    bool target_op_precedence_is_strong = target_operator_precedence < next_operator_precedence; // Smaller value gives higher precedence.
+    bool target_op_precedence_is_equal = target_operator_precedence == next_operator_precedence; // Smaller value gives higher precedence.
+    bool target_op_associativity_is_left = target_operator_associativity == OperatorAssociativity::LEFT;
+    return target_op_precedence_is_strong || (target_op_precedence_is_equal && target_op_associativity_is_left);
 }
 
 /**
@@ -885,7 +899,7 @@ bool Parser::should_add_right_operand_to_stacked_operator(
         return false;
     }
     return Parser::should_add_right_operand(
-        stack.back()->token.opinfo.precedence, next_operator_precedence
+        stack.back()->token.opinfo.associativity, stack.back()->token.opinfo.precedence, next_operator_precedence
     );
 }
 
@@ -986,6 +1000,8 @@ std::string AstNode::to_markupped_text(uint64_t indent_stage) {
         result.append(operator_type_name(opinfo.type));
         result.append("\" precedence=\"");
         result.append(std::to_string(opinfo.precedence));
+        result.append("\" associativity=\"");
+        result.append(operator_associativity_name(opinfo.associativity));
         result.append("\"");
     }
 

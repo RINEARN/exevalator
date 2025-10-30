@@ -152,6 +152,18 @@ enum OperatorType {
 };
 
 /**
+ * The enum representing associativities of operators.
+ */
+enum OperatorAssociativity {
+
+    /** Represents left-associative. */
+    LEFT,
+
+    /** Represents right-associative. */
+    RIGHT,
+};
+
+/**
  * The struct storing information of an oprator.
  */
 struct OperatorInfo {
@@ -164,6 +176,9 @@ struct OperatorInfo {
 
     /** The precedence of this operator (smaller value gives higher precedence). */
     uint64_t precedence;
+
+    /** The associativity of this operator. */
+    OperatorAssociativity associativity;
 };
 
 /**
@@ -181,6 +196,20 @@ static std::string operator_type_name(OperatorType type) {
     }
 }
 
+/**
+ * Converts a OperatorAssociativity enum to its name.
+ * 
+ * @param associativity A OperatorAssociativity enum element to be converted.
+ * @return The name of the spacified enum element.
+ */
+static std::string operator_associativity_name(OperatorAssociativity associativity) {
+    switch (associativity) {
+        case OperatorAssociativity::LEFT:  return std::string { "LEFT"  };
+        case OperatorAssociativity::RIGHT: return std::string { "RIGHT" };
+        default: return std::string { "UNKNOWN" };
+    }
+}
+
 
 /**
  * The enum representing types of tokens.
@@ -192,9 +221,6 @@ enum TokenType {
 
     /** Represents operator tokens, for example: +. */
     OPERATOR,
-
-    /** Represents separator tokens of partial expressions: ,. */
-    EXPRESSION_SEPARATOR,
 
     /** Represents parenthesis, for example: ( and ) of (1*(2+3)). */
     PARENTHESIS,
@@ -235,7 +261,6 @@ static std::string token_type_name(TokenType type) {
     switch (type) {
         case TokenType::NUMBER_LITERAL:       return std::string { "NUMBER_LITERAL" };
         case TokenType::OPERATOR:             return std::string { "OPERATOR" };
-        case TokenType::EXPRESSION_SEPARATOR: return std::string { "EXPRESSION_SEPARATOR" };
         case TokenType::PARENTHESIS:          return std::string { "PARENTHESIS" };
         case TokenType::VARIABLE_IDENTIFIER:  return std::string { "VARIABLE_IDENTIFIER" };
         case TokenType::FUNCTION_IDENTIFIER:  return std::string { "FUNCTION_IDENTIFIER" };
@@ -294,13 +319,14 @@ struct Settings {
         max_name_char_count = 64;
         max_token_count = 64;
         max_ast_depth = 32;
-        OperatorInfo addition_operator_info       = OperatorInfo { OperatorType::BINARY,       '+', 400 };
-        OperatorInfo subtraction_operator_info    = OperatorInfo { OperatorType::BINARY,       '-', 400 };
-        OperatorInfo multiplication_operator_info = OperatorInfo { OperatorType::BINARY,       '*', 300 };
-        OperatorInfo division_operator_info       = OperatorInfo { OperatorType::BINARY,       '/', 300 };
-        OperatorInfo minus_operator_info          = OperatorInfo { OperatorType::UNARY_PREFIX, '-', 200 };
-        OperatorInfo call_begin_operator_info     = OperatorInfo { OperatorType::CALL,         '(', 100 };
-        OperatorInfo call_end_operator_info       = OperatorInfo { OperatorType::CALL,         ')', std::numeric_limits<uint64_t>::max() };
+        OperatorInfo addition_operator_info       = OperatorInfo { OperatorType::BINARY,       '+', 400, OperatorAssociativity::LEFT };
+        OperatorInfo subtraction_operator_info    = OperatorInfo { OperatorType::BINARY,       '-', 400, OperatorAssociativity::LEFT };
+        OperatorInfo multiplication_operator_info = OperatorInfo { OperatorType::BINARY,       '*', 300, OperatorAssociativity::LEFT };
+        OperatorInfo division_operator_info       = OperatorInfo { OperatorType::BINARY,       '/', 300, OperatorAssociativity::LEFT };
+        OperatorInfo minus_operator_info          = OperatorInfo { OperatorType::UNARY_PREFIX, '-', 200, OperatorAssociativity::RIGHT };
+        OperatorInfo call_begin_operator_info     = OperatorInfo { OperatorType::CALL,         '(', 100, OperatorAssociativity::LEFT };
+        OperatorInfo call_end_operator_info       = OperatorInfo { OperatorType::CALL,         ')', std::numeric_limits<uint64_t>::max(), OperatorAssociativity::LEFT };
+        OperatorInfo call_separator_operator_info = OperatorInfo { OperatorType::CALL,         ',', std::numeric_limits<uint64_t>::max(), OperatorAssociativity::LEFT };
         this->binary_symbol_operator_map['+']       = addition_operator_info;
         this->binary_symbol_operator_map['-']       = subtraction_operator_info;
         this->binary_symbol_operator_map['*']       = multiplication_operator_info;
@@ -308,6 +334,7 @@ struct Settings {
         this->unary_prefix_symbol_operator_map['-'] = minus_operator_info;
         this->call_symbol_operator_map['(']         = call_begin_operator_info;
         this->call_symbol_operator_map[')']         = call_end_operator_info;
+        this->call_symbol_operator_map[',']         = call_separator_operator_info;
         this->operator_symbol_set.insert('+');
         this->operator_symbol_set.insert('-');
         this->operator_symbol_set.insert('*');
@@ -315,6 +342,7 @@ struct Settings {
         this->operator_symbol_set.insert('-');
         this->operator_symbol_set.insert('(');
         this->operator_symbol_set.insert(')');
+        this->operator_symbol_set.insert(',');
         this->token_splitter_character_list.push_back('+');
         this->token_splitter_character_list.push_back('-');
         this->token_splitter_character_list.push_back('*');
@@ -501,11 +529,13 @@ class Parser {
     /**
      * Judges whether the right-side token should be connected directly as an operand, to the target operator.
      *
+     * @param target_operator_associativity The associativity (right/left) of the target opeartor
      * @param target_operator_precedence The precedence of the target operator (smaller value gives higher precedence)
      * @param next_operator_precedence The precedence of the next operator (smaller value gives higher precedence)
      * @return Returns true if the right-side token (operand) should be connected to the target operator
      */
-    static constexpr bool should_add_right_operand(uint64_t target_operator_precedence, uint64_t next_operator_precedence);
+    static constexpr bool should_add_right_operand(
+            OperatorAssociativity target_operator_associativity, uint64_t target_operator_precedence, uint64_t next_operator_precedence);
 
     /**
      * Judges whether the right-side token should be connected directly as an operand,

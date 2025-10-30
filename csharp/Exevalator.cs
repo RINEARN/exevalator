@@ -456,7 +456,15 @@ namespace Rinearn.ExevalatorCS
                     parenthesisDepth--;
 
                 }
-                // Cases of operators.
+                // Case of separators of function arguments:
+                // they are handled as a special operator, for the algorithm of the parser of Exevalator.
+                else if (word == ",")
+                {
+                    Operator op = StaticSettings.CallSymbolOperatorDict[word[0]];
+                    tokens[itoken] = new Token(TokenType.Operator, word, op);
+                }
+                
+                // Cases of other operators.
                 else if (word.Length == 1 && StaticSettings.OperatorSymbolSet.Contains(word[0]))
                 {
                     tokens[itoken] = new Token(TokenType.Operator, word);
@@ -501,16 +509,11 @@ namespace Rinearn.ExevalatorCS
                     tokens[itoken] = new Token(TokenType.Operator, word, op.Value);
 
                 }
-                // Cases of literals, and separator.
+                // Case of literals.
                 else if (word == StaticSettings.EscapedNumberLiteral)
                 {
                     tokens[itoken] = new Token(TokenType.NumberLiteral, numberLiterals[iliteral]);
                     iliteral++;
-                }
-                else if (word == ",")
-                {
-                    tokens[itoken] = new Token(TokenType.ExpressionSeparator, word);
-
                 }
                 // Cases of variable identifier of function identifier.
                 else
@@ -749,13 +752,6 @@ namespace Rinearn.ExevalatorCS
                         operatorNode = Parser.PopPartialExprNodes(stack, parenthesisStackLidToken)[0];
                     }
                 }
-                // Case of separator: ","
-                else if (token.Type == TokenType.ExpressionSeparator)
-                {
-                    stack.Push(new AstNode(separatorStackLidToken));
-                    itoken++;
-                    continue;
-                }
                 // Case of operators: "+", "-", etc.
                 else if (token.Type == TokenType.Operator)
                 {
@@ -766,10 +762,10 @@ namespace Rinearn.ExevalatorCS
                     // * Connect the node of right-token as an operand, if necessary (depending the next operator's precedence).
                     if (token.Operator!.Value.Type == OperatorType.UnaryPrefix)
                     {
-                        if (Parser.ShouldAddRightOperand(token.Operator.Value.Precedence, nextOpPrecedence))
+                        if (Parser.ShouldAddRightOperand(token.Operator.Value.Associativity, token.Operator.Value.Precedence, nextOpPrecedence))
                         {
                             operatorNode.ChildNodeList.Add(new AstNode(tokens[itoken + 1]));
-                            itoken++;
+                            itoken++; // The next token has been looked-ahead.
                         } // else: Operand will be connected later. See the bottom of this loop.
 
                     }
@@ -779,10 +775,10 @@ namespace Rinearn.ExevalatorCS
                     else if (token.Operator!.Value.Type == OperatorType.Binary)
                     {
                         operatorNode.ChildNodeList.Add(stack.Pop());
-                        if (Parser.ShouldAddRightOperand(token.Operator.Value.Precedence, nextOpPrecedence))
+                        if (Parser.ShouldAddRightOperand(token.Operator.Value.Associativity, token.Operator.Value.Precedence, nextOpPrecedence))
                         {
                             operatorNode.ChildNodeList.Add(new AstNode(tokens[itoken + 1]));
-                            itoken++;
+                            itoken++; // The next token has been looked-ahead.
                         } // else: Right-operand will be connected later. See the bottom of this loop.
                     }
                     // Case of function-call operators.
@@ -796,8 +792,7 @@ namespace Rinearn.ExevalatorCS
                             itoken++;
                             continue;
                         }
-                        // Case of ")"
-                        else
+                        else if (token.Word == ")")
                         {
                             AstNode[] argNodes = Parser.PopPartialExprNodes(stack, callBeginStackLidToken);
                             operatorNode = stack.Pop();
@@ -805,6 +800,12 @@ namespace Rinearn.ExevalatorCS
                             {
                                 operatorNode.ChildNodeList.Add(argNode);
                             }
+                        }
+                        else if (token.Word == ",")
+                        {
+                            stack.Push(new AstNode(separatorStackLidToken));
+                            itoken++;
+                            continue;
                         }
                     }
                 }
@@ -834,12 +835,22 @@ namespace Rinearn.ExevalatorCS
         /// <summary>
         /// Judges whether the right-side token should be connected directly as an operand, to the target operator.
         /// </summary>
+        /// <param name="targetOperatorAssociativity">The associativity (right/left) of the target opeartor.</param>
         /// <param name="targetOperatorPrecedence">The precedence of the target operator (smaller value gives higher precedence)</param>
         /// <param name="nextOperatorPrecedence">The precedence of the next operator (smaller value gives higher precedence)</param>
         /// <returns>Returns true if the right-side token (operand) should be connected to the target operator</returns>
-        private static bool ShouldAddRightOperand(uint targetOperatorPrecedence, uint nextOperatorPrecedence)
+        private static bool ShouldAddRightOperand(OperatorAssociativity targetOperatorAssociativity, uint targetOperatorPrecedence, uint nextOperatorPrecedence)
         {
-            return targetOperatorPrecedence <= nextOperatorPrecedence; // left is stronger
+            // If the precedence of the target operator is stronger than the next operator, return true.
+            // If the precedence of the next operator is stronger than the target operator, return false.
+            // If the precedence of both operators is the same:
+            //         Return true if the target operator is left-associative.
+            //         Return false if the target operator is right-associative.
+
+            bool targetOpPrecedenceIsStrong = targetOperatorPrecedence < nextOperatorPrecedence; // Smaller value gives higher precedence.
+            bool targetOpPrecedenceIsEqual = targetOperatorPrecedence == nextOperatorPrecedence; // Smaller value gives higher precedence.
+            bool targetOpAssociativityIsLeft = targetOperatorAssociativity == OperatorAssociativity.LEFT;
+            return targetOpPrecedenceIsStrong || (targetOpPrecedenceIsEqual && targetOpAssociativityIsLeft);
         }
 
         /// <summary>
@@ -855,7 +866,8 @@ namespace Rinearn.ExevalatorCS
             {
                 return false;
             }
-            return ShouldAddRightOperand(stack.Peek().Token.Operator!.Value.Precedence, nextOperatorPrecedence);
+            Operator operatorOnStackTop = stack.Peek().Token.Operator!.Value;
+            return ShouldAddRightOperand(operatorOnStackTop.Associativity, operatorOnStackTop.Precedence, nextOperatorPrecedence);
         }
 
         /// <summary>
@@ -954,6 +966,19 @@ namespace Rinearn.ExevalatorCS
     }
 
     /// <summary>
+    /// The enum representing associativities of operators.
+    /// </summary>
+    public enum OperatorAssociativity 
+    {
+
+        /// <summary>Represents left-associative.</summary>
+        LEFT,
+
+        /// <summary>Represents right-associative.</summary>
+        RIGHT
+    }
+
+    /// <summary>
     /// The struct storing information of an operator.
     /// </summary>
     public struct Operator
@@ -968,17 +993,22 @@ namespace Rinearn.ExevalatorCS
         /// <summary>The precedence of this operator (smaller value gives higher precedence).</summary>
         public readonly uint Precedence;
 
+        /// <summary>The associativity of operator tokens.</summary>
+        public readonly OperatorAssociativity Associativity;
+
         /// <summary>
         /// Create an Operator instance storing specified information.
         /// </summary>
         /// <param name="type">The type of this operator</param>
         /// <param name="symbol">The symbol of this operator</param>
         /// <param name="precedence">The precedence of this operator</param>
-        public Operator(OperatorType type, char symbol, uint precedence)
+        /// <param name="associativity">The associativity of this operator</param>
+        public Operator(OperatorType type, char symbol, uint precedence, OperatorAssociativity associativity)
         {
             this.Type = type;
             this.Symbol = symbol;
             this.Precedence = precedence;
+            this.Associativity = associativity;
         }
 
         /// <summary>
@@ -1024,8 +1054,9 @@ namespace Rinearn.ExevalatorCS
         public override string ToString()
         {
             return "Operator [Symbol=" + this.Symbol +
-                   ", Precedence=" + this.Precedence +
                    ", Type=" + this.Type +
+                   ", Precedence=" + this.Precedence +
+                   ", Associativity=" + this.Associativity +
                    "]";
         }
     }
@@ -1042,9 +1073,6 @@ namespace Rinearn.ExevalatorCS
 
         /// <summary>Represents operator tokens, for example: +</summary>
         Operator,
-
-        /// <summary>Represents separator tokens of partial expressions: ,</summary>
-        ExpressionSeparator,
 
         /// <summary>Represents parenthesis, for example: ( and ) of (1*(2+3))</summary>
         Parenthesis,
@@ -1774,13 +1802,14 @@ namespace Rinearn.ExevalatorCS
         /// <summary>Initializes values of static-readonly members.</summary>
         static StaticSettings()
         {
-            Operator additionOperator = new Operator(OperatorType.Binary, '+', 400);
-            Operator subtractionOperator = new Operator(OperatorType.Binary, '-', 400);
-            Operator multiplicationOperator = new Operator(OperatorType.Binary, '*', 300);
-            Operator divisionOperator = new Operator(OperatorType.Binary, '/', 300);
-            Operator minusOperator = new Operator(OperatorType.UnaryPrefix, '-', 200);
-            Operator callBeginOperator = new Operator(OperatorType.Call, '(', 100);
-            Operator callEndOperator = new Operator(OperatorType.Call, ')', System.UInt32.MaxValue); // least prior
+            Operator additionOperator = new Operator(OperatorType.Binary, '+', 400, OperatorAssociativity.LEFT);
+            Operator subtractionOperator = new Operator(OperatorType.Binary, '-', 400, OperatorAssociativity.LEFT);
+            Operator multiplicationOperator = new Operator(OperatorType.Binary, '*', 300, OperatorAssociativity.LEFT);
+            Operator divisionOperator = new Operator(OperatorType.Binary, '/', 300, OperatorAssociativity.LEFT);
+            Operator minusOperator = new Operator(OperatorType.UnaryPrefix, '-', 200, OperatorAssociativity.RIGHT);
+            Operator callBeginOperator = new Operator(OperatorType.Call, '(', 100, OperatorAssociativity.LEFT);
+            Operator callEndOperator = new Operator(OperatorType.Call, ')', System.UInt32.MaxValue, OperatorAssociativity.LEFT); // least prior
+            Operator callSeparatorOperator = new Operator(OperatorType.Call, ',', System.UInt32.MaxValue, OperatorAssociativity.LEFT); // least prior
 
             OperatorSymbolSet = new HashSet<char>();
             OperatorSymbolSet.Add('+');
@@ -1789,6 +1818,7 @@ namespace Rinearn.ExevalatorCS
             OperatorSymbolSet.Add('/');
             OperatorSymbolSet.Add('(');
             OperatorSymbolSet.Add(')');
+            OperatorSymbolSet.Add(',');
 
             BinarySymbolOperatorDict = new Dictionary<char, Operator>();
             BinarySymbolOperatorDict.Add('+', additionOperator);
@@ -1802,6 +1832,7 @@ namespace Rinearn.ExevalatorCS
             CallSymbolOperatorDict = new Dictionary<char, Operator>();
             CallSymbolOperatorDict.Add('(', callBeginOperator);
             CallSymbolOperatorDict.Add(')', callEndOperator);
+            CallSymbolOperatorDict.Add(',', callSeparatorOperator);
 
             TokenSplitterSymbolList = new List<char>();
             TokenSplitterSymbolList.Add('+');

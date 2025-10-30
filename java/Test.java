@@ -214,7 +214,7 @@ public class Test {
         );
 
         check(
-            "Test of Precedences of Operators 15",
+            "Test of Precedences of Operators 16",
             exevalator.eval("1.2*--3.4"),
             1.2*(-(-3.4))
         );

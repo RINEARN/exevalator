@@ -209,6 +209,12 @@ fn test_precedences_of_oerators() {
         exevalator.eval("1.2 + 3.4 / 5.6 * -7.8"),
         1.2 + 3.4 / 5.6 * -7.8
     );
+
+    check(
+        "Test of Precedences of Operators 16",
+        exevalator.eval("1.2*--3.4"),
+        1.2*(-(-3.4))
+    );
 }
 
 

@@ -220,6 +220,12 @@ Module Test
             exevalator.Eval("1.2 + 3.4 / 5.6 * -7.8"), _
             1.2 + 3.4 / 5.6 * -7.8 _
         )
+
+        Check( _
+            "Test of Precedences of Operators 16", _
+            exevalator.Eval("1.2*--3.4"), _
+            1.2*(-(-3.4)) _
+        )
     End Sub
 
 

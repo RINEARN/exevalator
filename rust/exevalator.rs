@@ -529,6 +529,14 @@ impl LexicalAnalyzer {
                 }
                 parenthesis_depth -= 1;
 
+            // Case of separators of function arguments:
+            // they are handled as a special operator, for the algorithm of the parser of Exevalator.
+            } else if word.eq(",") {
+                let mut token: Token = Token::new(TokenType::Operator, word.clone());
+                token.operator = Some(settings.call_symbol_operator_map[&','].clone());
+                last_operator_type = Some(&OperatorType::Call);
+                tokens.push(token);
+
             // Cases of operators.
             } else if word.len() == 1 && settings.operator_symbol_set.contains(&word.chars().nth(0).unwrap()) {
                 let mut token: Token = Token::new(TokenType::Operator, word.clone());
@@ -564,8 +572,6 @@ impl LexicalAnalyzer {
             } else if word.eq(&settings.escaped_number_literal) {
                 tokens.push(Token::new(TokenType::NumberLiteral, number_literals[iliteral].clone()));
                 iliteral += 1;
-            } else if word.eq(",") {
-                tokens.push(Token::new(TokenType::ExpressionSeparator, word.clone()));
 
             // Cases of variable identifier of function identifier.
             } else {
@@ -773,12 +779,6 @@ impl Parser {
                     operator_node = Some(partial_expr_node); // Note: the peak of AST of expression is an operator node.
                 }
 
-            // Case of separator: ","
-            } else if token.token_type == TokenType::ExpressionSeparator {
-                stack.push_back( AstNode::new(separator_lid_token.clone()) );
-                itoken += 1;
-                continue;
-
             // Case of operators: "+", "-", etc.
             } else if token.token_type == TokenType::Operator {
                 operator_node = Some( AstNode::new(token.clone()) );
@@ -789,9 +789,9 @@ impl Parser {
                 // Case of unary-prefix operators:
                 // * Connect the node of right-token as an operand, if necessary (depending the next operator's precedence).
                 if operator.operator_type == OperatorType::UnaryPrefix {
-                    if Parser::should_add_right_operand(operator.precedence, next_op_precedence) {
+                    if Parser::should_add_right_operand(operator.associativity, operator.precedence, next_op_precedence) {
                         opnode_mut_ref.child_nodes.push( AstNode::new(tokens[itoken + 1].clone()) );
-                        itoken += 1;
+                        itoken += 1; // The next token has been looked-ahead.
                     } // else: Operand will be connected later. See the bottom of this loop.
 
                 // Case of binary operators:
@@ -799,9 +799,9 @@ impl Parser {
                 // * Connect the node of right-token as an operand, if necessary (depending the next operator's precedence).
                 } else if operator.operator_type == OperatorType::Binary {
                     opnode_mut_ref.child_nodes.push( stack.pop_back().unwrap() );
-                    if Parser::should_add_right_operand(operator.precedence, next_op_precedence) {
+                    if Parser::should_add_right_operand(operator.associativity, operator.precedence, next_op_precedence) {
                         opnode_mut_ref.child_nodes.push( AstNode::new(tokens[itoken + 1].clone()) );
-                        itoken += 1;
+                        itoken += 1; // The next token has been looked-ahead.
                     } // else: Right-operand will be connected later. See the bottom of this loop.
 
                 // Case of function-call operators.
@@ -812,7 +812,7 @@ impl Parser {
                         stack.push_back( AstNode::new(call_begin_lid_token.clone()) ); // The marker to correct partial expressions of args from the stack.
                         itoken += 1;
                         continue;
-                    } else { // Case of ")"
+                    } else if token.word.eq(")") {
                         let arg_nodes: Vec<AstNode> = match Parser::pop_partial_expr_nodes(&mut stack, &call_begin_lid_token) {
                             Ok(popped_nodes) => popped_nodes,
                             Err(popping_error) => return Err(popping_error),
@@ -822,6 +822,10 @@ impl Parser {
                         for arg_node in arg_nodes {
                             opnode_mut_ref.child_nodes.push(arg_node);
                         }
+                    } else if token.word.eq(",") {
+                        stack.push_back( AstNode::new(separator_lid_token.clone()) );
+                        itoken += 1;
+                        continue;
                     }
                 }
             }
@@ -850,12 +854,25 @@ impl Parser {
 
     /// Judges whether the right-side token should be connected directly as an operand, to the target operator.
     ///
+    /// * `target_operator_associativity` - The associativity of the target operator.
     /// * `target_operator_precedence` - The precedence of the target operator (smaller value gives higher precedence).
     /// * `next_operator_precedence` - The precedence of the next operator (smaller value gives higher precedence).
     /// * Return value - Returns true if the right-side token (operand) should be connected to the target operator.
     ///
-    fn should_add_right_operand(target_operator_precedence: u64, next_operator_precedence: u64) -> bool {
-        return target_operator_precedence <= next_operator_precedence; // left is stronger
+    fn should_add_right_operand(
+            target_operator_associativity: OperatorAssociativity,
+            target_operator_precedence: u64, next_operator_precedence: u64) -> bool {
+
+        // If the precedence of the target operator is stronger than the next operator, return true.
+        // If the precedence of the next operator is stronger than the target operator, return false.
+        // If the precedence of both operators is the same:
+        //         Return true if the target operator is left-associative.
+        //         Return false if the target operator is right-associative.
+
+        let target_op_precedence_is_strong: bool = target_operator_precedence < next_operator_precedence; // Smaller value gives higher precedence.
+        let target_op_precedence_is_equal: bool = target_operator_precedence == next_operator_precedence; // Smaller value gives higher precedence.
+        let target_op_associativity_is_left: bool = target_operator_associativity == OperatorAssociativity::LEFT;
+        return target_op_precedence_is_strong || (target_op_precedence_is_equal && target_op_associativity_is_left);
     }
 
     /// Judges whether the right-side token should be connected directly as an operand,
@@ -875,7 +892,9 @@ impl Parser {
             return false;
         }
         return Parser::should_add_right_operand(
-            back_node.token.operator.as_ref().unwrap().precedence, next_operator_precedence
+            back_node.token.operator.as_ref().unwrap().associativity,
+            back_node.token.operator.as_ref().unwrap().precedence,
+            next_operator_precedence
         );
     }
 
@@ -960,6 +979,17 @@ enum OperatorType {
     Call,
 }
 
+/// The enum representing associativities of operators.
+#[derive(PartialEq,Eq,Clone,Copy,Debug)]
+enum OperatorAssociativity {
+
+    /// Represents left-associative.
+    LEFT,
+
+    /// Represents right-associative.
+    RIGHT,
+}
+
 /// The struct storing information of an operator.
 #[derive(PartialEq,Eq,Clone,Debug)]
 struct Operator {
@@ -972,6 +1002,9 @@ struct Operator {
 
     /// The precedence of this operator (smaller value gives higher precedence).
     precedence: u64,
+
+    /// The associativity of this operator.
+    associativity: OperatorAssociativity,
 }
 impl Operator {
 
@@ -980,13 +1013,15 @@ impl Operator {
     /// * `operator_type` The type of this operator.
     /// * `symbol` - The symbol of this operator.
     /// * `precedence` - The precedence of this operator.
+    /// * `associativity` - The associativity of this operator.
     /// * Return value - The created instance.
     ///
-    fn new(operator_type: OperatorType, symbol: char, precedence: u64) -> Self {
+    fn new(operator_type: OperatorType, symbol: char, precedence: u64, associativity: OperatorAssociativity) -> Self {
         Self {
             operator_type: operator_type,
             symbol: symbol,
             precedence: precedence,
+            associativity: associativity,
         }
     }
 
@@ -999,6 +1034,7 @@ impl Operator {
             operator_type: self.operator_type.clone(),
             symbol: self.symbol.clone(),
             precedence: self.precedence.clone(),
+            associativity: self.associativity.clone(),
         }
     }
 }
@@ -1013,9 +1049,6 @@ enum TokenType {
 
     /// Represents operator tokens, for example: +.
     Operator,
-
-    /// Represents separator tokens of partial expressions: ,.
-    ExpressionSeparator,
 
     /// Represents parenthesis, for example: ( and ) of (1*(2+3)).
     Parenthesis,
@@ -1138,6 +1171,8 @@ impl AstNode {
             result.push_str(&format!("{:?}", operator.operator_type));
             result.push_str("\" precedence=\"");
             result.push_str(&operator.precedence.to_string());
+            result.push_str("\" associativity=\"");
+            result.push_str(&format!("{:?}", operator.associativity));
             result.push_str("\"");
         }
 
@@ -1577,19 +1612,21 @@ impl Settings {
             space_equivalents: Vec::new(),
             escaped_number_literal: "@NUMBER_LITERAL@".to_string(),
         };
-        let addition_operator: Operator       = Operator::new(OperatorType::Binary,      '+', 400);
-        let subtraction_operator: Operator    = Operator::new(OperatorType::Binary,      '-', 400);
-        let multiplication_operator: Operator = Operator::new(OperatorType::Binary,      '*', 300);
-        let division_operator: Operator       = Operator::new(OperatorType::Binary,      '/', 300);
-        let minus_operator: Operator          = Operator::new(OperatorType::UnaryPrefix, '-', 200);
-        let call_begin_operator: Operator     = Operator::new(OperatorType::Call,        '(', 100);
-        let call_end_operator: Operator       = Operator::new(OperatorType::Call,        ')', std::u64::MAX);
+        let addition_operator: Operator       = Operator::new(OperatorType::Binary,      '+', 400, OperatorAssociativity::LEFT);
+        let subtraction_operator: Operator    = Operator::new(OperatorType::Binary,      '-', 400, OperatorAssociativity::LEFT);
+        let multiplication_operator: Operator = Operator::new(OperatorType::Binary,      '*', 300, OperatorAssociativity::LEFT);
+        let division_operator: Operator       = Operator::new(OperatorType::Binary,      '/', 300, OperatorAssociativity::LEFT);
+        let minus_operator: Operator          = Operator::new(OperatorType::UnaryPrefix, '-', 200, OperatorAssociativity::RIGHT);
+        let call_begin_operator: Operator     = Operator::new(OperatorType::Call,        '(', 100, OperatorAssociativity::LEFT);
+        let call_end_operator: Operator       = Operator::new(OperatorType::Call,        ')', std::u64::MAX, OperatorAssociativity::LEFT);
+        let call_separator_operator: Operator = Operator::new(OperatorType::Call,        ',', std::u64::MAX, OperatorAssociativity::LEFT);
         settings.operator_symbol_set.insert('+');
         settings.operator_symbol_set.insert('-');
         settings.operator_symbol_set.insert('*');
         settings.operator_symbol_set.insert('/');
         settings.operator_symbol_set.insert('(');
         settings.operator_symbol_set.insert(')');
+        settings.operator_symbol_set.insert(',');
         settings.binary_symbol_operator_map.insert('+', addition_operator.clone());
         settings.binary_symbol_operator_map.insert('-', subtraction_operator.clone());
         settings.binary_symbol_operator_map.insert('*', multiplication_operator.clone());
@@ -1597,6 +1634,7 @@ impl Settings {
         settings.unary_prefix_symbol_operator_map.insert('-', minus_operator.clone());
         settings.call_symbol_operator_map.insert('(', call_begin_operator.clone());
         settings.call_symbol_operator_map.insert(')', call_end_operator.clone());
+        settings.call_symbol_operator_map.insert(',', call_separator_operator.clone());
         settings.token_splitters.push('+');
         settings.token_splitters.push('-');
         settings.token_splitters.push('*');

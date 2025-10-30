@@ -402,7 +402,13 @@ Namespace Rinearn.ExevalatorVB
                     End If
                     parenthesisDepth -= 1
 
-                ' Cases of operators.
+                ' Case of separators of function arguments:
+                ' they are handled as a special operator, for the algorithm of the parser of Exevalator.
+                Else If String.Equals(word, ",") Then
+                    Dim op As OperatorInfo = StaticSettings.CallSymbolOperatorDict(word(0))
+                    tokens(itoken) = New Token(TokenType.OperatorToken, word, op)
+
+                ' Cases of other operators.
                 Else If word.Length = 1 AndAlso StaticSettings.OperatorSymbolSet.Contains(word(0)) Then
                     tokens(itoken) = New Token(TokenType.OperatorToken, word)
 
@@ -435,13 +441,10 @@ Namespace Rinearn.ExevalatorVB
 
                     tokens(itoken) = New Token(TokenType.OperatorToken, word, op.Value)
 
-                ' Cases of literals, and separator.
+                ' Case of literals.
                 Else If String.Equals(word, StaticSettings.EscapedNumberLiteral) Then
                     tokens(itoken) = New Token(TokenType.NumberLiteral, numberLiterals(iliteral))
                     iliteral += 1
-
-                Else If String.Equals(word, ",") Then
-                    tokens(itoken) = New Token(TokenType.ExpressionSeparator, word)
 
                 ' Cases of variable identifier of function identifier.
                 Else
@@ -649,12 +652,6 @@ Namespace Rinearn.ExevalatorVB
                         operatorNode = Parser.PopPartialExprNodes(stack, parenthesisStackLidToken)(0)
                     End If
 
-                ' Case of separator: ","
-                Else If token.Type = TokenType.ExpressionSeparator Then
-                    stack.Push(New AstNode(separatorStackLidToken))
-                    itoken += 1
-                    Continue Do
-
                 ' Case of operators: "+", "-", etc.
                 Else If token.Type = TokenType.OperatorToken Then
                     operatorNode = New AstNode(token)
@@ -663,9 +660,9 @@ Namespace Rinearn.ExevalatorVB
                     ' Case of unary-prefix operators:
                     ' * Connect the node of right-token as an operand, if necessary (depending the next operator's precedence).
                     If token.OperatorInfo.Value.Type = OperatorType.UnaryPrefix Then
-                        If Parser.ShouldAddRightOperand(token.OperatorInfo.Value.Precedence, nextOpPrecedence) Then
+                        If Parser.ShouldAddRightOperand(token.OperatorInfo.Value.Associativity, token.OperatorInfo.Value.Precedence, nextOpPrecedence) Then
                             operatorNode.ChildNodeList.Add(New AstNode(tokens(itoken + 1)))
-                            itoken += 1
+                            itoken += 1 ' The next token has been looked-ahead.
                         End If ' else: Operand will be connected later. See the bottom of this loop.
 
                     ' Case of binary operators:
@@ -673,9 +670,9 @@ Namespace Rinearn.ExevalatorVB
                     ' Connect the node of right-token as an operand, if necessary (depending the next operator's precedence).
                     Else If token.OperatorInfo.Value.Type = OperatorType.Binary Then
                         operatorNode.ChildNodeList.Add(stack.Pop())
-                        If Parser.ShouldAddRightOperand(token.OperatorInfo.Value.Precedence, nextOpPrecedence) Then
+                        If Parser.ShouldAddRightOperand(token.OperatorInfo.Value.Associativity, token.OperatorInfo.Value.Precedence, nextOpPrecedence) Then
                             operatorNode.ChildNodeList.Add(New AstNode(tokens(itoken + 1)))
-                            itoken += 1
+                            itoken += 1 ' The next token has been looked-ahead.
                         End if ' else: Right-operand will be connected later. See the bottom of this loop.
 
                     ' Case of function-call operators.
@@ -683,18 +680,23 @@ Namespace Rinearn.ExevalatorVB
                         If String.Equals(token.Word, "(") Then
                             operatorNode.ChildNodeList.Add(stack.Pop()) ' Add function-identifier node at the top of the stack.
                             stack.Push(operatorNode)
-                            stack.Push(new AstNode(callBeginStackLidToken)) ' The marker to correct partial expressions of args from the stack.
+                            stack.Push(New AstNode(callBeginStackLidToken)) ' The marker to correct partial expressions of args from the stack.
                             itoken += 1
                             Continue Do
 
-                        ' Case of ")"
-                        Else
+                        Else If String.Equals(token.Word, ")") Then
                             Dim argNodes() As AstNode = Parser.PopPartialExprNodes(stack, callBeginStackLidToken)
                             operatorNode = stack.Pop()
 
                             For Each argNode As AstNode in argNodes
                                 operatorNode.ChildNodeList.Add(argNode)
                             Next
+
+                        Else If String.Equals(token.Word, ",") Then
+                            stack.Push(New AstNode(separatorStackLidToken))
+                            itoken += 1
+                            Continue Do
+
                         End If
                     End If
                 End if
@@ -724,11 +726,22 @@ Namespace Rinearn.ExevalatorVB
         ''' <summary>
         ''' Judges whether the right-side token should be connected directly as an operand, to the target operator.
         ''' </summary>
+        ''' <param name="targetOperatorAssociativity">The associativity (right/left) of the target opeartor</param>
         ''' <param name="targetOperatorPrecedence">The precedence of the target operator (smaller value gives higher precedence)</param>
         ''' <param name="nextOperatorPrecedence">The precedence of the next operator (smaller value gives higher precedence)</param>
         ''' <returns>Returns true if the right-side token (operand) should be connected to the target operator</returns>
-        Private Shared Function ShouldAddRightOperand(targetOperatorPrecedence As UInteger, nextOperatorPrecedence As UInteger) As Boolean
-            Return targetOperatorPrecedence <= nextOperatorPrecedence ' left is stronger
+        Private Shared Function ShouldAddRightOperand(targetOperatorAssociativity As OperatorAssociativity, targetOperatorPrecedence As UInteger, nextOperatorPrecedence As UInteger) As Boolean
+
+            ' If the precedence of the target operator is stronger than the next operator, return true.
+            ' If the precedence of the next operator is stronger than the target operator, return false.
+            ' If the precedence of both operators is the same:
+            '         Return true if the target operator is left-associative.
+            '         Return false if the target operator is right-associative.
+
+            Dim targetOpPrecedenceIsStrong As Boolean = targetOperatorPrecedence < nextOperatorPrecedence ' Smaller value gives higher precedence.
+            Dim targetOpPrecedenceIsEqual As Boolean = (targetOperatorPrecedence = nextOperatorPrecedence) ' Smaller value gives higher precedence.
+            Dim targetOpAssociativityIsLeft As Boolean = (targetOperatorAssociativity = OperatorAssociativity.LEFT)
+            return targetOpPrecedenceIsStrong OrElse (targetOpPrecedenceIsEqual AndAlso targetOpAssociativityIsLeft)
         End Function
 
         ''' <summary>
@@ -742,7 +755,8 @@ Namespace Rinearn.ExevalatorVB
             If stack.Count = 0 OrElse stack.Peek().Token.Type <> TokenType.OperatorToken Then
                 Return False
             End If
-            Return ShouldAddRightOperand(stack.Peek().Token.OperatorInfo.Value.Precedence, nextOperatorPrecedence)
+            Dim operatorOnStackTop As OperatorInfo = stack.Peek().Token.OperatorInfo.Value
+            Return ShouldAddRightOperand(operatorOnStackTop.Associativity, operatorOnStackTop.Precedence, nextOperatorPrecedence)
         End Function
 
         ''' <summary>
@@ -833,6 +847,19 @@ Namespace Rinearn.ExevalatorVB
     End Enum
 
     ''' <summary>
+    ''' The enum representing associativities of operators.
+    ''' </summary>
+    Public Enum OperatorAssociativity
+
+        ''' <summary>Represents left-associative.</summary>
+        LEFT
+
+        ''' <summary>Represents right-associative.</summary>
+        RIGHT
+
+    End Enum
+
+    ''' <summary>
     ''' The struct storing information of an operator.
     ''' </summary>
     Public Structure OperatorInfo
@@ -846,16 +873,21 @@ Namespace Rinearn.ExevalatorVB
         ''' <summary>The precedence of this operator (smaller value gives higher precedence).</summary>
         Public Readonly Precedence As UInteger
 
+        ''' <summary>The associativity of operator tokens.</summary>
+        Public Readonly Associativity As OperatorAssociativity
+
         ''' <summary>
         ''' Create an Operator instance storing specified information.
         ''' </summary>
         ''' <param name="type">The type of this operator</param>
         ''' <param name="symbol">The symbol of this operator</param>
         ''' <param name="precedence">The precedence of this operator</param>
-        Public Sub New(type As OperatorType, symbol As Char, precedence As UInteger)
+        ''' <param name="associativity">The associativity of this operator</param>
+        Public Sub New(type As OperatorType, symbol As Char, precedence As UInteger, associativity As OperatorAssociativity)
             Me.Type = type
             Me.Symbol = symbol
             Me.Precedence = precedence
+            Me.Associativity = associativity
         End Sub
 
         ''' <summary>
@@ -898,8 +930,9 @@ Namespace Rinearn.ExevalatorVB
         ''' <returns>The String representation of this Operator instance</returns>
         Public Overrides Function ToString() As String
             Return "Operator [Symbol=" + Me.Symbol.ToString() + _
-                   ", Precedence=" + Me.Precedence.ToString() + _
                    ", Type=" + Me.Type.ToString() + _
+                   ", Precedence=" + Me.Precedence.ToString() + _
+                   ", Associativity=" + Me.Associativity.ToString() + _
                    "]"
         End Function
 
@@ -916,9 +949,6 @@ Namespace Rinearn.ExevalatorVB
 
         ''' <summary>Represents operator tokens, for example: +</summary>
         OperatorToken ' "Operator" is a reserved word.
-
-        ''' <summary>Represents separator tokens of partial expressions: ,</summary>
-        ExpressionSeparator
 
         ''' <summary>Represents parenthesis, for example: ( and ) of (1*(2+3))</summary>
         Parenthesis
@@ -1588,13 +1618,14 @@ Namespace Rinearn.ExevalatorVB
 
         ''' <summary>Initializes values of static-readonly members.</summary>
         Shared Sub New()
-            Dim additionOperator As OperatorInfo = New OperatorInfo(OperatorType.Binary, "+"c, 400)
-            Dim subtractionOperator As OperatorInfo = new OperatorInfo(OperatorType.Binary, "-"c, 400)
-            Dim multiplicationOperator As OperatorInfo = new OperatorInfo(OperatorType.Binary, "*"c, 300)
-            Dim divisionOperator As OperatorInfo = new OperatorInfo(OperatorType.Binary, "/"c, 300)
-            Dim minusOperator As OperatorInfo = new OperatorInfo(OperatorType.UnaryPrefix, "-"c, 200)
-            Dim callBeginOperator As OperatorInfo = new OperatorInfo(OperatorType.FunctionCall, "("c, 100)
-            Dim callEndOperator As OperatorInfo = new OperatorInfo(OperatorType.FunctionCall, ")"c, UInteger.MaxValue) ' least prior
+            Dim additionOperator As OperatorInfo = New OperatorInfo(OperatorType.Binary, "+"c, 400, OperatorAssociativity.LEFT)
+            Dim subtractionOperator As OperatorInfo = new OperatorInfo(OperatorType.Binary, "-"c, 400, OperatorAssociativity.LEFT)
+            Dim multiplicationOperator As OperatorInfo = new OperatorInfo(OperatorType.Binary, "*"c, 300, OperatorAssociativity.LEFT)
+            Dim divisionOperator As OperatorInfo = new OperatorInfo(OperatorType.Binary, "/"c, 300, OperatorAssociativity.LEFT)
+            Dim minusOperator As OperatorInfo = new OperatorInfo(OperatorType.UnaryPrefix, "-"c, 200, OperatorAssociativity.RIGHT)
+            Dim callBeginOperator As OperatorInfo = new OperatorInfo(OperatorType.FunctionCall, "("c, 100, OperatorAssociativity.LEFT)
+            Dim callEndOperator As OperatorInfo = new OperatorInfo(OperatorType.FunctionCall, ")"c, UInteger.MaxValue, OperatorAssociativity.LEFT) ' least prior
+            Dim callSeparatorOperator As OperatorInfo = new OperatorInfo(OperatorType.FunctionCall, ","c, UInteger.MaxValue, OperatorAssociativity.LEFT) ' least prior
 
             OperatorSymbolSet = New HashSet(Of Char)()
             OperatorSymbolSet.Add("+"c)
@@ -1603,6 +1634,7 @@ Namespace Rinearn.ExevalatorVB
             OperatorSymbolSet.Add("/"c)
             OperatorSymbolSet.Add("("c)
             OperatorSymbolSet.Add(")"c)
+            OperatorSymbolSet.Add(","c)
 
             BinarySymbolOperatorDict = New Dictionary(Of Char, OperatorInfo)()
             BinarySymbolOperatorDict.Add("+"c, additionOperator)
@@ -1616,6 +1648,7 @@ Namespace Rinearn.ExevalatorVB
             CallSymbolOperatorDict = New Dictionary(Of Char, OperatorInfo)()
             CallSymbolOperatorDict.Add("("c, callBeginOperator)
             CallSymbolOperatorDict.Add(")"c, callEndOperator)
+            CallSymbolOperatorDict.Add(","c, callSeparatorOperator)
 
             TokenSplitterSymbolList = New List(Of Char)()
             TokenSplitterSymbolList.Add("+"c)

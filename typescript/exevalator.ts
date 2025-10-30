@@ -412,6 +412,12 @@ class LexicalAnalyzer {
                 }
                 parenthesisDepth--;
 
+            // Case of separators of function arguments:
+            // they are handled as a special operator, for the algorithm of the parser of Exevalator.
+            } else if (word === ",") {
+                const op: Operator | undefined = StaticSettings.CALL_OPERATOR_SYMBOL_MAP.get(word.charAt(0));
+                tokens[itoken] = new Token(TokenType.OPERATOR, word, op);
+
             // Cases of operators.
             } else if (word.length == 1 && StaticSettings.OPERATOR_SYMBOL_SET.has(word.charAt(0))) {
                 let op: Operator | undefined = undefined;
@@ -442,12 +448,10 @@ class LexicalAnalyzer {
                 }
                 tokens[itoken] = new Token(TokenType.OPERATOR, word, op);
 
-            // Cases of literals, and separator.
+            // Case of literals.
             } else if (word === StaticSettings.ESCAPED_NUMBER_LITERAL) {
                 tokens[itoken] = new Token(TokenType.NUMBER_LITERAL, numberLiterals[iliteral]);
                 iliteral++;
-            } else if (word === ",") {
-                tokens[itoken] = new Token(TokenType.EXPRESSION_SEPARATOR, word);
 
             // Cases of variable identifier of function identifier.
             } else {
@@ -679,12 +683,6 @@ class Parser {
                 itoken++; // To "continue" for the next token.
                 continue;
 
-            // Case of separator: ","
-            } else if (token.type === TokenType.EXPRESSION_SEPARATOR) {
-                stack.push(separatorStackLid);
-                itoken++; // To "continue" for the next token.
-                continue;
-
             // Case of operators: "+", "-", etc.
             } else if (token.type === TokenType.OPERATOR) {
                 let operatorNode = new AstNode(token);
@@ -693,7 +691,7 @@ class Parser {
                 // Case of unary-prefix operators:
                 // * Connect the node of right-token as an operand, if necessary (depending the next operator's precedence).
                 if (token.operator?.type === OperatorType.UNARY_PREFIX) {
-                    if (Parser.shouldAddRightTokenAsOperand(token.operator.precedence, nextOpPrecedence)) {
+                    if (Parser.shouldAddRightTokenAsOperand(token.operator.associativity, token.operator.precedence, nextOpPrecedence)) {
                         operatorNode.childNodeList.push(new AstNode(tokens[itoken + 1]));
                         itoken++; // Because one token is looked ahead. Don't "continue" here.
                     } // else: Operand will be connected later. See the bottom of this loop.
@@ -703,7 +701,7 @@ class Parser {
                 // * Connect the node of right-token as an operand, if necessary (depending the next operator's precedence).
                 } else if (token.operator?.type === OperatorType.BINARY) {
                     operatorNode.childNodeList.push(stack.pop()!);
-                    if (Parser.shouldAddRightTokenAsOperand(token.operator.precedence, nextOpPrecedence)) {
+                    if (Parser.shouldAddRightTokenAsOperand(token.operator.associativity, token.operator.precedence, nextOpPrecedence)) {
                         operatorNode.childNodeList.push(new AstNode(tokens[itoken + 1]));
                         itoken++; // Because one token is looked ahead. Don't "continue" here.
                     } // else: Right-operand will be connected later. See the bottom of this loop.
@@ -716,12 +714,16 @@ class Parser {
                         stack.push(callBeginStackLid); // The marker to correct partial expressions of args from the stack.
                         itoken++; // To "continue" for the next token.
                         continue;
-                    } else { // Case of ")"
+                    } else if (token.word === ")") {
                         const argNodes: AstNode[] = Parser.popPartialExprNodes(stack, callBeginStackLid);
                         operatorNode = stack.pop()!;
                         for (const argNode of argNodes) {
                             operatorNode.childNodeList.push(argNode);
                         }
+                    } else if (token.word === ",") {
+                        stack.push(separatorStackLid);
+                        itoken++;
+                        continue;
                     }
                 }
 
@@ -749,23 +751,36 @@ class Parser {
     /**
      * Judges whether the right-side token should be connected directly as an operand, to the target operator.
      *
+     * @param targetOperatorAssociativity - The associativity of the target operator.
      * @param targetOperatorPrecedence - The precedence of the target operator (smaller value gives higher precedence).
      * @param nextOperatorPrecedence - The precedence of the next operator (smaller value gives higher precedence).
      * @return Returns true if the right-side token (operand) should be connected to the target operator.
      */
-    private static shouldAddRightTokenAsOperand(targetOperatorPrecedence: number, nextOperatorPrecedence: number): boolean {
-        return targetOperatorPrecedence <= nextOperatorPrecedence; // left-side token's operator is prior
+    private static shouldAddRightTokenAsOperand(
+            targetOperatorAssociativity: OperatorAssociativity,
+            targetOperatorPrecedence: number, nextOperatorPrecedence: number): boolean {
+
+		// If the precedence of the target operator is stronger than the next operator, return true.
+		// If the precedence of the next operator is stronger than the target operator, return false.
+		// If the precedence of both operators is the same:
+		//         Return true if the target operator is left-associative.
+		//         Return false if the target operator is right-associative.
+
+		const targetOpPrecedenceIsStrong: boolean = targetOperatorPrecedence < nextOperatorPrecedence; // Smaller value gives higher precedence.
+		const targetOpPrecedenceIsEqual: boolean = targetOperatorPrecedence == nextOperatorPrecedence; // Smaller value gives higher precedence.
+		const targetOpAssociativityIsLeft: boolean = targetOperatorAssociativity == OperatorAssociativity.LEFT;
+		return targetOpPrecedenceIsStrong || (targetOpPrecedenceIsEqual && targetOpAssociativityIsLeft);
     }
 
     /**
-     * Judges whether the node at the stack-top is an operator-type node,
-     * and it is prior (has stronger precedence) to the next operator.
+     * Judges whether the right-side token should be connected directly as an operand,
+     * to the operator at the top of the working stack.
      *
      * @param stack - The working stack used for the parsing.
      * @param nextOperatorPrecedence - The precedence of the next operator (smaller value gives higher precedence).
-     * @return Returns true if the stack top is operator-type node, and is prior to the next operator.
+     * @return Returns true if the right-side token (operand) should be connected to the operator at the top of the stack.
      */
-    private static isStackTopPriorOperator(stack: AstNode[], nextOperatorPrecedence: number): boolean {
+    private static shouldAddRightOperandToStackedOperator(stack: AstNode[], nextOperatorPrecedence: number): boolean {
         if (stack.length == 0) {
             return false;
         }
@@ -773,7 +788,11 @@ class Parser {
         if (stackTopToken.type != TokenType.OPERATOR || !stackTopToken.operator) {
             return false;
         }
-        return stackTopToken.operator.precedence <= nextOperatorPrecedence; // The stack-top operator is prior to next operator.
+
+        const operatorOnStackTop: Operator = stackTopToken.operator;
+        return Parser.shouldAddRightTokenAsOperand(
+            operatorOnStackTop.associativity, operatorOnStackTop.precedence, nextOperatorPrecedence
+        );
     }
 
     /**
@@ -793,7 +812,7 @@ class Parser {
         // If the updated stack-top node is an operator-type node, and it is prior to the next operator, 
         // connect the previously popped stack-top node to the current stack-top node as an operand.
         // Repeat the above while the updated stack-top node is an operator-type and prior to the next operator. 
-        while (Parser.isStackTopPriorOperator(stack, nextOperatorPrecedence)) {
+        while (Parser.shouldAddRightOperandToStackedOperator(stack, nextOperatorPrecedence)) {
             const operandNode: AstNode = stackTopNode;
             stackTopNode = stack.pop()!;
             if (stackTopNode.token.type !== TokenType.OPERATOR) {
@@ -891,6 +910,19 @@ enum OperatorType {
 
 
 /**
+ * The enum representing associativities of operators.
+ */
+enum OperatorAssociativity {
+
+    /** Represents left-associative. */
+    LEFT,
+
+    /** Represents right-associative. */
+    RIGHT
+}
+
+
+/**
  * The class storing information of an operator.
  */
 class Operator {
@@ -904,24 +936,29 @@ class Operator {
     /** The type of operator tokens. */
     public readonly type: OperatorType;
 
+    /** The associativity of operator tokens. */
+    public readonly associativity: OperatorAssociativity;
+
     /**
      * Create an Operator instance storing specified information.
      *
      * @param type - The type of this operator.
      * @param symbol - The symbol of this operator.
      * @param precedence - The precedence of this operator.
+     * @param associativity - The associativity of this operator.
      */
-    public constructor(type: OperatorType, symbol: string, precedence: number) {
+    public constructor(type: OperatorType, symbol: string, precedence: number, associativity: OperatorAssociativity) {
         this.type = type;
         this.symbol = symbol;
         this.precedence = precedence;
+        this.associativity = associativity;
     }
 
     /**
      * Returns the String representation of this Operator instance.
      */
     public toString(): string {
-        return `Operator [symbol=${this.symbol}, precedence=${this.precedence}, type=${this.type}]`;
+        return `Operator [symbol=${this.symbol}, type=${this.type}, precedence=${this.precedence}, associativity=${this.associativity}]`;
     }
 }
 
@@ -936,9 +973,6 @@ enum TokenType {
 
     /** Represents operator tokens, for example: + */
     OPERATOR,
-
-    /** Represents separator tokens of partial expressions: , */
-    EXPRESSION_SEPARATOR,
 
     /** Represents parenthesis, for example: ( and ) of (1*(2+3)) */
     PARENTHESIS,
@@ -1527,26 +1561,27 @@ export class StaticSettings {
 
     /** The set of symbols of available operators. */
     public static readonly OPERATOR_SYMBOL_SET: Set<string> = new Set<string>([
-        "+", "-", "*", "/", "(", ")"
+        "+", "-", "*", "/", "(", ")", ","
     ]);
 
     /** The Map mapping each symbol of an unary-prefix operator to an instance of Operator class. */
     public static readonly UNARY_PREFIX_OPERATOR_SYMBOL_MAP: Map<string, Operator> = new Map<string, Operator>([
-        ["-", new Operator(OperatorType.UNARY_PREFIX, '-', 200)] // unary-minus operator
+        ["-", new Operator(OperatorType.UNARY_PREFIX, '-', 200, OperatorAssociativity.RIGHT)] // unary-minus operator
     ]);
 
     /** The Map mapping each symbol of an binary operator to an instance of Operator class. */
     public static readonly BINARY_OPERATOR_SYMBOL_MAP: Map<string, Operator> = new Map<string, Operator>([
-        ["+", new Operator(OperatorType.BINARY, '+', 400)], // addition operator
-        ["-", new Operator(OperatorType.BINARY, '-', 400)], // subtraction operator
-        ["*", new Operator(OperatorType.BINARY, '*', 300)], // multiplication operator
-        ["/", new Operator(OperatorType.BINARY, '/', 300)]  // division operator
+        ["+", new Operator(OperatorType.BINARY, '+', 400, OperatorAssociativity.LEFT)], // addition operator
+        ["-", new Operator(OperatorType.BINARY, '-', 400, OperatorAssociativity.LEFT)], // subtraction operator
+        ["*", new Operator(OperatorType.BINARY, '*', 300, OperatorAssociativity.LEFT)], // multiplication operator
+        ["/", new Operator(OperatorType.BINARY, '/', 300, OperatorAssociativity.LEFT)]  // division operator
     ]);
 
     /** The Map mapping each symbol of an call operator to an instance of Operator class. */
     public static readonly CALL_OPERATOR_SYMBOL_MAP: Map<string, Operator> = new Map<string, Operator>([
-        ["(", new Operator(OperatorType.CALL, "(", 100)],                    // call-begin operator
-        [")", new Operator(OperatorType.CALL, ")", Number.MAX_SAFE_INTEGER)] // call-end operator, least prior
+        ["(", new Operator(OperatorType.CALL, "(", 100, OperatorAssociativity.LEFT)],                     // call-begin operator
+        [")", new Operator(OperatorType.CALL, ")", Number.MAX_SAFE_INTEGER, OperatorAssociativity.LEFT)], // call-end operator, least prior
+        [",", new Operator(OperatorType.CALL, ",", Number.MAX_SAFE_INTEGER, OperatorAssociativity.LEFT)]  // call-separator operator, least prior
     ]);
 
     /** The list of symbols to split an expression into tokens. */

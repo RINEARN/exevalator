@@ -427,7 +427,7 @@ final class LexicalAnalyzer {
                 }
                 parenthesisDepth--;
 
-            // Cases of separators of function arguments:
+            // Case of separators of function arguments:
             // they are handled as a special operator, for the algorithm of the parser of Exevalator.
             } else if (word.equals(",")) {
                 Operator op = StaticSettings.CALL_OPERATOR_SYMBOL_MAP.get(word.charAt(0));
@@ -784,7 +784,6 @@ final class Parser {
 		boolean targetOpPrecedenceIsEqual = targetOperatorPrecedence == nextOperatorPrecedence; // Smaller value gives higher precedence.
 		boolean targetOpAssociativityIsLeft = targetOperatorAssociativity == OperatorAssociativity.LEFT;
 		return targetOpPrecedenceIsStrong || (targetOpPrecedenceIsEqual && targetOpAssociativityIsLeft);
-        // return targetOperatorPrecedence <= nextOperatorPrecedence;
     }
 
     /**
@@ -1168,6 +1167,7 @@ final class Evaluator {
             AstNode ast, Map<String, Integer> variableTable, Map<String, Exevalator.FunctionInterface> functionTable) {
 
         // Note: This method creates a tree of evaluator nodes by traversing each node in the AST recursively.
+
         List<AstNode> childNodeList = ast.childNodeList;
         int childCount = childNodeList.size();
 
@@ -1578,6 +1578,7 @@ final class StaticSettings {
         OPERATOR_SYMBOL_SET.add('/');
         OPERATOR_SYMBOL_SET.add('(');
         OPERATOR_SYMBOL_SET.add(')');
+        OPERATOR_SYMBOL_SET.add(',');
 
         UNARY_PREFIX_OPERATOR_SYMBOL_MAP = new ConcurrentHashMap<Character, Operator>();
         UNARY_PREFIX_OPERATOR_SYMBOL_MAP.put('-', minusOperator);
