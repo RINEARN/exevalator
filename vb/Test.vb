@@ -226,6 +226,30 @@ Module Test
             exevalator.Eval("1.2*--3.4"), _
             1.2*(-(-3.4)) _
         )
+
+        Check( _
+            "Test of Precedences of Operators 17", _
+            exevalator.Eval("1.2*---3.4"), _
+            1.2*(-(-(-3.4))) _
+        )
+
+        Check( _
+            "Test of Precedences of Operators 18", _
+            exevalator.Eval("1.2*----3.4"), _
+            1.2*(-(-(-(-3.4)))) _
+        )
+
+        Check( _
+            "Test of Precedences of Operators 19", _
+            exevalator.Eval("1.2*----3.4-5.6"), _
+            1.2*(-(-(-(-3.4))))-5.6 _
+        )
+
+        Check( _
+            "Test of Precedences of Operators 20", _
+            exevalator.Eval("1.2-----3.4-5.6"), _
+            1.2-(-(-(-(-3.4))))-5.6 _
+        )
     End Sub
 
 

@@ -223,6 +223,30 @@ class Test
             exevalator.Eval("1.2*--3.4"),
             1.2*(-(-3.4))
         );
+
+        Check(
+            "Test of Precedences of Operators 17",
+            exevalator.Eval("1.2*---3.4"),
+            1.2*(-(-(-3.4)))
+        );
+
+        Check(
+            "Test of Precedences of Operators 18",
+            exevalator.Eval("1.2*----3.4"),
+            1.2*(-(-(-(-3.4))))
+        );
+
+        Check(
+            "Test of Precedences of Operators 19",
+            exevalator.Eval("1.2*----3.4-5.6"),
+            1.2*(-(-(-(-3.4))))-5.6
+        );
+ 
+        Check(
+            "Test of Precedences of Operators 20",
+            exevalator.Eval("1.2-----3.4-5.6"),
+            1.2-(-(-(-(-3.4))))-5.6
+        );
     }
 
 

@@ -247,6 +247,30 @@ function testPrecedencesOfOperators() {
         exevalator.eval("1.2*--3.4"),
         1.2*(-(-3.4))
     );
+
+    check(
+        "Test of Precedences of Operators 17",
+        exevalator.eval("1.2*---3.4"),
+        1.2*(-(-(-3.4)))
+    );
+
+    check(
+        "Test of Precedences of Operators 18",
+        exevalator.eval("1.2*----3.4"),
+        1.2*(-(-(-(-3.4))))
+    );
+
+    check(
+        "Test of Precedences of Operators 19",
+        exevalator.eval("1.2*----3.4-5.6"),
+        1.2*(-(-(-(-3.4))))-5.6
+    );
+
+    check(
+        "Test of Precedences of Operators 20",
+        exevalator.eval("1.2-----3.4-5.6"),
+        1.2-(-(-(-(-3.4))))-5.6
+    );
 }
 
 
