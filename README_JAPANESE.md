@@ -22,6 +22,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 	- <a href="#how-to-use-cpp">C++での使用方法</a>
 	- <a href="#how-to-use-vb">Visual Basic での使用方法</a>
 	- <a href="#how-to-use-typescript">TypeScript での使用方法</a>
+- <a href="#customize-error-languages">エラーメッセージの日本語化やカスタマイズ</a>
 - <a href="#performance">処理速度</a>
 - <a href="#about-us">開発元について</a>
 - <a href="#references">参考情報</a>
@@ -215,6 +216,17 @@ Webブラウザ上で動作させる場合は、esbuild 等のバンドラツー
 
 より詳しい解説や機能一覧については [TypeScript 用README](./typescript/README_JAPANESE.md) をご参照ください。
 
+
+<a id="customize-error-languages"></a>
+## エラーメッセージの日本語化やカスタマイズ
+
+エラーメッセージは、標準状態では英語になっています。日本語化するには、下記の手順でソースコードを編集してください：
+
+* まず、各言語実装版のフォルダ内にある「ERROR_MESSAGE_JAPANESE.\* (\*の箇所は実装言語に応じた拡張子)」の内容をコピーする。
+
+* Exevalator 本体のソースコード（Exevalator.\* または exevalator.\* ）内の先頭付近にある、ErrorMessage クラス/構造体の内容を、上記内容で上書きする。
+
+エラーメッセージの内容をカスタマイズしたい場合は、上記の ErrorMessage クラス/構造体の内容を編集してください。
 
 
 <a id="performance"></a>

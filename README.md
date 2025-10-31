@@ -23,6 +23,7 @@ Exevalator, an abbreviation for "**Ex**pression-**Eval**u**ator**," is a compact
 	- <a href="#how-to-use-cpp">How to Use in C++</a>
 	- <a href="#how-to-use-vb">How to Use in Visual Basic</a>
 	- <a href="#how-to-use-typescript">How to Use in TypeScript</a>
+- <a href="#customize-error-languages">Localizing or Customizing Error Messages</a>
 - <a href="#performance">Performance</a>
 - <a href="#about-us">About Us</a>
 - <a href="#references">References</a>
@@ -210,6 +211,18 @@ If you want to run it in a web browser, you can easily bundle the code into a si
 
 For more detailed explanations and a list of features, please refer to the [README for TypeScript](./typescript/README.md).
 
+
+
+<a id="customize-error-languages"></a>
+## Localizing or Customizing Error Messages
+
+By default, error messages are shown in English. To switch them to Japanese, edit the source as follows:
+
+* In the folder for your language-specific implementation, copy the contents of `ERROR_MESSAGE_JAPANESE.*` (`*` is the extension for that implementation).
+
+* In the Exevalator core source file (`Exevalator.*` or `exevalator.*`), near the top, overwrite the ErrorMessage class (or structure, depending on the language) with the copied contents.
+
+If you want to customize the messages, edit the ErrorMessage class (or structure) directly.
 
 
 
