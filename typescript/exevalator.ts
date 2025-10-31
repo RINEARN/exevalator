@@ -4,6 +4,12 @@
  * You can choose the "CC0" license instead, if you want.
  */
 
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// To change the language of error messages,
+// copy the contents of ERROR_MESSAGE_*.ts and 
+// overwrite the ErrorMessage class below with them.
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 /**
  * Error messages of ExevalatorError,
  * which is thrown by Exevalator if the input expression is syntactically incorrect, or uses undeclared variables/functions.

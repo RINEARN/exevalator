@@ -19,6 +19,12 @@ namespace Rinearn.ExevalatorCS
 {
 #nullable enable
 
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // To change the language of error messages,
+    // copy the contents of ERROR_MESSAGE_*.cs and 
+    // overwrite the ErrorMessage struct below with them.
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
     /// <summary>
     /// Error messages of ExevalatorException,
     /// which is thrown by Exevalator if the input expression is syntactically incorrect, or uses undeclared variables/functions.

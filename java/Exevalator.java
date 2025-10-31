@@ -21,6 +21,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// To change the language of error messages,
+// copy the contents of ERROR_MESSAGE_*.java and 
+// overwrite the ErrorMessage class below with them.
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 /**
  * Error messages of ExevalatorException,
