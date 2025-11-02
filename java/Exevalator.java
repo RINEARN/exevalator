@@ -771,7 +771,7 @@ final class Parser {
     /**
      * Judges whether the right-side token should be connected directly as an operand, to the target operator.
      *
-	 * @param targetOperatorAssociativity The associativity (right/left) of the target opeartor.
+     * @param targetOperatorAssociativity The associativity (right/left) of the target opeartor.
      * @param targetOperatorPrecedence The precedence of the target operator (smaller value gives higher precedence).
      * @param nextOperatorPrecedence The precedence of the next operator (smaller value gives higher precedence).
      * @return Returns true if the right-side token (operand) should be connected to the target operator.
@@ -1168,7 +1168,7 @@ final class Evaluator {
      * @param functionTable The Map mapping each function name to an IExevalatorFunction instance.
      * @return The root node of the created tree of evaluator nodes.
      */
-    public static EvaluatorNode createEvaluatorNodeTree(
+    private static EvaluatorNode createEvaluatorNodeTree(
             AstNode ast, Map<String, Integer> variableTable, Map<String, Exevalator.FunctionInterface> functionTable) {
 
         // Note: This method creates a tree of evaluator nodes by traversing each node in the AST recursively.
@@ -1231,7 +1231,7 @@ final class Evaluator {
     /**
      * The super class of evaluator nodes.
      */
-    public static abstract class EvaluatorNode {
+    private static abstract class EvaluatorNode {
 
         /**
          * Performs the evaluation.
@@ -1245,7 +1245,7 @@ final class Evaluator {
     /**
      * The super class of evaluator nodes of binary operations.
      */
-    public static abstract class BinaryOperationEvaluatorNode extends EvaluatorNode {
+    private static abstract class BinaryOperationEvaluatorNode extends EvaluatorNode {
 
         /** The node for evaluating the right-side operand. */
         protected final EvaluatorNode leftOperandNode;
@@ -1268,7 +1268,7 @@ final class Evaluator {
     /**
      * The evaluator node for evaluating the value of a addition operator.
      */
-    public static final class AdditionEvaluatorNode extends BinaryOperationEvaluatorNode {
+    private static final class AdditionEvaluatorNode extends BinaryOperationEvaluatorNode {
 
         /**
          * Initializes operands.
@@ -1295,7 +1295,7 @@ final class Evaluator {
     /**
      * The evaluator node for evaluating the value of a subtraction operator.
      */
-    public static final class SubtractionEvaluatorNode extends BinaryOperationEvaluatorNode {
+    private static final class SubtractionEvaluatorNode extends BinaryOperationEvaluatorNode {
 
         /**
          * Initializes operands.
@@ -1322,7 +1322,7 @@ final class Evaluator {
     /**
      * The evaluator node for evaluating the value of a multiplication operator.
      */
-    public static final class MultiplicationEvaluatorNode extends BinaryOperationEvaluatorNode {
+    private static final class MultiplicationEvaluatorNode extends BinaryOperationEvaluatorNode {
 
         /**
          * Initializes operands.
@@ -1349,7 +1349,7 @@ final class Evaluator {
     /**
      * The evaluator node for evaluating the value of a division operator.
      */
-    public static final class DivisionEvaluatorNode extends BinaryOperationEvaluatorNode {
+    private static final class DivisionEvaluatorNode extends BinaryOperationEvaluatorNode {
 
         /**
          * Initializes operands.
@@ -1376,7 +1376,7 @@ final class Evaluator {
     /**
      * The evaluator node for evaluating the value of a unary-minus operator.
      */
-    public static final class MinusEvaluatorNode extends EvaluatorNode {
+    private static final class MinusEvaluatorNode extends EvaluatorNode {
 
         /** The node for evaluating the operand. */
         private final EvaluatorNode operandNode;
@@ -1405,7 +1405,7 @@ final class Evaluator {
     /**
      * The evaluator node for evaluating the value of a number literal.
      */
-    public static final class NumberLiteralEvaluatorNode extends EvaluatorNode {
+    private static final class NumberLiteralEvaluatorNode extends EvaluatorNode {
 
         /** The value of the number literal. */
         private final double value;
@@ -1438,7 +1438,7 @@ final class Evaluator {
     /**
      * The evaluator node for evaluating the value of a variable.
      */
-    public static final class VariableEvaluatorNode extends EvaluatorNode {
+    private static final class VariableEvaluatorNode extends EvaluatorNode {
 
         /** The address of the variable. */
         private volatile int address;
@@ -1471,7 +1471,7 @@ final class Evaluator {
      * The evaluator node for evaluating a function-call operator.
      *
      */
-    public static final class FunctionEvaluatorNode extends EvaluatorNode {
+    private static final class FunctionEvaluatorNode extends EvaluatorNode {
 
         /** The function to be called. */
         private volatile Exevalator.FunctionInterface function;
