@@ -1,7 +1,7 @@
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // To set the error-message language to English (the default),
 // copy the contents below and
-// overwrite the ErrorMessage class in exevalator.java with them.
+// overwrite the ErrorMessages class in Exevalator.java with them.
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 /**

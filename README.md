@@ -218,7 +218,7 @@ For more detailed explanations and a list of features, please refer to the [READ
 
 By default, error messages are shown in English. To switch them to Japanese, edit the source as follows:
 
-* In the folder for your language-specific implementation, copy the contents of `ERROR_MESSAGE_JAPANESE.*` (`*` is the extension for that implementation).
+* In the folder for your language-specific implementation, copy the contents of `ERROR_MESSAGES_JAPANESE.*` (`*` is the extension for that implementation).
 
 * In the Exevalator core source file (`Exevalator.*` or `exevalator.*`), near the top, overwrite the ErrorMessage class (or structure, depending on the language) with the copied contents.
 

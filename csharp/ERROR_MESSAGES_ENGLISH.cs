@@ -1,7 +1,7 @@
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // To set the error-message language to English (the default),
     // copy the contents below and
-    // overwrite the ErrorMessage struct in exevalator.vb with them.
+    // overwrite the ErrorMessages struct in Exevalator.vb with them.
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     /// <summary>

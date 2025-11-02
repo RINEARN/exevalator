@@ -23,8 +23,8 @@ import java.util.regex.Pattern;
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // To change the language of error messages,
-// copy the contents of ERROR_MESSAGE_*.java and 
-// overwrite the ErrorMessage class below with them.
+// copy the contents of ERROR_MESSAGES_*.java and 
+// overwrite the ErrorMessages class below with them.
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 /**

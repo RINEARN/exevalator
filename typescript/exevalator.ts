@@ -6,8 +6,8 @@
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // To change the language of error messages,
-// copy the contents of ERROR_MESSAGE_*.ts and 
-// overwrite the ErrorMessage class below with them.
+// copy the contents of ERROR_MESSAGES_*.ts and 
+// overwrite the ErrorMessages class below with them.
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 /**

@@ -1,9 +1,9 @@
 
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// To change the language of error messages,
-// copy the contents of ERROR_MESSAGE_*.rs and 
-// overwrite the ErrorMessage struct below with them.
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// To set the error-message language to English (the default),
+// copy the contents below and
+// overwrite the ErrorMessages struct in exevalator.rs with them.
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 /// Error messages of ExevalatorException,
 /// which is thrown by Exevalator if the input expression is syntactically incorrect, or uses undeclared variables/functions.

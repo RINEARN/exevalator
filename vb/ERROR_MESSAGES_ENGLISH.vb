@@ -1,8 +1,8 @@
-    ''' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ''' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ''' To set the error-message language to English (the default),
     ''' copy the contents below and
-    ''' overwrite the ErrorMessage structure in exevalator.vb with them.
-    ''' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ''' overwrite the ErrorMessages structure in Exevalator.vb with them.
+    ''' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     ''' <summary>
     ''' Error messages of ExevalatorException,

@@ -15,8 +15,8 @@ Namespace Rinearn.ExevalatorVB
 
     ''' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     ''' To change the language of error messages,
-    ''' copy the contents of ERROR_MESSAGE_*.cs and 
-    ''' overwrite the ErrorMessage structure below with them.
+    ''' copy the contents of ERROR_MESSAGES_*.vb and 
+    ''' overwrite the ErrorMessages structure below with them.
     ''' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     ''' <summary>

@@ -22,11 +22,11 @@
 
 namespace exevalator {
 
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // To change the language of error messages,
-// copy the contents of ERROR_MESSAGE_*.hpp and 
-// overwrite the ErrorMessage struct below with them.
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// copy the contents of ERROR_MESSAGES_*.hpp and 
+// overwrite the ErrorMessages struct below with them.
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 /**
  * Error messages of ExevalatorException,

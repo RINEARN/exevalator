@@ -9,11 +9,11 @@ use std::collections::HashMap;
 use std::collections::VecDeque;
 use std::fmt;
 
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // To change the language of error messages,
-// copy the contents of ERROR_MESSAGE_*.rs and 
-// overwrite the ErrorMessage struct below with them.
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// copy the contents of ERROR_MESSAGES_*.rs and 
+// overwrite the ErrorMessages struct below with them.
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 /// Error messages of ExevalatorException,
 /// which is thrown by Exevalator if the input expression is syntactically incorrect, or uses undeclared variables/functions.
