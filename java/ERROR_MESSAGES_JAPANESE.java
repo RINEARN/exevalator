@@ -20,7 +20,7 @@ final class ErrorMessages {
     public static final String RIGHT_OPERATOR_REQUIRED = "'$0' の右に、演算子（ + や - 等の演算記号）が必要です。";
     public static final String LEFT_OPERATOR_REQUIRED = "'$0' の左に、演算子（ + や - 等の演算記号）が必要です。";
     public static final String UNKNOWN_UNARY_PREFIX_OPERATOR = "'$0' は文法的に前置演算子と解釈されましたが、サポートされていない記号です。";
-    public static final String UNKNOWN_BINARY_OPERATOR ="'$0' は文法的に二項演算子と解釈されましたが、サポートされていない記号です。";
+    public static final String UNKNOWN_BINARY_OPERATOR = "'$0' は文法的に二項演算子と解釈されましたが、サポートされていない記号です。";
     public static final String UNKNOWN_OPERATOR_SYNTAX = "'$0' は文法的に演算子と推測されますが、サポートされていない書き方や記号です。";
     public static final String EXCEEDS_MAX_AST_DEPTH = "抽象構文木の深さが、許容上限を超過しています (StaticSettings.MAX_AST_DEPTH: '$0')";
     public static final String UNEXPECTED_PARTIAL_EXPRESSION = "部分式が、予期しない形で終わっています。";

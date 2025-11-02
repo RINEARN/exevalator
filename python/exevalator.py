@@ -48,7 +48,7 @@ class ErrorMessages:
     UNEXPECTED_TOKEN = "Unexpected token: '$0'"
     TOO_LONG_EXPRESSION = "The length of the expression exceeds the limit (StaticSettings.MAX_EXPRESSION_CHAR_COUNT: '$0')"
     UNEXPECTED_ERROR = "Unexpected error occurred: $0"
-    REEVAL_NOT_AVAILABLE = '"reeval" is not available before using "eval"'
+    REEVAL_NOT_AVAILABLE = "'reeval' is not available before using 'eval'"
     TOO_LONG_VARIABLE_NAME = "The length of the variable name exceeds the limit (StaticSettings.MAX_NAME_CHAR_COUNT: '$0')"
     TOO_LONG_FUNCTION_NAME = "The length of the function name exceeds the limit (StaticSettings.MAX_NAME_CHAR_COUNT: '$0')"
     VARIABLE_ALREADY_DECLARED = "The variable '$0' is already declared"
