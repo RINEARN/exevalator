@@ -70,19 +70,19 @@ class Exevalator:
         # self.memory: array = array('d')
 
         # The current usage (max used index + 1) of the memory.
-        self.memoryUsage: int = 0
+        self.memory_usage: int = 0
 
         # The object evaluating the value of the expression.
         self.evaluator: Evaluator = Evaluator()
 
         # The Map mapping each variable name to an address of the variable.
-        self.variableTable: Dict[str, int] = {}
+        self.variable_table: Dict[str, int] = {}
 
         # The Map mapping each function name to a FunctionInterface instance.
-        self.functionTable: Dict[str, FunctionInterface] = {}
+        self.function_table: Dict[str, FunctionInterface] = {}
 
         # Caches the content of the expression evaluated last time, to skip re-parsing.
-        self.lastEvaluatedExpression: Optional[str] = None
+        self.last_evaluated_expression: Optional[str] = None
 
 
     def eval(self, expression: str) -> float:
@@ -115,13 +115,13 @@ class Exevalator:
 
         try:
             expressionChanged = (
-                self.lastEvaluatedExpression is None
-                or expression is not self.lastEvaluatedExpression # comparing references
-                and expression != self.lastEvaluatedExpression    # comparing values
+                self.last_evaluated_expression is None
+                or expression is not self.last_evaluated_expression # comparing references
+                and expression != self.last_evaluated_expression    # comparing values
             )
 
             # If the expression changed from the last-evaluated expression, re-parsing is necessary.
-            if expressionChanged or not self.evaluator.isEvaluatable():
+            if expressionChanged or not self.evaluator.is_evaluatable():
 
                 # Tokenize & analyze
                 tokens = LexicalAnalyzer.analyze(expression)
@@ -137,10 +137,10 @@ class Exevalator:
                 # print(ast.toMarkuppedText())
 
                 # Update evaluator with current symbol tables
-                self.evaluator.update(ast, self.variableTable, self.functionTable)
+                self.evaluator.update(ast, self.variable_table, self.function_table)
 
                 # Cache
-                self.lastEvaluatedExpression = expression
+                self.last_evaluated_expression = expression
 
             # Evaluate
             return self.evaluator.evaluate(self.memory)
@@ -163,7 +163,7 @@ class Exevalator:
         Note:
             The result may differ from the last value if variables/functions changed.
         """
-        if self.evaluator.isEvaluatable():
+        if self.evaluator.is_evaluatable():
             return self.evaluator.evaluate(self.memory)
         raise ExevalatorException(ErrorMessages.REEVAL_NOT_AVAILABLE)
 
@@ -187,21 +187,21 @@ class Exevalator:
                     "$0", str(StaticSettings.MAX_NAME_CHAR_COUNT)
                 )
             )
-        if name in self.variableTable:
+        if name in self.variable_table:
             raise ExevalatorException(
                 ErrorMessages.VARIABLE_ALREADY_DECLARED.replace("$0", name)
             )
 
         # Expand memory if full (double size, Java と同じノリ)
-        if len(self.memory) == self.memoryUsage:
+        if len(self.memory) == self.memory_usage:
             stock = self.memory[:]
             self.memory = [0.0] * (len(stock) * 2)
             self.memory[: len(stock)] = stock
 
         # Assign address & register
-        address = self.memoryUsage
-        self.variableTable[name] = address
-        self.memoryUsage += 1
+        address = self.memory_usage
+        self.variable_table[name] = address
+        self.memory_usage += 1
         return address
 
 
@@ -218,12 +218,12 @@ class Exevalator:
 
         if (
             StaticSettings.MAX_NAME_CHAR_COUNT < len(name)
-            or name not in self.variableTable
+            or name not in self.variable_table
         ):
             raise ExevalatorException(
                 ErrorMessages.VARIABLE_NOT_FOUND.replace("$0", name)
             )
-        address = self.variableTable[name]
+        address = self.variable_table[name]
         self.writeVariableAt(address, value)
 
 
@@ -236,7 +236,7 @@ class Exevalator:
             address (int): The virtual address of the variable to be written.
             value (float): The new value of the variable.
         """
-        if address < 0 or self.memoryUsage <= address:
+        if address < 0 or self.memory_usage <= address:
             raise ExevalatorException(
                 ErrorMessages.INVALID_VARIABLE_ADDRESS.replace("$0", str(address))
             )
@@ -258,12 +258,12 @@ class Exevalator:
 
         if (
             StaticSettings.MAX_NAME_CHAR_COUNT < len(name)
-            or name not in self.variableTable
+            or name not in self.variable_table
         ):
             raise ExevalatorException(
                 ErrorMessages.VARIABLE_NOT_FOUND.replace("$0", name)
             )
-        address = self.variableTable[name]
+        address = self.variable_table[name]
         return self.readVariableAt(address)
 
 
@@ -278,7 +278,7 @@ class Exevalator:
         Returns:
             float: The current value of the variable.
         """
-        if address < 0 or self.memoryUsage <= address:
+        if address < 0 or self.memory_usage <= address:
             raise ExevalatorException(
                 ErrorMessages.INVALID_VARIABLE_ADDRESS.replace("$0", str(address))
             )
@@ -302,11 +302,11 @@ class Exevalator:
                     "$0", str(StaticSettings.MAX_NAME_CHAR_COUNT)
                 )
             )
-        if name in self.functionTable:
+        if name in self.function_table:
             raise ExevalatorException(
                 ErrorMessages.FUNCTION_ALREADY_CONNECTED.replace("$0", name)
             )
-        self.functionTable[name] = function
+        self.function_table[name] = function
 
 
 class FunctionInterface(ABC):
@@ -360,34 +360,34 @@ class LexicalAnalyzer:
         # Firstly, to simplify the tokenization,
         # replace number literals in the expression to the escaped representation: "@NUMBER_LITERAL",
         # because number literals may contain "+" or "-" in their exponent part.
-        numberLiteralList: List[str] = []
-        expression = LexicalAnalyzer.escapeNumberLiterals(expression, numberLiteralList)
+        number_literal_list: List[str] = []
+        expression = LexicalAnalyzer._escape_number_literals(expression, number_literal_list)
 
         # Tokenize (split) the expression into token words.
         for splitter in StaticSettings.TOKEN_SPLITTER_SYMBOL_LIST:
             expression = expression.replace(str(splitter), f" {splitter} ")
-        tokenWords: List[str] = expression.strip().split()
+        token_words: List[str] = expression.strip().split()
 
-        # Empty expression detection (the case: tokenWords == [])
-        if not tokenWords:
+        # Empty expression detection (the case: token_words == [])
+        if not token_words:
             raise ExevalatorException(ErrorMessages.EMPTY_EXPRESSION)
 
         # Checks the total number of tokens.
-        if len(tokenWords) > StaticSettings.MAX_TOKEN_COUNT:
+        if len(token_words) > StaticSettings.MAX_TOKEN_COUNT:
             limit = str(StaticSettings.MAX_TOKEN_COUNT)
             error_message = ErrorMessages.TOO_MANY_TOKENS.replace("$0", limit)
             raise ExevalatorException(error_message)
 
         # Create Token instances.
         # Also, escaped number literals will be recovered.
-        tokens: List[Token] = LexicalAnalyzer.createTokensFromTokenWords(
-            tokenWords, numberLiteralList
+        tokens: List[Token] = LexicalAnalyzer._create_tokens_from_token_words(
+            token_words, number_literal_list
         )
 
         # Checks syntactic correctness of tokens of inputted expressions.
-        LexicalAnalyzer.checkParenthesisBalance(tokens)
-        LexicalAnalyzer.checkEmptyParentheses(tokens)
-        LexicalAnalyzer.checkLocationsOfOperatorsAndLeafs(tokens)
+        LexicalAnalyzer._check_parenthesis_balance(tokens)
+        LexicalAnalyzer._check_empty_parentheses(tokens)
+        LexicalAnalyzer._check_locations_of_operators_and_leafs(tokens)
 
         return tokens
 
@@ -397,21 +397,21 @@ class LexicalAnalyzer:
     # ------------------------
 
     @staticmethod
-    def escapeNumberLiterals(expression: str, numberLiteralList: List[str]) -> str:
+    def _escape_number_literals(expression: str, number_literal_list: List[str]) -> str:
         """
         Replace number literals with an escaped marker and collect originals.
 
         Args:
             expression (str): The raw expression string.
-            numberLiteralList (List[str]): A list to append detected number literals in order.
+            number_literal_list (List[str]): A list to append detected number literals in order.
 
         Returns:
             The expression with all number literals replaced by ESCAPED_NUMBER_LITERAL.
         """
         pattern = StaticSettings.NUMBER_LITERAL_REGEX_COMPILED
 
-        # Detect all number literals and append them to numberLiteralList (in order).
-        numberLiteralList.extend(m.group(0) for m in pattern.finditer(expression))
+        # Detect all number literals and append them to number_literal_list (in order).
+        number_literal_list.extend(m.group(0) for m in pattern.finditer(expression))
 
         # Replace all number literals in the expression with the marker "@NUMBER_LITERAL@".
         replaced = pattern.sub(StaticSettings.ESCAPED_NUMBER_LITERAL, expression)
@@ -419,34 +419,34 @@ class LexicalAnalyzer:
         return replaced
 
     @staticmethod
-    def createTokensFromTokenWords(tokenWords: List[str],
-                                   numberLiteralList: List[str]) -> List["Token"]:
+    def _create_tokens_from_token_words(token_words: List[str],
+                                   number_literal_list: List[str]) -> List[Token]:
         """
         Convert token words into Token instances.
         Also recover escaped number literals.
         """
-        tokenCount = len(tokenWords)
+        token_count = len(token_words)
 
         # Stores the parenthesis-depth, which will increase at "(" and decrease at ")".
-        parenthesisDepth: int = 0
+        parenthesis_depth: int = 0
 
         # Stores the parenthesis-depth where a function call begins,
         # for detecting the end of the function operator.
-        callParenthesisDepths: Set[int] = set()
+        callparenthesis_depths: Set[int] = set()
 
-        tokens: List[Token] = [None] * tokenCount  # type: ignore[list-item]
-        lastToken: Token | None = None
+        tokens: List[Token] = [None] * token_count  # type: ignore[list-item]
+        last_token: Token | None = None
         iliteral: int = 0
         
-        for itoken in range(tokenCount):
-            word = tokenWords[itoken]
+        for itoken in range(token_count):
+            word = token_words[itoken]
 
             # Cases of open parentheses, or beginning of function calls.
             if word == "(":
-                parenthesisDepth += 1
+                parenthesis_depth += 1
                 if itoken >= 1 and tokens[itoken - 1] is not None and tokens[itoken - 1].type == TokenType.FUNCTION_IDENTIFIER:
                     # this '(' is a call-begin operator
-                    callParenthesisDepths.add(parenthesisDepth)
+                    callparenthesis_depths.add(parenthesis_depth)
                     op = StaticSettings.CALL_OPERATOR_SYMBOL_DICT[word]  # '('
                     tokens[itoken] = Token(TokenType.OPERATOR, word, op)
                 else:
@@ -455,15 +455,15 @@ class LexicalAnalyzer:
 
             # Cases of close parentheses, or end of function calls.
             elif word == ")":
-                if parenthesisDepth in callParenthesisDepths:
+                if parenthesis_depth in callparenthesis_depths:
                     # this ')' is a call-end operator
-                    callParenthesisDepths.remove(parenthesisDepth)
+                    callparenthesis_depths.remove(parenthesis_depth)
                     op = StaticSettings.CALL_OPERATOR_SYMBOL_DICT[word]  # ')'
                     tokens[itoken] = Token(TokenType.OPERATOR, word, op)
                 else:
                     # this ')' is an close parenthesis
                     tokens[itoken] = Token(TokenType.PARENTHESIS, word)
-                parenthesisDepth -= 1
+                parenthesis_depth -= 1
 
             # Case of separators of function arguments (treated as special operator).
             elif word == ",":
@@ -475,19 +475,19 @@ class LexicalAnalyzer:
                 op = None
 
                 # Unary-prefix operators:
-                if (lastToken is None
-                    or lastToken.word == "("
-                    or lastToken.word == ","
-                    or (lastToken.type == TokenType.OPERATOR and lastToken.operator is not None and lastToken.operator.type != OperatorType.CALL)):
+                if (last_token is None
+                    or last_token.word == "("
+                    or last_token.word == ","
+                    or (last_token.type == TokenType.OPERATOR and last_token.operator is not None and last_token.operator.type != OperatorType.CALL)):
                     if word not in StaticSettings.UNARY_PREFIX_OPERATOR_SYMBOL_DICT:
                         mesasge = ErrorMessages.UNKNOWN_UNARY_PREFIX_OPERATOR.replace("$0", word)
                         raise ExevalatorException(mesasge)
                     op = StaticSettings.UNARY_PREFIX_OPERATOR_SYMBOL_DICT[word]
 
                 # Binary operators:
-                elif (lastToken.word == ")"
-                    or lastToken.type == TokenType.NUMBER_LITERAL
-                    or lastToken.type == TokenType.VARIABLE_IDENTIFIER):
+                elif (last_token.word == ")"
+                    or last_token.type == TokenType.NUMBER_LITERAL
+                    or last_token.type == TokenType.VARIABLE_IDENTIFIER):
                     if word not in StaticSettings.BINARY_OPERATOR_SYMBOL_DICT:
                         mesasge = ErrorMessages.UNKNOWN_BINARY_OPERATOR.replace("$0", word)
                         raise ExevalatorException(mesasge)
@@ -502,7 +502,7 @@ class LexicalAnalyzer:
             # Case of number literals (escaped marker)
             elif word == StaticSettings.ESCAPED_NUMBER_LITERAL:
                 try:
-                    literal = numberLiteralList[iliteral]
+                    literal = number_literal_list[iliteral]
                 except IndexError as ie:
                     message = ErrorMessages.UNEXPECTED_ERROR.replace("$0", "literal index out of range")
                     raise ExevalatorException(message) from ie
@@ -511,15 +511,15 @@ class LexicalAnalyzer:
 
             # Cases of variable identifier or function identifier
             else:
-                if itoken < tokenCount - 1 and tokenWords[itoken + 1] == "(":
+                if itoken < token_count - 1 and token_words[itoken + 1] == "(":
                     tokens[itoken] = Token(TokenType.FUNCTION_IDENTIFIER, word)
                 else:
                     tokens[itoken] = Token(TokenType.VARIABLE_IDENTIFIER, word)
 
-            lastToken = tokens[itoken]
+            last_token = tokens[itoken]
 
         # If unrecovered number literals exist: error
-        if iliteral != len(numberLiteralList):
+        if iliteral != len(number_literal_list):
             message = ErrorMessages.UNEXPECTED_ERROR.replace("$0", "unrecovered number literals detected")
             raise ExevalatorException(message)
 
@@ -527,7 +527,7 @@ class LexicalAnalyzer:
 
 
     @staticmethod
-    def checkParenthesisBalance(tokens: List[Token]) -> None:
+    def _check_parenthesis_balance(tokens: List[Token]) -> None:
         """
         Check if the numbers of '(' and ')' are balanced.
 
@@ -556,7 +556,7 @@ class LexicalAnalyzer:
 
 
     @staticmethod
-    def checkEmptyParentheses(tokens: List[Token]) -> None:
+    def _check_empty_parentheses(tokens: List[Token]) -> None:
         """
         Check if there exists an empty '()'.
 
@@ -568,21 +568,21 @@ class LexicalAnalyzer:
         Args:
             tokens (List[Token]): Tokens of the inputted expression.
         """
-        tokenCount = len(tokens)
-        contentCounter = 0
-        for tokenIndex in range(tokenCount):
-            token = tokens[tokenIndex]
+        token_count = len(tokens)
+        content_counter = 0
+        for token_index in range(token_count):
+            token = tokens[token_index]
             if token.type == TokenType.PARENTHESIS:  # Excepting CALL operators
                 if token.word == "(":
-                    contentCounter = 0
+                    content_counter = 0
                 elif token.word == ")":
-                    if contentCounter == 0:
+                    if content_counter == 0:
                         raise ExevalatorException(ErrorMessages.EMPTY_PARENTHESIS)
             else:
-                contentCounter += 1
+                content_counter += 1
 
     @staticmethod
-    def checkLocationsOfOperatorsAndLeafs(tokens: List[Token]) -> None:
+    def _check_locations_of_operators_and_leafs(tokens: List[Token]) -> None:
         """
         Checks correctness of locations of operators and leaf elements (literals and identifiers).
         An ExevalatorException will be thrown when any errors detected.
@@ -591,44 +591,44 @@ class LexicalAnalyzer:
         Args:
             tokens (List[Token]): Tokens of the inputted expression.
         """
-        tokenCount = len(tokens)
-        leafTypeSet = {TokenType.NUMBER_LITERAL, TokenType.VARIABLE_IDENTIFIER}
+        token_count = len(tokens)
+        leaf_type_set = {TokenType.NUMBER_LITERAL, TokenType.VARIABLE_IDENTIFIER}
 
         # Reads and check tokens from left to right.
-        for tokenIndex in range(tokenCount):
-            token = tokens[tokenIndex]
+        for token_index in range(token_count):
+            token = tokens[token_index]
 
             # Prepare information of next/previous token.
-            nextIsLeaf = (
-                tokenIndex != tokenCount - 1
-                and tokens[tokenIndex + 1].type in leafTypeSet
+            next_is_leaf = (
+                token_index != token_count - 1
+                and tokens[token_index + 1].type in leaf_type_set
             )
-            prevIsLeaf = (
-                tokenIndex != 0
-                and tokens[tokenIndex - 1].type in leafTypeSet
+            prev_is_leaf = (
+                token_index != 0
+                and tokens[token_index - 1].type in leaf_type_set
             )
-            nextIsOpenParenthesis = (
-                tokenIndex < tokenCount - 1
-                and tokens[tokenIndex + 1].word == "("
+            next_is_open_parenthesis = (
+                token_index < token_count - 1
+                and tokens[token_index + 1].word == "("
             )
-            prevIsCloseParenthesis = (
-                tokenIndex != 0
-                and tokens[tokenIndex - 1].word == ")"
+            prev_is_close_parenthesis = (
+                token_index != 0
+                and tokens[token_index - 1].word == ")"
             )
-            nextIsPrefixOperator = (
-                tokenIndex < tokenCount - 1
-                and tokens[tokenIndex + 1].type == TokenType.OPERATOR
-                and tokens[tokenIndex + 1].operator.type == OperatorType.UNARY_PREFIX
+            next_is_prefix_operator = (
+                token_index < token_count - 1
+                and tokens[token_index + 1].type == TokenType.OPERATOR
+                and tokens[token_index + 1].operator.type == OperatorType.UNARY_PREFIX
             )
-            nextIsFunctionCallBegin = (
-                nextIsOpenParenthesis
-                and tokenIndex < tokenCount - 1
-                and tokens[tokenIndex + 1].type == TokenType.OPERATOR
-                and tokens[tokenIndex + 1].operator.type == OperatorType.CALL
+            next_is_function_call_begin = (
+                next_is_open_parenthesis
+                and token_index < token_count - 1
+                and tokens[token_index + 1].type == TokenType.OPERATOR
+                and tokens[token_index + 1].operator.type == OperatorType.CALL
             )
-            nextIsFunctionIdentifier = (
-                tokenIndex < tokenCount - 1
-                and tokens[tokenIndex + 1].type == TokenType.FUNCTION_IDENTIFIER
+            next_is_function_identifier = (
+                token_index < token_count - 1
+                and tokens[token_index + 1].type == TokenType.FUNCTION_IDENTIFIER
             )
 
             # Case of operators
@@ -636,30 +636,30 @@ class LexicalAnalyzer:
                 # Cases of unary-prefix operators
                 if token.operator is not None and token.operator.type == OperatorType.UNARY_PREFIX:
                     # Only leafs, open parentheses, unary-prefix and function-call operators can be an operand.
-                    if not (nextIsLeaf or nextIsOpenParenthesis or nextIsPrefixOperator or nextIsFunctionIdentifier):
+                    if not (next_is_leaf or next_is_open_parenthesis or next_is_prefix_operator or next_is_function_identifier):
                         message = ErrorMessages.RIGHT_OPERAND_REQUIRED.replace("$0", token.word)
                         raise ExevalatorException(message)
 
                 # Cases of binary operators or a separator of partial expressions
                 if (token.operator is not None and token.operator.type == OperatorType.BINARY) or token.word == ",":
                     # Only leafs, open parentheses, unary-prefix and function-call operators can be right-operands.
-                    if not (nextIsLeaf or nextIsOpenParenthesis or nextIsPrefixOperator or nextIsFunctionIdentifier):
+                    if not (next_is_leaf or next_is_open_parenthesis or next_is_prefix_operator or next_is_function_identifier):
                         message = ErrorMessages.RIGHT_OPERAND_REQUIRED.replace("$0", token.word)
                         raise ExevalatorException(message)
                     # Only leaf elements and closed parenthesis can be a left-operand.
-                    if not (prevIsLeaf or prevIsCloseParenthesis):
+                    if not (prev_is_leaf or prev_is_close_parenthesis):
                         message = ErrorMessages.LEFT_OPERAND_REQUIRED.replace("$0", token.word)
                         raise ExevalatorException(message)
 
             # Case of leaf elements
-            if token.type in leafTypeSet:
+            if token.type in leaf_type_set:
                 # Another leaf or an open parenthesis cannot be at the right of a leaf element.
-                if (not nextIsFunctionCallBegin) and (nextIsOpenParenthesis or nextIsLeaf):
+                if (not next_is_function_call_begin) and (next_is_open_parenthesis or next_is_leaf):
                     message = ErrorMessages.RIGHT_OPERATOR_REQUIRED.replace("$0", token.word)
                     raise ExevalatorException(message)
 
                 # Another leaf element or a closed parenthesis cannot be at the left of a leaf element.
-                if prevIsCloseParenthesis or prevIsLeaf:
+                if prev_is_close_parenthesis or prev_is_leaf:
                     message = ErrorMessages.LEFT_OPERATOR_REQUIRED.replace("$0", token.word)
                     raise ExevalatorException(message)
 
@@ -682,26 +682,26 @@ class Parser:
         """
 
         # Number of tokens
-        tokenCount = len(tokens)
+        token_count = len(tokens)
 
         # Working stack to form multiple AstNode instances into a tree-shape.
         stack: list[AstNode] = []
 
         # Temporary nodes used in the above working stack, for isolating ASTs of partial expressions.
-        parenthesisStackLid = AstNode(Token(type=TokenType.STACK_LID, word="(PARENTHESIS_STACK_LID)"))
-        separatorStackLid   = AstNode(Token(type=TokenType.STACK_LID, word="(SEPARATOR_STACK_LID)"))
-        callBeginStackLid   = AstNode(Token(type=TokenType.STACK_LID, word="(CALL_BEGIN_STACK_LID)"))
+        parenthesis_stack_lid = AstNode(Token(type=TokenType.STACK_LID, word="(PARENTHESIS_STACK_LID)"))
+        separator_stack_lid   = AstNode(Token(type=TokenType.STACK_LID, word="(SEPARATOR_STACK_LID)"))
+        call_begin_stack_lid   = AstNode(Token(type=TokenType.STACK_LID, word="(CALL_BEGIN_STACK_LID)"))
 
         # The array storing next operator's precedence for each token.
         # At [i], it stores the precedence of the first operator whose token-index is greater than i.
-        nextOperatorPrecedences = Parser.getNextOperatorPrecedences(tokens)
+        next_operator_precedences = Parser._get_next_operator_precedences(tokens)
 
         # Read tokens from left to right.
         itoken = 0
-        while True:  # do { ... } while (itoken < tokenCount);
+        while True:  # do { ... } while (itoken < token_count);
 
             token = tokens[itoken]
-            operatorNode: AstNode | None = None
+            operator_node: AstNode | None = None
 
             # Case of literals and identifiers: "1.23", "x", "f", etc.
             if token.type in (TokenType.NUMBER_LITERAL, TokenType.VARIABLE_IDENTIFIER, TokenType.FUNCTION_IDENTIFIER):
@@ -712,78 +712,78 @@ class Parser:
             # Case of parenthesis: "(" or ")"
             elif token.type == TokenType.PARENTHESIS:
                 if token.word == "(":
-                    stack.append(parenthesisStackLid)
+                    stack.append(parenthesis_stack_lid)
                     itoken += 1
                     continue
                 else:  # ")"
-                    operatorNode = Parser.popPartialExprNodes(stack, parenthesisStackLid)[0]
+                    operator_node = Parser._pop_partial_expr_nodes(stack, parenthesis_stack_lid)[0]
 
             # Case of operators: "+", "-", etc.
             elif token.type == TokenType.OPERATOR:
-                operatorNode = AstNode(token)
-                nextOpPrecedence = nextOperatorPrecedences[itoken]
+                operator_node = AstNode(token)
+                next_op_precedence = next_operator_precedences[itoken]
 
                 # Case of unary-prefix operators
                 if token.operator.type == OperatorType.UNARY_PREFIX:
-                    if Parser.shouldAddRightOperand(token.operator.associativity, token.operator.precedence, nextOpPrecedence):
-                        operatorNode.childNodeList.append(AstNode(tokens[itoken + 1]))
+                    if Parser._should_add_right_operand(token.operator.associativity, token.operator.precedence, next_op_precedence):
+                        operator_node.child_node_list.append(AstNode(tokens[itoken + 1]))
                         itoken += 1  # looked-ahead
 
                 # Case of binary operators
                 elif token.operator.type == OperatorType.BINARY:
-                    operatorNode.childNodeList.append(stack.pop())
-                    if Parser.shouldAddRightOperand(token.operator.associativity, token.operator.precedence, nextOpPrecedence):
-                        operatorNode.childNodeList.append(AstNode(tokens[itoken + 1]))
+                    operator_node.child_node_list.append(stack.pop())
+                    if Parser._should_add_right_operand(token.operator.associativity, token.operator.precedence, next_op_precedence):
+                        operator_node.child_node_list.append(AstNode(tokens[itoken + 1]))
                         itoken += 1  # looked-ahead
 
                 # Case of function-call operators
                 elif token.operator.type == OperatorType.CALL:
                     if token.word == "(":
                         # Add function-identifier node at the top of the stack.
-                        operatorNode.childNodeList.append(stack.pop())
-                        stack.append(operatorNode)
+                        operator_node.child_node_list.append(stack.pop())
+                        stack.append(operator_node)
                         # Marker to collect partial expressions of args from the stack.
-                        stack.append(callBeginStackLid)
+                        stack.append(call_begin_stack_lid)
                         itoken += 1
                         continue
                     elif token.word == ")":
-                        argNodes = Parser.popPartialExprNodes(stack, callBeginStackLid)
-                        operatorNode = stack.pop()  # the '(' CALL operator node
+                        argNodes = Parser._pop_partial_expr_nodes(stack, call_begin_stack_lid)
+                        operator_node = stack.pop()  # the '(' CALL operator node
                         for argNode in argNodes:
-                            operatorNode.childNodeList.append(argNode)
+                            operator_node.child_node_list.append(argNode)
                     elif token.word == ",":
-                        stack.append(separatorStackLid)
+                        stack.append(separator_stack_lid)
                         itoken += 1
                         continue
 
             # If the precedence of the operator at the top of the stack is stronger than the next operator,
             # connect all "unconnected yet" operands and operators in the stack.
-            while Parser.shouldAddRightOperandToStackedOperator(stack, nextOperatorPrecedences[itoken]):
-                oldOperatorNode = operatorNode
-                operatorNode = stack.pop()
-                operatorNode.childNodeList.append(oldOperatorNode)  # type: ignore[arg-type]
+            while Parser._should_add_right_operandToStackedOperator(stack, next_operator_precedences[itoken]):
+                oldoperator_node = operator_node
+                operator_node = stack.pop()
+                operator_node.child_node_list.append(oldoperator_node)  # type: ignore[arg-type]
 
-            stack.append(operatorNode)  # type: ignore[arg-type]
+            stack.append(operator_node)  # type: ignore[arg-type]
             itoken += 1
 
-            # Tail of "do { ... } while (itoken < tokenCount);"
-            if not (itoken < tokenCount):
+            # Tail of "do { ... } while (itoken < token_count);"
+            if not (itoken < token_count):
                 break
         
         # The AST has been constructed on the stack, and only its root node is stored in the stack.
-        rootNodeOfExpressionAst = stack.pop()
+        root_node_of_expression_ast = stack.pop()
 
         # Check that the depth of the constructed AST does not exceed the limit.
-        rootNodeOfExpressionAst.checkDepth(1, StaticSettings.MAX_AST_DEPTH)
+        root_node_of_expression_ast.checkDepth(1, StaticSettings.MAX_AST_DEPTH)
 
-        return rootNodeOfExpressionAst
+        return root_node_of_expression_ast
 
 
     @staticmethod
-    def shouldAddRightOperand(
+    def _should_add_right_operand(
         targetOperatorAssociativity: OperatorAssociativity,
         targetOperatorPrecedence: int,
-        nextOperatorPrecedence: int,
+        next_operator_precedence: int,
     ) -> bool:
         """
         Judges whether the right-side token should be connected directly as an operand, to the target operator.
@@ -795,14 +795,14 @@ class Parser:
         # If the precedence of both operators is the same:
         #         Return true if the target operator is left-associative.
         #         Return false if the target operator is right-associative.
-        targetOpPrecedenceIsStrong = targetOperatorPrecedence < nextOperatorPrecedence
-        targetOpPrecedenceIsEqual = targetOperatorPrecedence == nextOperatorPrecedence
-        targetOpAssociativityIsLeft = targetOperatorAssociativity == OperatorAssociativity.LEFT
-        return targetOpPrecedenceIsStrong or (targetOpPrecedenceIsEqual and targetOpAssociativityIsLeft)
+        target_op_precedence_is_strong = targetOperatorPrecedence < next_operator_precedence
+        target_op_precedence_is_equal = targetOperatorPrecedence == next_operator_precedence
+        target_op_associativity_is_left = targetOperatorAssociativity == OperatorAssociativity.LEFT
+        return target_op_precedence_is_strong or (target_op_precedence_is_equal and target_op_associativity_is_left)
 
     @staticmethod
-    def shouldAddRightOperandToStackedOperator(
-        stack: List[AstNode], nextOperatorPrecedence: int
+    def _should_add_right_operandToStackedOperator(
+        stack: List[AstNode], next_operator_precedence: int
     ) -> bool:
         """
         Judges whether the right-side token should be connected directly as an operand,
@@ -811,16 +811,16 @@ class Parser:
         if len(stack) == 0 or stack[-1].token.type != TokenType.OPERATOR:
             return False
         
-        operatorOnStackTop: Operator = stack[-1].token.operator  # type: ignore[assignment]
+        operator_on_stack_top: Operator = stack[-1].token.operator  # type: ignore[assignment]
 
-        return Parser.shouldAddRightOperand(
-            operatorOnStackTop.associativity,
-            operatorOnStackTop.precedence,
-            nextOperatorPrecedence,
+        return Parser._should_add_right_operand(
+            operator_on_stack_top.associativity,
+            operator_on_stack_top.precedence,
+            next_operator_precedence,
         )
 
     @staticmethod
-    def popPartialExprNodes(stack: List[AstNode], endStackLidNode: AstNode) -> List[AstNode]:
+    def _pop_partial_expr_nodes(stack: List[AstNode], endStackLidNode: AstNode) -> List[AstNode]:
         """
         Pops root nodes of ASTs of partial expressions constructed on the stack.
         In the returned list, the popped nodes are stored in FIFO order.
@@ -828,48 +828,49 @@ class Parser:
         if len(stack) == 0:
             raise ExevalatorException(ErrorMessages.UNEXPECTED_PARTIAL_EXPRESSION)
 
-        partialExprNodeList: List[AstNode] = []
+        partial_expr_node_list: List[AstNode] = []
         while len(stack) != 0:
             if stack[-1].token.type == TokenType.STACK_LID:
-                stackLidNode = stack.pop()
-                if stackLidNode is endStackLidNode:
+                stack_lid_node = stack.pop()
+                if stack_lid_node is endStackLidNode:
                     break
             else:
-                partialExprNodeList.append(stack.pop())
+                partial_expr_node_list.append(stack.pop())
 
         # Store elements in FIFO order and return
-        nodeCount = len(partialExprNodeList)
-        partialExprNodes: List[AstNode] = [None] * nodeCount  # type: ignore[list-item]
-        for inode in range(nodeCount):
-            partialExprNodes[inode] = partialExprNodeList[nodeCount - inode - 1]
-        return partialExprNodes  # type: ignore[return-value]
+        node_count = len(partial_expr_node_list)
+        partial_expr_nodes: List[AstNode] = [None] * node_count  # type: ignore[list-item]
+        for inode in range(node_count):
+            partial_expr_nodes[inode] = partial_expr_node_list[node_count - inode - 1]
+        return partial_expr_nodes  # type: ignore[return-value]
 
     @staticmethod
-    def getNextOperatorPrecedences(tokens: List[Token]) -> List[int]:
+    def _get_next_operator_precedences(tokens: List[Token]) -> List[int]:
         """
         Returns an array storing next operator's precedence for each token.
         At index i, it stores the precedence of the first operator whose token-index is greater than i.
         """
-        tokenCount = len(tokens)
-        lastOperatorPrecedence: int = StaticSettings.LEAST_PRIOR_OPERATOR_PRECEDENCE
-        nextOperatorPrecedences: List[int] = [StaticSettings.LEAST_PRIOR_OPERATOR_PRECEDENCE] * tokenCount
+        token_count = len(tokens)
+        last_operator_precedence: int = StaticSettings.LEAST_PRIOR_OPERATOR_PRECEDENCE
+        next_operator_precedences: List[int] = [StaticSettings.LEAST_PRIOR_OPERATOR_PRECEDENCE] * token_count
 
-        for itoken in range(tokenCount - 1, -1, -1):
-        # for (int itoken=tokenCount-1; 0<=itoken; itoken--) {
+        for itoken in range(token_count - 1, -1, -1):
+        # for (int itoken=token_count-1; 0<=itoken; itoken--) {
 
             token = tokens[itoken]
-            nextOperatorPrecedences[itoken] = lastOperatorPrecedence
+            next_operator_precedences[itoken] = last_operator_precedence
 
             if token.type == TokenType.OPERATOR:
-                lastOperatorPrecedence = token.operator.precedence  # type: ignore[assignment]
+                last_operator_precedence = token.operator.precedence  # type: ignore[assignment]
 
             if token.type == TokenType.PARENTHESIS:
                 if token.word == "(":
-                    lastOperatorPrecedence = 0  # most prior
+                    last_operator_precedence = 0  # most prior
                 else:  # case of ")"
-                    lastOperatorPrecedence = StaticSettings.LEAST_PRIOR_OPERATOR_PRECEDENCE
+                    last_operator_precedence = StaticSettings.LEAST_PRIOR_OPERATOR_PRECEDENCE
 
-        return nextOperatorPrecedences
+        return next_operator_precedences
+
 
 class Evaluator:
     """
@@ -878,52 +879,52 @@ class Evaluator:
 
     def __init__(self) -> None:
         # The tree of evaluator nodes, which evaluates an expression.
-        self.evaluatorNodeTree: Optional[EvaluatorNode] = None
+        self.evaluator_node_tree: Optional[EvaluatorNode] = None
 
     def update(
         self,
         ast: "AstNode",
-        variableTable: Dict[str, int],
-        functionTable: Dict[str, "FunctionInterface"],
+        variable_table: Dict[str, int],
+        function_table: Dict[str, "FunctionInterface"],
     ) -> None:
         """
         Updates the state to evaluate the value of the AST.
         """
-        node = Evaluator._createEvaluatorNodeTree(ast, variableTable, functionTable)
+        node = Evaluator._create_evaluator_node_tree(ast, variable_table, function_table)
         if node is None:
             raise ExevalatorException(
                 ErrorMessages.UNEXPECTED_ERROR.replace("$0", "root node has no evaluator")
             )
-        self.evaluatorNodeTree = node
+        self.evaluator_node_tree = node
 
-    def isEvaluatable(self) -> bool:
+    def is_evaluatable(self) -> bool:
         """
         Returns whether `evaluate` method is available on the current state.
         """
-        return self.evaluatorNodeTree is not None
+        return self.evaluator_node_tree is not None
 
     def evaluate(self, memory: List[float]) -> float:
         """
         Evaluates the value of the AST set by `update` method.
         """
-        if self.evaluatorNodeTree is None:
-            message = ErrorMessages.UNEXPECTED_ERROR.replace("$0", "evaluatorNodeTree has not been initialized yet.")
+        if self.evaluator_node_tree is None:
+            message = ErrorMessages.UNEXPECTED_ERROR.replace("$0", "evaluator_node_tree has not been initialized yet.")
             raise ExevalatorException(message)
-        return self.evaluatorNodeTree.evaluate(memory)
+        return self.evaluator_node_tree.evaluate(memory)
 
     @staticmethod
-    def _createEvaluatorNodeTree(
+    def _create_evaluator_node_tree(
         ast: "AstNode",
-        variableTable: Dict[str, int],
-        functionTable: Dict[str, FunctionInterface],
+        variable_table: Dict[str, int],
+        function_table: Dict[str, FunctionInterface],
     ) -> Optional[EvaluatorNode]:
         """
         Creates a tree of evaluator nodes corresponding with the specified AST.
 
         Note: This method creates a tree of evaluator nodes by traversing each node in the AST recursively.
         """
-        childNodeList: List["AstNode"] = ast.childNodeList
-        childCount = len(childNodeList)
+        child_node_list: List[AstNode] = ast.child_node_list
+        child_count = len(child_node_list)
 
         # NOTE ABOUT FUNCTION_IDENTIFIER -> Optional[EvaluatorNode] (None):
         # We deliberately do NOT create an EvaluatorNode for FUNCTION_IDENTIFIER.
@@ -935,13 +936,13 @@ class Evaluator:
         # The evaluator tree keeps the "shape" aligned to the AST, but the function
         # name token has no corresponding evaluator behavior. To avoid inventing a
         # dummy no-op node, we store `None` for FUNCTION_IDENTIFIER and let the CALL
-        # operator read the name from `childNodeList[0].token.word`.
+        # operator read the name from `child_node_list[0].token.word`.
 
         # Creates evaluator nodes of child nodes, and store them into an array.
-        childNodeNodes: List[Optional[EvaluatorNode]] = [None] * childCount
-        for ichild in range(childCount):
-            childAstNode = childNodeList[ichild]
-            childNodeNodes[ichild] = Evaluator._createEvaluatorNodeTree(childAstNode, variableTable, functionTable)
+        child_node_nodes: List[Optional[EvaluatorNode]] = [None] * child_count
+        for ichild in range(child_count):
+            child_ast_node = child_node_list[ichild]
+            child_node_nodes[ichild] = Evaluator._create_evaluator_node_tree(child_ast_node, variable_table, function_table)
 
         # Initialize evaluator node of THIS node
         token = ast.token
@@ -949,11 +950,11 @@ class Evaluator:
             return NumberLiteralEvaluatorNode(token.word)
 
         elif token.type == TokenType.VARIABLE_IDENTIFIER:
-            if token.word not in variableTable:
+            if token.word not in variable_table:
                 raise ExevalatorException(
                     ErrorMessages.VARIABLE_NOT_FOUND.replace("$0", token.word)
                 )
-            address = variableTable[token.word]
+            address = variable_table[token.word]
             return VariableEvaluatorNode(address)
 
         elif token.type == TokenType.FUNCTION_IDENTIFIER:
@@ -964,45 +965,45 @@ class Evaluator:
 
             if op.type == OperatorType.UNARY_PREFIX and op.symbol == "-":
                 return MinusEvaluatorNode(
-                    Evaluator._requireNotNone(childNodeNodes[0])
+                    Evaluator._requireNotNone(child_node_nodes[0])
                 )
 
             elif op.type == OperatorType.BINARY and op.symbol == "+":
                 return AdditionEvaluatorNode(
-                    Evaluator._requireNotNone(childNodeNodes[0]),
-                    Evaluator._requireNotNone(childNodeNodes[1])
+                    Evaluator._requireNotNone(child_node_nodes[0]),
+                    Evaluator._requireNotNone(child_node_nodes[1])
                 )
 
             elif op.type == OperatorType.BINARY and op.symbol == "-":
                 return SubtractionEvaluatorNode(
-                    Evaluator._requireNotNone(childNodeNodes[0]),
-                    Evaluator._requireNotNone(childNodeNodes[1])
+                    Evaluator._requireNotNone(child_node_nodes[0]),
+                    Evaluator._requireNotNone(child_node_nodes[1])
                 )
 
             elif op.type == OperatorType.BINARY and op.symbol == "*":
                 return MultiplicationEvaluatorNode(
-                    Evaluator._requireNotNone(childNodeNodes[0]),
-                    Evaluator._requireNotNone(childNodeNodes[1])
+                    Evaluator._requireNotNone(child_node_nodes[0]),
+                    Evaluator._requireNotNone(child_node_nodes[1])
                 )
 
             elif op.type == OperatorType.BINARY and op.symbol == "/":
                 return DivisionEvaluatorNode(
-                    Evaluator._requireNotNone(childNodeNodes[0]),
-                    Evaluator._requireNotNone(childNodeNodes[1])
+                    Evaluator._requireNotNone(child_node_nodes[0]),
+                    Evaluator._requireNotNone(child_node_nodes[1])
                 )
 
             elif op.type == OperatorType.CALL and op.symbol == "(":
-                identifier = childNodeList[0].token.word  # FUNCTION_IDENTIFIER node
-                if identifier not in functionTable:
+                identifier = child_node_list[0].token.word  # FUNCTION_IDENTIFIER node
+                if identifier not in function_table:
                     raise ExevalatorException(
                         ErrorMessages.FUNCTION_NOT_FOUND.replace("$0", identifier)
                     )
-                function = functionTable[identifier]
-                argCount = childCount - 1
-                argNodes: List["EvaluatorNode"] = [None] * argCount  # type: ignore[list-item]
+                function = function_table[identifier]
+                argCount = child_count - 1
+                argNodes: List[EvaluatorNode] = [None] * argCount  # type: ignore[list-item]
                 for iarg in range(argCount):
-                    # childNodeNodes[1..] are arguments
-                    argNodes[iarg] = Evaluator._requireNotNone(childNodeNodes[iarg + 1])
+                    # child_node_nodes[1..] are arguments
+                    argNodes[iarg] = Evaluator._requireNotNone(child_node_nodes[iarg + 1])
                 return FunctionEvaluatorNode(function, identifier, argNodes)
 
             else:
@@ -1089,7 +1090,7 @@ class AstNode:
     """The class storing information of a node of an AST."""
 
     token: Token                  # The token corresponding with this AST node.
-    childNodeList: List[AstNode]  # The list of child nodes of this AST node.
+    child_node_list: List[AstNode]  # The list of child nodes of this AST node.
 
     def __init__(self, token: Token) -> None:
         """
@@ -1099,38 +1100,38 @@ class AstNode:
             token: The token corresponding with this AST node.
         """
         self.token = token
-        self.childNodeList = []
+        self.child_node_list = []
 
-    def checkDepth(self, depthOfThisNode: int, maxAstDepth: int) -> None:
+    def checkDepth(self, depth_of_this_node: int, max_ast_depth: int) -> None:
         """
         Checks that depths under this node do not exceed the specified maximum.
 
         Args:
-            depthOfThisNode: The depth of this node in the AST.
-            maxAstDepth: The maximum depth allowed.
+            depth_of_this_node: The depth of this node in the AST.
+            max_ast_depth: The maximum depth allowed.
 
         Raises:
             ExevalatorException: If the depth exceeds the maximum value.
         """
-        if maxAstDepth < depthOfThisNode:
+        if max_ast_depth < depth_of_this_node:
             message = ErrorMessages.EXCEEDS_MAX_AST_DEPTH.replace(
                 "$0", str(StaticSettings.MAX_AST_DEPTH)
             )
             raise ExevalatorException(message)
-        for childNode in self.childNodeList:
-            childNode.checkDepth(depthOfThisNode + 1, maxAstDepth)
+        for child_node in self.child_node_list:
+            child_node.checkDepth(depth_of_this_node + 1, max_ast_depth)
 
-    def toMarkuppedText(self, indentStage: int = 0) -> str:
+    def toMarkuppedText(self, indent_stage: int = 0) -> str:
         """
         Expresses the AST under this node in XML-like text format.
 
         Args:
-            indentStage: The stage of indent of this node.
+            indent_stage: The stage of indent of this node.
 
         Returns:
             XML-like text representation of the AST under this node.
         """
-        indent = StaticSettings.AST_INDENT * indentStage
+        indent = StaticSettings.AST_INDENT * indent_stage
         eol = os.linesep
         parts: List[str] = []
 
@@ -1148,11 +1149,11 @@ class AstNode:
             parts.append(str(self.token.operator.precedence))
             parts.append('"')
 
-        if self.childNodeList:
+        if self.child_node_list:
             parts.append(">")
-            for childNode in self.childNodeList:
+            for child_node in self.child_node_list:
                 parts.append(eol)
-                parts.append(childNode.toMarkuppedText(indentStage + 1))
+                parts.append(child_node.toMarkuppedText(indent_stage + 1))
             parts.append(eol)
             parts.append(indent)
             parts.append("</")
@@ -1184,18 +1185,18 @@ class EvaluatorNode(ABC):
 class BinaryOperationEvaluatorNode(EvaluatorNode):
     """The super class of evaluator nodes of binary operations."""
 
-    __slots__ = ("leftOperandNode", "rightOperandNode")
+    __slots__ = ("left_operand_node", "right_operand_node")
 
-    def __init__(self, leftOperandNode: EvaluatorNode, rightOperandNode: EvaluatorNode) -> None:
+    def __init__(self, left_operand_node: EvaluatorNode, right_operand_node: EvaluatorNode) -> None:
         """
         Initializes operands.
 
         Args:
-            leftOperandNode: The node for evaluating the left-side operand.
-            rightOperandNode: The node for evaluating the right-side operand.
+            left_operand_node: The node for evaluating the left-side operand.
+            right_operand_node: The node for evaluating the right-side operand.
         """
-        self.leftOperandNode = leftOperandNode
-        self.rightOperandNode = rightOperandNode
+        self.left_operand_node = left_operand_node
+        self.right_operand_node = right_operand_node
 
 
 class AdditionEvaluatorNode(BinaryOperationEvaluatorNode):
@@ -1203,7 +1204,7 @@ class AdditionEvaluatorNode(BinaryOperationEvaluatorNode):
 
     def evaluate(self, memory: List[float]) -> float:
         """Performs the addition."""
-        return self.leftOperandNode.evaluate(memory) + self.rightOperandNode.evaluate(memory)
+        return self.left_operand_node.evaluate(memory) + self.right_operand_node.evaluate(memory)
 
 
 class SubtractionEvaluatorNode(BinaryOperationEvaluatorNode):
@@ -1211,7 +1212,7 @@ class SubtractionEvaluatorNode(BinaryOperationEvaluatorNode):
 
     def evaluate(self, memory: List[float]) -> float:
         """Performs the subtraction."""
-        return self.leftOperandNode.evaluate(memory) - self.rightOperandNode.evaluate(memory)
+        return self.left_operand_node.evaluate(memory) - self.right_operand_node.evaluate(memory)
 
 
 class MultiplicationEvaluatorNode(BinaryOperationEvaluatorNode):
@@ -1219,7 +1220,7 @@ class MultiplicationEvaluatorNode(BinaryOperationEvaluatorNode):
 
     def evaluate(self, memory: List[float]) -> float:
         """Performs the multiplication."""
-        return self.leftOperandNode.evaluate(memory) * self.rightOperandNode.evaluate(memory)
+        return self.left_operand_node.evaluate(memory) * self.right_operand_node.evaluate(memory)
 
 
 class DivisionEvaluatorNode(BinaryOperationEvaluatorNode):
@@ -1227,26 +1228,26 @@ class DivisionEvaluatorNode(BinaryOperationEvaluatorNode):
 
     def evaluate(self, memory: List[float]) -> float:
         """Performs the division."""
-        return self.leftOperandNode.evaluate(memory) / self.rightOperandNode.evaluate(memory)
+        return self.left_operand_node.evaluate(memory) / self.right_operand_node.evaluate(memory)
 
 
 class MinusEvaluatorNode(EvaluatorNode):
     """The evaluator node for evaluating the value of a unary-minus operator."""
 
-    __slots__ = ("operandNode",)
+    __slots__ = ("operand_node",)
 
-    def __init__(self, operandNode: EvaluatorNode) -> None:
+    def __init__(self, operand_node: EvaluatorNode) -> None:
         """
         Initializes the operand.
 
         Args:
-            operandNode: The node for evaluating the operand.
+            operand_node: The node for evaluating the operand.
         """
-        self.operandNode = operandNode
+        self.operand_node = operand_node
 
     def evaluate(self, memory: List[float]) -> float:
         """Performs the negation (unary minus)."""
-        return -self.operandNode.evaluate(memory)
+        return -self.operand_node.evaluate(memory)
 
 
 class NumberLiteralEvaluatorNode(EvaluatorNode):
@@ -1306,44 +1307,44 @@ class FunctionEvaluatorNode(EvaluatorNode):
     The evaluator node for evaluating a function-call operator.
     """
 
-    __slots__ = ("function", "functionName", "argumentEvalNodes", "argumentArrayBuffer")
+    __slots__ = ("function", "function_name", "argument_eval_nodes", "argument_array_buffer")
 
     def __init__(
         self,
         function: FunctionInterface,
-        functionName: str,
-        argumentEvalNodes: List[EvaluatorNode],
+        function_name: str,
+        argument_eval_nodes: List[EvaluatorNode],
     ) -> None:
         """
         Initializes information of functions to be called.
 
         Args:
             function: The function to be called.
-            functionName: The name of the function.
-            argumentEvalNodes: Evaluator nodes for evaluating values of arguments.
+            function_name: The name of the function.
+            argument_eval_nodes: Evaluator nodes for evaluating values of arguments.
         """
         self.function = function
-        self.functionName = functionName
-        self.argumentEvalNodes = argumentEvalNodes
+        self.function_name = function_name
+        self.argument_eval_nodes = argument_eval_nodes
         # Preallocate buffer
-        self.argumentArrayBuffer = [0.0] * len(self.argumentEvalNodes)
+        self.argument_array_buffer = [0.0] * len(self.argument_eval_nodes)
 
     def evaluate(self, memory: List[float]) -> float:
         """
         Calls the function and returns the returned value of the function.
         """
-        argCount = len(self.argumentEvalNodes)
+        argCount = len(self.argument_eval_nodes)
         for iarg in range(argCount):
-            self.argumentArrayBuffer[iarg] = self.argumentEvalNodes[iarg].evaluate(memory)
+            self.argument_array_buffer[iarg] = self.argument_eval_nodes[iarg].evaluate(memory)
         try:
-            return self.function.invoke(self.argumentArrayBuffer)
+            return self.function.invoke(self.argument_array_buffer)
         except Exception as e:
-            msg = (
+            message = (
                 ErrorMessages.FUNCTION_ERROR
-                .replace("$0", self.functionName)
+                .replace("$0", self.function_name)
                 .replace("$1", str(e))
             )
-            raise ExevalatorException(msg) from e
+            raise ExevalatorException(message) from e
 
 
 class StaticSettings:
@@ -1390,35 +1391,35 @@ class StaticSettings:
     ESCAPED_NUMBER_LITERAL: str = "@NUMBER_LITERAL@"
 
     # --- Operators (same precedence/assoc as Java) ---
-    _additionOperator = Operator(
+    _addition_operator = Operator(
         type=OperatorType.BINARY,
         symbol='+', precedence=400, associativity=OperatorAssociativity.LEFT
     )
-    _subtractionOperator = Operator(
+    _subtraction_operator = Operator(
         type=OperatorType.BINARY,
         symbol='-', precedence=400, associativity=OperatorAssociativity.LEFT
     )
-    _multiplicationOperator = Operator(
+    _multiplication_operator = Operator(
         type=OperatorType.BINARY,
         symbol='*', precedence=300, associativity=OperatorAssociativity.LEFT
     )
-    _divisionOperator = Operator(
+    _division_operator = Operator(
         type=OperatorType.BINARY,
         symbol='/', precedence=300, associativity=OperatorAssociativity.LEFT
     )
-    _minusOperator = Operator(
+    _minus_operator = Operator(
         type=OperatorType.UNARY_PREFIX,
         symbol='-', precedence=200, associativity=OperatorAssociativity.RIGHT
     )
-    _callBeginOperator = Operator(
+    _call_begin_operator = Operator(
         type=OperatorType.CALL,
         symbol='(', precedence=100, associativity=OperatorAssociativity.LEFT
     )
-    _callEndOperator = Operator(
+    _call_end_operator = Operator(
         type=OperatorType.CALL,
         symbol=')', precedence=LEAST_PRIOR_OPERATOR_PRECEDENCE, associativity=OperatorAssociativity.LEFT
     )
-    _callSeparatorOperator = Operator(
+    _call_separator_operator = Operator(
         type=OperatorType.CALL,
         symbol=',', precedence=LEAST_PRIOR_OPERATOR_PRECEDENCE, associativity=OperatorAssociativity.LEFT
     )
@@ -1430,22 +1431,22 @@ class StaticSettings:
 
     # The Map mapping each symbol of an unary-prefix operator to an instance of Operator class.
     UNARY_PREFIX_OPERATOR_SYMBOL_DICT: Dict[str, Operator] = {
-        '-': _minusOperator,
+        '-': _minus_operator,
     }
 
     # The Map mapping each symbol of a binary operator to an instance of Operator class.
     BINARY_OPERATOR_SYMBOL_DICT: Dict[str, Operator] = {
-        '+': _additionOperator,
-        '-': _subtractionOperator,
-        '*': _multiplicationOperator,
-        '/': _divisionOperator,
+        '+': _addition_operator,
+        '-': _subtraction_operator,
+        '*': _multiplication_operator,
+        '/': _division_operator,
     }
 
     # The Map mapping each symbol of a call operator to an instance of Operator class.
     CALL_OPERATOR_SYMBOL_DICT: Dict[str, Operator] = {
-        '(': _callBeginOperator,
-        ')': _callEndOperator,
-        ',': _callSeparatorOperator,
+        '(': _call_begin_operator,
+        ')': _call_end_operator,
+        ',': _call_separator_operator,
     }
 
     # The list of symbols to split an expression into tokens.
