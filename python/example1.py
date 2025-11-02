@@ -4,10 +4,10 @@ def main() -> None:
     """ A minimal example of Exevalator usage. """
 
     # Create an instance of Exevalator Engine
-    exevalator = Exevalator()
+    ex = Exevalator()
 
     # Evaluate an expression
-    result = exevalator.eval("1.2 + 3.4")
+    result = ex.eval("1.2 + 3.4")
 
     # Show the result
     print(f"result: {result}")
