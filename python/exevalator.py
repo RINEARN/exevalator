@@ -700,6 +700,11 @@ class Parser:
         itoken = 0
         while True:  # do { ... } while (itoken < token_count);
 
+            # When jumped to here by "continue",
+            # we must check the condition and break this loop if necessary.
+            if not (itoken < token_count):
+                break
+
             token = tokens[itoken]
             operator_node: AstNode | None = None
 
@@ -766,7 +771,8 @@ class Parser:
             stack.append(operator_node)  # type: ignore[arg-type]
             itoken += 1
 
-            # Tail of "do { ... } while (itoken < token_count);"
+            # Tail of "do { ... } while (itoken < token_count);":
+            # We must check the condition and break this loop if necessary.
             if not (itoken < token_count):
                 break
         
