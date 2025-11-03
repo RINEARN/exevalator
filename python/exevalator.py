@@ -448,10 +448,10 @@ class LexicalAnalyzer:
                     # this '(' is a call-begin operator
                     callparenthesis_depths.add(parenthesis_depth)
                     op = StaticSettings.CALL_OPERATOR_SYMBOL_DICT[word]  # '('
-                    tokens[itoken] = Token(TokenType.OPERATOR, word, op)
+                    tokens[itoken] = Token(type=TokenType.OPERATOR, word=word, operator=op)
                 else:
                     # this '(' is an open parenthesis
-                    tokens[itoken] = Token(TokenType.PARENTHESIS, word)
+                    tokens[itoken] = Token(type=TokenType.PARENTHESIS, word=word, operator=None)
 
             # Cases of close parentheses, or end of function calls.
             elif word == ")":
@@ -459,16 +459,16 @@ class LexicalAnalyzer:
                     # this ')' is a call-end operator
                     callparenthesis_depths.remove(parenthesis_depth)
                     op = StaticSettings.CALL_OPERATOR_SYMBOL_DICT[word]  # ')'
-                    tokens[itoken] = Token(TokenType.OPERATOR, word, op)
+                    tokens[itoken] = Token(type=TokenType.OPERATOR, word=word, operator=op)
                 else:
                     # this ')' is an close parenthesis
-                    tokens[itoken] = Token(TokenType.PARENTHESIS, word)
+                    tokens[itoken] = Token(type=TokenType.PARENTHESIS, word=word, operator=None)
                 parenthesis_depth -= 1
 
             # Case of separators of function arguments (treated as special operator).
             elif word == ",":
                 op = StaticSettings.CALL_OPERATOR_SYMBOL_DICT[word]
-                tokens[itoken] = Token(TokenType.OPERATOR, word, op)
+                tokens[itoken] = Token(type=TokenType.OPERATOR, word=word, operator=op)
 
             # Cases of other operators.
             elif len(word) == 1 and word in StaticSettings.OPERATOR_SYMBOL_SET:
@@ -512,9 +512,9 @@ class LexicalAnalyzer:
             # Cases of variable identifier or function identifier
             else:
                 if itoken < token_count - 1 and token_words[itoken + 1] == "(":
-                    tokens[itoken] = Token(TokenType.FUNCTION_IDENTIFIER, word)
+                    tokens[itoken] = Token(type=TokenType.FUNCTION_IDENTIFIER, word=word, operator=None)
                 else:
-                    tokens[itoken] = Token(TokenType.VARIABLE_IDENTIFIER, word)
+                    tokens[itoken] = Token(type=TokenType.VARIABLE_IDENTIFIER, word=word, operator=None)
 
             last_token = tokens[itoken]
 
