@@ -19,7 +19,7 @@ class Test:
         self.test_number_literals()
         self.test_operations_of_operators()
         self.test_precedences_of_operators()
-        #self.test_parentheses()
+        self.test_parentheses()
         #self.test_complicated_cases()
         #self.test_syntax_checks_of_correspondences_of_parentheses()
         #self.test_syntax_checks_of_locations_of_operators_and_leafs()
@@ -259,6 +259,88 @@ class Test:
             "Test of Precedences of Operators 20",
             ex.eval("1.2-----3.4-5.6"),
             1.2-(-(-(-(-3.4))))-5.6
+        )
+
+
+    def test_parentheses(self) -> None:
+        ex = Exevalator()
+
+        self.check(
+            "Test of Parentheses 1",
+            ex.eval("(1.2 + 3.4)"),
+            (1.2 + 3.4)
+        )
+
+        self.check(
+            "Test of Parentheses 2",
+            ex.eval("(1.2 + 3.4) + 5.6"),
+            (1.2 + 3.4) + 5.6
+        )
+
+        self.check(
+            "Test of Parentheses 3",
+            ex.eval("1.2 + (3.4 + 5.6)"),
+            1.2 + (3.4 + 5.6)
+        )
+
+        self.check(
+            "Test of Parentheses 4",
+            ex.eval("1.2 + -(3.4 + 5.6)"),
+            1.2 + -(3.4 + 5.6)
+        )
+
+        self.check(
+            "Test of Parentheses 5",
+            ex.eval("1.2 + -(-3.4 + 5.6)"),
+            1.2 + -(-3.4 + 5.6)
+        )
+
+        self.check(
+            "Test of Parentheses 4",
+            ex.eval("(1.2 * 3.4) + 5.6"),
+            (1.2 * 3.4) + 5.6
+        )
+
+        self.check(
+            "Test of Parentheses 5",
+            ex.eval("(1.2 + 3.4) * 5.6"),
+            (1.2 + 3.4) * 5.6
+        )
+
+        self.check(
+            "Test of Parentheses 6",
+            ex.eval("1.2 + (3.4 * 5.6)"),
+            1.2 + (3.4 * 5.6)
+        )
+
+        self.check(
+            "Test of Parentheses 7",
+            ex.eval("1.2 + (3.4 * 5.6) + 7.8"),
+            1.2 + (3.4 * 5.6) + 7.8
+        )
+
+        self.check(
+            "Test of Parentheses 8",
+            ex.eval("1.2 * (3.4 + 5.6) / 7.8"),
+            1.2 * (3.4 + 5.6) / 7.8
+        )
+
+        self.check(
+            "Test of Parentheses 9",
+            ex.eval("(1.2 + 3.4 - 5.6) * ((7.8 + 9.0) / 10.1)"),
+            (1.2 + 3.4 - 5.6) * ((7.8 + 9.0) / 10.1)
+        )
+
+        self.check(
+            "Test of Parentheses 10",
+            ex.eval("(-(1.2 + 3.4 - 5.6) * ((7.8 + 9.0) / 10.1) / 11.2 + 12.3 * ((13.4 + -(15.6 - 17.8)) * 18.9)) + 19.0 * 20.1"),
+            (-(1.2 + 3.4 - 5.6) * ((7.8 + 9.0) / 10.1) / 11.2 + 12.3 * ((13.4 + -(15.6 - 17.8)) * 18.9)) + 19.0 * 20.1
+        )
+
+        self.check(
+            "Test of Parenthesis 11",
+            ex.eval("1.2 + 3.4 + (5.6)"),
+            1.2 + 3.4 + (5.6)
         )
 
 
