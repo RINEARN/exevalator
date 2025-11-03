@@ -22,7 +22,7 @@ public class Example6 {
 
         // Get the value of the x from the standard-input
         System.out.println("x = ?                  (default: 1)");
-        double xValue = 0.0;
+        double xValue = 1.0;
         String xValueStr = scanner.nextLine();
         if (xValueStr.length() != 0) {
             xValue = Double.parseDouble(xValueStr);
