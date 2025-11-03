@@ -18,7 +18,7 @@ class Test:
     def main(self) -> None:
         self.test_number_literals()
         self.test_operations_of_operators()
-        #self.test_precedences_of_operators()
+        self.test_precedences_of_operators()
         #self.test_parentheses()
         #self.test_complicated_cases()
         #self.test_syntax_checks_of_correspondences_of_parentheses()
@@ -135,6 +135,130 @@ class Test:
             "Test of Unary Minus Operator",
             ex.eval("-1.2"),
             -1.2
+        )
+
+
+    def test_precedences_of_operators(self) -> None:
+        ex = Exevalator()
+
+        self.check(
+            "Test of Precedences of Operators 1",
+            ex.eval("1.2 + 3.4 + 5.6 + 7.8"),
+            1.2 + 3.4 + 5.6 + 7.8
+        )
+
+        self.check(
+            "Test of Precedences of Operators 2",
+            ex.eval("1.2 + 3.4 - 5.6 + 7.8"),
+            1.2 + 3.4 - 5.6 + 7.8
+        )
+
+        self.check(
+            "Test of Precedences of Operators 3",
+            ex.eval("1.2 + 3.4 * 5.6 + 7.8"),
+            1.2 + 3.4 * 5.6 + 7.8
+        )
+
+        self.check(
+            "Test of Precedences of Operators 4",
+            ex.eval("1.2 + 3.4 / 5.6 + 7.8"),
+            1.2 + 3.4 / 5.6 + 7.8
+        )
+
+        self.check(
+            "Test of Precedences of Operators 5",
+            ex.eval("1.2 * 3.4 + 5.6 + 7.8"),
+            1.2 * 3.4 + 5.6 + 7.8
+        )
+
+        self.check(
+            "Test of Precedences of Operators 6",
+            ex.eval("1.2 * 3.4 - 5.6 + 7.8"),
+            1.2 * 3.4 - 5.6 + 7.8
+        )
+
+        self.check(
+            "Test of Precedences of Operators 7",
+            ex.eval("1.2 * 3.4 * 5.6 + 7.8"),
+            1.2 * 3.4 * 5.6 + 7.8
+        )
+
+        self.check(
+            "Test of Precedences of Operators 8",
+            ex.eval("1.2 * 3.4 / 5.6 + 7.8"),
+            1.2 * 3.4 / 5.6 + 7.8
+        )
+
+        self.check(
+            "Test of Precedences of Operators 9",
+            ex.eval("1.2 + 3.4 + 5.6 * 7.8"),
+            1.2 + 3.4 + 5.6 * 7.8
+        )
+
+        self.check(
+            "Test of Precedences of Operators 10",
+            ex.eval("1.2 + 3.4 - 5.6 * 7.8"),
+            1.2 + 3.4 - 5.6 * 7.8
+        )
+
+        self.check(
+            "Test of Precedences of Operators 11",
+            ex.eval("1.2 + 3.4 * 5.6 * 7.8"),
+            1.2 + 3.4 * 5.6 * 7.8
+        )
+
+        self.check(
+            "Test of Precedences of Operators 12",
+            ex.eval("1.2 + 3.4 / 5.6 * 7.8"),
+            1.2 + 3.4 / 5.6 * 7.8
+        )
+
+        self.check(
+            "Test of Precedences of Operators 13",
+            ex.eval("-1.2 + 3.4 / 5.6 * 7.8"),
+            -1.2 + 3.4 / 5.6 * 7.8
+        )
+
+        self.check(
+            "Test of Precedences of Operators 14",
+            ex.eval("1.2 + 3.4 / -5.6 * 7.8"),
+            1.2 + 3.4 / 5.6 * -7.8
+        )
+
+        self.check(
+            "Test of Precedences of Operators 15",
+            ex.eval("1.2 + 3.4 / 5.6 * -7.8"),
+            1.2 + 3.4 / 5.6 * -7.8
+        )
+
+        self.check(
+            "Test of Precedences of Operators 16",
+            ex.eval("1.2*--3.4"),
+            1.2*(-(-3.4))
+        )
+
+        self.check(
+            "Test of Precedences of Operators 17",
+            ex.eval("1.2*---3.4"),
+            1.2*(-(-(-3.4)))
+        )
+
+        self.check(
+            "Test of Precedences of Operators 18",
+            ex.eval("1.2*----3.4"),
+            1.2*(-(-(-(-3.4))))
+        )
+
+        self.check(
+            "Test of Precedences of Operators 19",
+            ex.eval("1.2*----3.4-5.6"),
+            1.2*(-(-(-(-3.4))))-5.6
+        )
+
+        self.check(
+            "Test of Precedences of Operators 20",
+            ex.eval("1.2-----3.4-5.6"),
+            1.2-(-(-(-(-3.4))))-5.6
         )
 
 
