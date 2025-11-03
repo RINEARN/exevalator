@@ -17,7 +17,7 @@ class Test:
 
     def main(self) -> None:
         self.test_number_literals()
-        #self.test_operations_of_operators()
+        self.test_operations_of_operators()
         #self.test_precedences_of_operators()
         #self.test_parentheses()
         #self.test_complicated_cases()
@@ -101,6 +101,40 @@ class Test:
             "Test of a Number Literal with a Exponent Part 6",
             ex.eval("123.4567E-12"),
             123.4567E-12
+        )
+
+
+    def test_operations_of_operators(self) -> None:
+        ex = Exevalator()
+
+        self.check(
+            "Test of Addition Operator",
+            ex.eval("1.2 + 3.4"),
+            1.2 + 3.4
+        )
+
+        self.check(
+            "Test of Subtraction Operator",
+            ex.eval("1.2 - 3.4"),
+            1.2 - 3.4
+        )
+
+        self.check(
+            "Test of Multiplication Operator",
+            ex.eval("1.2 * 3.4"),
+            1.2 * 3.4
+        )
+
+        self.check(
+            "Test of Division Operator",
+            ex.eval("1.2 / 3.4"),
+            1.2 / 3.4
+        )
+
+        self.check(
+            "Test of Unary Minus Operator",
+            ex.eval("-1.2"),
+            -1.2
         )
 
 
