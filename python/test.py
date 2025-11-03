@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Callable, Type
 import math
 
-from exevalator import Exevalator, ExevalatorException
+from exevalator import Exevalator, ExevalatorException, FunctionInterface
 
 ALLOWABLE_ERROR: float = 1.0e-12
 
@@ -24,7 +24,7 @@ class Test:
         self.test_syntax_checks_of_correspondences_of_parentheses()
         self.test_syntax_checks_of_locations_of_operators_and_leafs()
         self.test_variables()
-        #self.test_functions()
+        self.test_functions()
         #self.test_empty_expressions()
         #self.test_reeval()
         #self.test_tokenization()
@@ -645,6 +645,122 @@ class Test:
             ex.eval("x + y + 2 + x2 + 2 * y2"),
             2.5 + 0.5 + 2.0 + 22.5 + 2.0 * 32.5
         )
+
+
+    def test_functions(self) -> None:
+        ex = Exevalator()
+
+        try:
+            ex.eval("funA()");
+            raise ExevalatorTestException("Expected exception has not been thrown")
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Functions 1: OK.")
+
+        ex.connect_function("funA", FunctionA())
+        self.check(
+            "Test of Functions 2",
+            ex.eval("funA()"),
+            1.25
+        )
+
+        try:
+            ex.eval("funB(2.5)")
+            raise ExevalatorTestException("Expected exception has not been thrown")
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Functions 3: OK.")
+
+        ex.connect_function("funB", FunctionB())
+        self.check(
+            "Test of Functions 4",
+            ex.eval("funB(2.5)"),
+            2.5
+        )
+
+        ex.connect_function("funC", FunctionC())
+        self.check(
+            "Test of Functions 5",
+            ex.eval("funC(1.25, 2.5)"),
+            1.25 + 2.5
+        )
+
+        self.check(
+            "Test of Functions 6",
+            ex.eval("funC(funA(), funB(2.5))"),
+            1.25 + 2.5
+        )
+
+        self.check(
+            "Test of Functions 7",
+            ex.eval("funC(funC(funA(), funB(2.5)), funB(1.0))"),
+            1.25 + 2.5 + 1.0
+        )
+        
+        self.check(
+            "Test of Function 8",
+            ex.eval("funC(1.0, 3.5 * funB(2.5) / 2.0)"),
+            1.0 + 3.5 * 2.5 / 2.0
+        )
+        
+        self.check(
+            "Test of Functions 9",
+            ex.eval("funA() * funC(funC(funA(), 3.5 * funB(2.5) / 2.0), funB(1.0))"),
+            1.25 * (1.25 + 3.5 * 2.5 / 2.0 + 1.0)
+        )
+
+        self.check(
+            "Test of Functions 10",
+            ex.eval("2 + 256 * funA() * funC(funC(funA(), 3.5 * funB(2.5) / 2.0), funB(1.0)) * 128"),
+            2.0 + 256.0 * (1.25 * (1.25 + 3.5 * 2.5 / 2.0 + 1.0)) * 128.0
+        )
+
+        ex.connect_function("funD", FunctionD())
+        self.check(
+            "Test of Functions 11",
+            ex.eval("funD(1.25, 2.5, 5.0)"),
+            0.0
+        )
+
+        self.check(
+            "Test of Functions 12",
+            ex.eval("-funC(-1.25, -2.5)"),
+            - (-1.25 + -2.5)
+        )
+
+
+class FunctionA(FunctionInterface):
+    def invoke(self, arguments: list[float]) -> float:
+        if len(arguments) != 0:
+            raise ExevalatorException("Incorrect number of arguments")
+        return 1.25
+
+
+class FunctionB(FunctionInterface):
+    def invoke(self, arguments: list[float]) -> float:
+        if len(arguments) != 1:
+            raise ExevalatorException("Incorrect number of arguments")
+        return arguments[0]
+
+
+class FunctionC(FunctionInterface):
+    def invoke(self, arguments: list[float]) -> float:
+        if len(arguments) != 2:
+            raise ExevalatorException("Incorrect number of arguments")
+        return arguments[0] + arguments[1]
+
+
+class FunctionD(FunctionInterface):
+    def invoke(self, arguments: list[float]) -> float:
+        if len(arguments) != 3:
+            raise ExevalatorException("Incorrect number of arguments")
+        if arguments[0] != 1.25:
+            raise ExevalatorException("The value of args[0] is incorrect")
+        if arguments[1] != 2.5:
+            raise ExevalatorException("The value of args[1] is incorrect")
+        if arguments[2] != 5.0:
+            raise ExevalatorException("The value of args[2] is incorrect")
+        return 0.0
 
 
 if __name__ == "__main__":
