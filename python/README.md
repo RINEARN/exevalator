@@ -49,14 +49,17 @@ Copy `python/exevalator.py` into your source tree, for example:
 
 Now, you are ready to use Exevalator! You can compute expressions as follows:
 
+	# Create an instance of Exevalator Engine
 	ex = Exevalator()
 
 	# Evaluate the value of an expression
 	result = ex.eval("1.2 + 3.4")
 
+	# Show the result
 	print(f"result: {result}")   # -> result: 4.6
 
 All numbers in expressions are handled as Python `float` values, and `eval()` returns a `float`.
+
 If computation fails (e.g., syntactic error, undeclared variable/function), eval() raises ExevalatorException, which you should catch and handle appropriately in real applications.
 
 
@@ -94,6 +97,7 @@ As demonstrated above, Exevalator evaluates arithmetic expressions:
 
 	ex = Exevalator()
 	result = ex.eval("(-(1.2 + 3.4) * 5) / 2")
+
 	print(result)  # -> -11.5
 
 	# See: python/example2.py
@@ -136,10 +140,10 @@ Provide custom functions by implementing the simple callable protocol `FunctionI
 
 	# Create a function available in expressions
 	class MyFunction(FunctionInterface):
-		def invoke(self, arguments: Sequence[float]) -> float:
-			if len(arguments) != 2:
-				raise ExevalatorException("Incorrect number of args")
-			return arguments[0] + arguments[1]
+    	def invoke(self, arguments: list[float]) -> float:
+		if len(arguments) != 2:
+			raise ExevalatorException("Incorrect number of arguments")
+		return arguments[0] + arguments[1]
 
 	# Connect the above function for using it in expressions
 	ex = Exevalator()
@@ -242,7 +246,7 @@ Here is a list of methods for the Exevalator class, along with their specificati
 
 
 <a id="methods-connect-function"></a>
-| Signature | void connect_function(name: str, function: FunctionInterface) |
+| Signature | connect_function(name: str, function: FunctionInterface) -> None |
 |:---|:---|
 | Description | Connects a function to be used in expressions. |
 | Parameters | name (str): The function name as used in expressions.<br>function (FunctionInterface): An instance of a class implementing the `FunctionInterface`, which must define the method `invoke(self, arguments: List[float]) -> float` to process the function. |
