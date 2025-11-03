@@ -23,7 +23,7 @@ class Test:
         self.test_complicated_cases()
         self.test_syntax_checks_of_correspondences_of_parentheses()
         self.test_syntax_checks_of_locations_of_operators_and_leafs()
-        #self.test_variables()
+        self.test_variables()
         #self.test_functions()
         #self.test_empty_expressions()
         #self.test_reeval()
@@ -556,6 +556,95 @@ class Test:
             # Expected to be thrown
             print("Test of Detection of Lacking Operator: OK.")
 
+
+    def test_variables(self) -> None:
+        ex = Exevalator()
+
+        try:
+            ex.eval("x")
+            raise ExevalatorTestException("Expected exception has not been thrown")
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Variables 1: OK.")
+
+        xAddress = ex.declare_variable("x")
+
+        self.check(
+            "Test of Variables 2",
+            ex.eval("x"),
+            0.0
+        )
+
+        ex.write_variable("x", 1.25)
+
+        self.check(
+            "Test of Variables 3",
+            ex.eval("x"),
+            1.25
+        )
+
+        ex.write_variable_at(xAddress, 2.5)
+
+        self.check(
+            "Test of Variables 4",
+            ex.eval("x"),
+            2.5
+        )
+
+        try:
+            ex.write_variable_at(100, 5.0)
+            raise ExevalatorTestException("Expected exception has not been thrown")
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Variables 5: OK.")
+
+        try:
+            ex.eval("y")
+            raise ExevalatorTestException("Expected exception has not been thrown")
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Variables 6: OK.")
+
+        yAddress = ex.declare_variable("y")
+
+        self.check(
+            "Test of Variables 7",
+            ex.eval("y"),
+            0.0
+        )
+
+        ex.write_variable("y", 0.25)
+
+        self.check(
+            "Test of Variables 8",
+            ex.eval("y"),
+            0.25
+        )
+
+        ex.write_variable_at(yAddress, 0.5)
+
+        self.check(
+            "Test of Variables 9",
+            ex.eval("y"),
+            0.5
+        )
+
+        self.check(
+            "Test of Variables 10",
+            ex.eval("x + y"),
+            2.5 + 0.5
+        )
+
+        # Variables having names containing numbers
+        ex.declare_variable("x2")
+        ex.declare_variable("y2")
+        ex.write_variable("x2", 22.5)
+        ex.write_variable("y2", 32.5)
+        self.check(
+            "Test of Variables 11",
+            ex.eval("x + y + 2 + x2 + 2 * y2"),
+            2.5 + 0.5 + 2.0 + 22.5 + 2.0 * 32.5
+        )
 
 
 if __name__ == "__main__":
