@@ -25,7 +25,7 @@ class Test:
         self.test_syntax_checks_of_locations_of_operators_and_leafs()
         self.test_variables()
         self.test_functions()
-        #self.test_empty_expressions()
+        self.test_empty_expressions()
         #self.test_reeval()
         #self.test_tokenization()
 
@@ -727,6 +727,38 @@ class Test:
             ex.eval("-funC(-1.25, -2.5)"),
             - (-1.25 + -2.5)
         )
+
+
+    def test_empty_expressions(self) -> None:
+        ex = Exevalator()
+
+        try:
+            ex.eval("")
+            raise ExevalatorTestException("Expected exception has not been thrown")
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Empty Expression 1: OK.")
+
+        try:
+            ex.eval(" ")
+            raise ExevalatorTestException("Expected exception has not been thrown")
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Empty Expression 2: OK.")
+
+        try:
+            ex.eval("  ")
+            raise ExevalatorTestException("Expected exception has not been thrown")
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Empty Expression 3: OK.")
+
+        try:
+            ex.eval("   ")
+            raise ExevalatorTestException("Expected exception has not been thrown")
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Empty Expression 4: OK.")
 
 
 class FunctionA(FunctionInterface):
