@@ -21,7 +21,7 @@ class Test:
         self.test_precedences_of_operators()
         self.test_parentheses()
         self.test_complicated_cases()
-        #self.test_syntax_checks_of_correspondences_of_parentheses()
+        self.test_syntax_checks_of_correspondences_of_parentheses()
         #self.test_syntax_checks_of_locations_of_operators_and_leafs()
         #self.test_variables()
         #self.test_functions()
@@ -353,6 +353,115 @@ class Test:
             (-(1.2E1 + 3.4E-2 - 5.6E2) * ((7.8E0 + 9.0) / 10.1E-3) / 11.2 + 12.3E-1 * ((13.4 + -(15.6E-12 - 17.8E-10)) * 18.9E-5)) + 19.0E-2 * 20.1E0
         )
 
+
+    def test_syntax_checks_of_correspondences_of_parentheses(self) -> None:
+        ex = Exevalator()
+
+        self.check(
+            "Test of Detection of Mismatching of Open/Closed Parentheses 1",
+            ex.eval("(1 + 2)"),
+            (1 + 2)
+        )
+
+        try:
+            self.check(
+                "Test of Detection of Mismatching of Open/Closed Parentheses 2",
+                ex.eval("((1 + 2)"),
+                (1 + 2)
+            )
+            raise ExevalatorTestException("Expected exception has not been thrown");
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Detection of Mismatching of Open/Closed Parentheses 2: OK.");
+
+        try:
+            self.check(
+                "Test of Detection of Mismatching of Open/Closed Parentheses 3",
+                ex.eval("(1 + 2))"),
+                (1 + 2)
+            )
+            raise ExevalatorTestException("Expected exception has not been thrown");
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Detection of Mismatching of Open/Closed Parentheses 3: OK.");
+
+        self.check(
+            "Test of Detection of Mismatching of Open/Closed Parentheses 4",
+            ex.eval("(1 + 2) + (3 + 4)"),
+            (1 + 2) + (3 + 4)
+        )
+
+        try:
+            self.check(
+                "Test of Detection of Mismatching of Open/Closed Parentheses 5",
+                ex.eval("1 + 2) + (3 + 4"),
+                (1 + 2) + (3 + 4)
+            )
+            raise ExevalatorTestException("Expected exception has not been thrown");
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Detection of Mismatching of Open/Closed Parentheses 5: OK.");
+
+        self.check(
+            "Test of Detection of Mismatching of Open/Closed Parentheses 6",
+            ex.eval("1 + ((2 + (3 + 4) + 5) + 6)"),
+            1 + ((2 + (3 + 4) + 5) + 6)
+        )
+
+        try:
+            self.check(
+                "Test of Detection of Mismatching of Open/Closed Parentheses 7",
+                ex.eval("1 + ((2 + (3 + 4) + 5) + 6"),
+                1 + ((2 + (3 + 4) + 5) + 6)
+            )
+            raise ExevalatorTestException("Expected exception has not been thrown");
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Detection of Mismatching of Open/Closed Parentheses 7: OK.");
+
+        try:
+            self.check(
+                "Test of Detection of Mismatching of Open/Closed Parentheses 8",
+                ex.eval("1 + (2 + (3 + 4) + 5) + 6)"),
+                1 + ((2 + (3 + 4) + 5) + 6)
+            )
+            raise ExevalatorTestException("Expected exception has not been thrown");
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Detection of Mismatching of Open/Closed Parentheses 8: OK.");
+
+        try:
+            self.check(
+                "Test of Detection of Empty Parentheses 1",
+                ex.eval("()"),
+                math.nan
+            )
+            raise ExevalatorTestException("Expected exception has not been thrown");
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Detection of Empty Parentheses 1: OK.");
+
+        try:
+            self.check(
+                "Test of Detection of Empty Parentheses 2",
+                ex.eval("1 + ()"),
+                math.nan
+            )
+            raise ExevalatorTestException("Expected exception has not been thrown");
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Detection of Empty Parentheses 2: OK.");
+
+        try:
+            self.check(
+                "Test of Detection of Empty Parentheses 3",
+                ex.eval("() + 1"),
+                math.nan
+            )
+            raise ExevalatorTestException("Expected exception has not been thrown");
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Detection of Empty Parentheses 3: OK.");
 
 
 if __name__ == "__main__":
