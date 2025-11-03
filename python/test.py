@@ -26,7 +26,7 @@ class Test:
         self.test_variables()
         self.test_functions()
         self.test_empty_expressions()
-        #self.test_reeval()
+        self.test_reeval()
         #self.test_tokenization()
 
         print("All tests have completed successfully.")
@@ -759,6 +759,64 @@ class Test:
         except ExevalatorException as ee:
             # Expected to be thrown
             print("Test of Empty Expression 4: OK.")
+
+
+    def test_reeval(self) -> None:
+        ex = Exevalator()
+
+        self.check(
+            "Test of reval() Method 1",
+            ex.eval("1.2 + 3.4"),
+            1.2 + 3.4
+        )
+
+        self.check(
+            "Test of reval() Method 2",
+            ex.reeval(),
+            1.2 + 3.4
+        )
+
+        self.check(
+            "Test of reval() Method 3",
+            ex.reeval(),
+            1.2 + 3.4
+        )
+
+        self.check(
+            "Test of reval() Method 4",
+            ex.eval("5.6 - 7.8"),
+            5.6 - 7.8
+        )
+
+        self.check(
+            "Test of reval() Method 5",
+            ex.reeval(),
+            5.6 - 7.8
+        )
+
+        self.check(
+            "Test of reval() Method 6",
+            ex.reeval(),
+            5.6 - 7.8
+        )
+
+        self.check(
+            "Test of reval() Method 7",
+            ex.eval("(1.23 + 4.56) * 7.89"),
+            (1.23 + 4.56) * 7.89
+        )
+
+        self.check(
+            "Test of reval() Method 8",
+            ex.reeval(),
+            (1.23 + 4.56) * 7.89
+        )
+
+        self.check(
+            "Test of reval() Method 9",
+            ex.reeval(),
+            (1.23 + 4.56) * 7.89
+        )
 
 
 class FunctionA(FunctionInterface):
