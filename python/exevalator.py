@@ -1042,7 +1042,8 @@ class OperatorAssociativity(Enum):
     RIGHT = auto() # Represents right-associative.
 
 
-@dataclass(frozen=True, kw_only=True)
+#@dataclass(frozen=True, kw_only=True) # kw_only is not supported on Python 3.9, we want to support it.
+@dataclass(frozen=True)
 class Operator:
     """The class storing information of an operator."""
 
@@ -1073,7 +1074,8 @@ class TokenType(Enum):
     STACK_LID = auto()            # Represents temporary token for isolating partial expressions in the stack, in parser
 
 
-@dataclass(frozen=True, kw_only=True)
+#@dataclass(frozen=True, kw_only=True) # kw_only is not supported on Python 3.9, we want to support it.
+@dataclass(frozen=True)
 class Token:
     """The class storing information of an operator."""
 
