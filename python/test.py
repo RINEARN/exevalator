@@ -22,7 +22,7 @@ class Test:
         self.test_parentheses()
         self.test_complicated_cases()
         self.test_syntax_checks_of_correspondences_of_parentheses()
-        #self.test_syntax_checks_of_locations_of_operators_and_leafs()
+        self.test_syntax_checks_of_locations_of_operators_and_leafs()
         #self.test_variables()
         #self.test_functions()
         #self.test_empty_expressions()
@@ -462,6 +462,100 @@ class Test:
         except ExevalatorException as ee:
             # Expected to be thrown
             print("Test of Detection of Empty Parentheses 3: OK.");
+
+
+    def test_syntax_checks_of_locations_of_operators_and_leafs(self) -> None:
+        ex = Exevalator()
+
+        self.check(
+            "Test of Detection of Left Operand of Unary-Prefix Operator 1",
+            ex.eval("1 + -123"),
+            1 + -123
+        )
+
+        try:
+            self.check(
+                "Test of Detection of Left Operand of Unary-Prefix Operator 2",
+                ex.eval("1 + -"),
+                1 + -123
+            )
+            raise ExevalatorTestException("Expected exception has not been thrown")
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Detection of Left Operand of Unary-Prefix Operator 2: OK.")
+
+        try:
+            self.check(
+                "Test of Detection of Left Operand of Unary-Prefix Operator 3",
+                ex.eval("(1 + -)"),
+                1 + -123
+            )
+            raise ExevalatorTestException("Expected exception has not been thrown")
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Detection of Left Operand of Unary-Prefix Operator 3: OK.")
+
+        self.check(
+            "Test of Detection of Left Operand of Binary Operator 1",
+            ex.eval("123 + 456"),
+            123 + 456
+        )
+
+        try:
+            self.check(
+                "Test of Detection of Left Operand of Binary Operator 2",
+                ex.eval("123 *"),
+                123 * 456
+            )
+            raise ExevalatorTestException("Expected exception has not been thrown")
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Detection of Left Operand of Binary Operator 2: OK.")
+
+        try:
+            self.check(
+                "Test of Detection of Left Operand of Binary Operator 3",
+                ex.eval("* 456"),
+                123 * 456
+            )
+            raise ExevalatorTestException("Expected exception has not been thrown")
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Detection of Left Operand of Binary Operator 3: OK.")
+
+        try:
+            self.check(
+                "Test of Detection of Left Operand of Binary Operator 4",
+                ex.eval("123 + ( * 456)"),
+                123 * 456
+            )
+            raise ExevalatorTestException("Expected exception has not been thrown")
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Detection of Left Operand of Binary Operator 4: OK.")
+
+        try:
+            self.check(
+                "Test of Detection of Left Operand of Binary Operator 5",
+                ex.eval("(123 *) + 456"),
+                123 * 456
+            )
+            raise ExevalatorTestException("Expected exception has not been thrown")
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Detection of Left Operand of Binary Operator 5: OK.")
+
+        try:
+            self.check(
+                "Test of Detection of Lacking Operator",
+                ex.eval("123 456"),
+                123 * 456
+            )
+            raise ExevalatorTestException("Expected exception has not been thrown")
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Detection of Lacking Operator: OK.")
+
 
 
 if __name__ == "__main__":
