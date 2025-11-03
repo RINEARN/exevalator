@@ -821,7 +821,7 @@ function testEmptyExpressions() {
         throw new ExevalatorTestError("Expected exception has not been thrown");
     } catch (error) {
         // Expected to be thrown
-        console.log("Test of Empty Functions 1: OK.");
+        console.log("Test of Empty Expression 1: OK.");
     }
 
     try {
@@ -829,7 +829,7 @@ function testEmptyExpressions() {
         throw new ExevalatorTestError("Expected exception has not been thrown");
     } catch (error) {
         // Expected to be thrown
-        console.log("Test of Empty Functions 2: OK.");
+        console.log("Test of Empty Expression 2: OK.");
     }
 
     try {
@@ -837,7 +837,7 @@ function testEmptyExpressions() {
         throw new ExevalatorTestError("Expected exception has not been thrown");
     } catch (error) {
         // Expected to be thrown
-        console.log("Test of Empty Functions 3: OK.");
+        console.log("Test of Empty Expression 3: OK.");
     }
 
     try {
@@ -845,7 +845,7 @@ function testEmptyExpressions() {
         throw new ExevalatorTestError("Expected exception has not been thrown");
     } catch (error) {
         // Expected to be thrown
-        console.log("Test of Empty Functions 4: OK.");
+        console.log("Test of Empty Expression 4: OK.");
     }
 }
 

@@ -795,7 +795,7 @@ public class Test {
             throw new ExevalatorTestException("Expected exception has not been thrown");
         } catch (Exevalator.Exception ee) {
             // Expected to be thrown
-            System.out.println("Test of Empty Functions 1: OK.");
+            System.out.println("Test of Empty Expression 1: OK.");
         }
 
         try {
@@ -803,7 +803,7 @@ public class Test {
             throw new ExevalatorTestException("Expected exception has not been thrown");
         } catch (Exevalator.Exception ee) {
             // Expected to be thrown
-            System.out.println("Test of Empty Functions 2: OK.");
+            System.out.println("Test of Empty Expression 2: OK.");
         }
 
         try {
@@ -811,7 +811,7 @@ public class Test {
             throw new ExevalatorTestException("Expected exception has not been thrown");
         } catch (Exevalator.Exception ee) {
             // Expected to be thrown
-            System.out.println("Test of Empty Functions 3: OK.");
+            System.out.println("Test of Empty Expression 3: OK.");
         }
 
         try {
@@ -819,7 +819,7 @@ public class Test {
             throw new ExevalatorTestException("Expected exception has not been thrown");
         } catch (Exevalator.Exception ee) {
             // Expected to be thrown
-            System.out.println("Test of Empty Functions 4: OK.");
+            System.out.println("Test of Empty Expression 4: OK.");
         }
     }
 
