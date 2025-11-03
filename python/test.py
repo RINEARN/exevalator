@@ -20,7 +20,7 @@ class Test:
         self.test_operations_of_operators()
         self.test_precedences_of_operators()
         self.test_parentheses()
-        #self.test_complicated_cases()
+        self.test_complicated_cases()
         #self.test_syntax_checks_of_correspondences_of_parentheses()
         #self.test_syntax_checks_of_locations_of_operators_and_leafs()
         #self.test_variables()
@@ -342,6 +342,17 @@ class Test:
             ex.eval("1.2 + 3.4 + (5.6)"),
             1.2 + 3.4 + (5.6)
         )
+
+
+    def test_complicated_cases(self) -> None:
+        ex = Exevalator()
+
+        self.check(
+            "Test of Complicated Case 1: The Expression Containing Many Parentheses and Many Literals having Exponent Parts",
+            ex.eval("(-(1.2E1 + 3.4E-2 - 5.6E2) * ((7.8E0 + 9.0) / 10.1E-3) / 11.2 + 12.3E-1 * ((13.4 + -(15.6E-12 - 17.8E-10)) * 18.9E-5)) + 19.0E-2 * 20.1E0"),
+            (-(1.2E1 + 3.4E-2 - 5.6E2) * ((7.8E0 + 9.0) / 10.1E-3) / 11.2 + 12.3E-1 * ((13.4 + -(15.6E-12 - 17.8E-10)) * 18.9E-5)) + 19.0E-2 * 20.1E0
+        )
+
 
 
 if __name__ == "__main__":
