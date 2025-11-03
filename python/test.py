@@ -27,7 +27,7 @@ class Test:
         self.test_functions()
         self.test_empty_expressions()
         self.test_reeval()
-        #self.test_tokenization()
+        self.test_tokenization()
 
         print("All tests have completed successfully.")
 
@@ -816,6 +816,89 @@ class Test:
             "Test of reval() Method 9",
             ex.reeval(),
             (1.23 + 4.56) * 7.89
+        )
+
+
+    def test_tokenization(self) -> None:
+        ex = Exevalator()
+
+        self.check(
+            "Test of Tokenization 1",
+            ex.eval("1.2345678"),
+            1.2345678
+        )
+
+        try:
+            ex.eval("1.234\n5678")
+            raise ExevalatorTestException("Expected exception has not been thrown");
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Tokenization 2: OK.")
+
+        try:
+            ex.eval("1.234\r\n5678")
+            raise ExevalatorTestException("Expected exception has not been thrown");
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Tokenization 3: OK.")
+
+        try:
+            ex.eval("1.234\t5678")
+            raise ExevalatorTestException("Expected exception has not been thrown");
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Tokenization 4: OK.")
+
+        try:
+            ex.eval("1.234 5678")
+            raise ExevalatorTestException("Expected exception has not been thrown");
+        except ExevalatorException as ee:
+            # Expected to be thrown
+            print("Test of Tokenization 5: OK.")
+
+        self.check(
+            "Test of Tokenization 6",
+            ex.eval("1+2*3-4/5"),
+            1.0 + 2.0 * 3.0 - 4.0 / 5.0
+        )
+
+        self.check(
+            "Test of Tokenization 7",
+            ex.eval("1+\n2*3\r\n-4/5"),
+            1.0 + 2.0 * 3.0 - 4.0 / 5.0
+        )
+
+        self.check(
+            "Test of Tokenization 8",
+            ex.eval("((1+2)*3)-(4/5)"),
+            ((1.0 + 2.0) * 3.0) - (4.0 / 5.0)
+        )
+
+        funC: FunctionC = FunctionC()
+        ex.connect_function("funC", funC)
+
+        self.check(
+            "Test of Tokenization 9",
+            ex.eval("funC(1,2)"),
+            1.0 + 2.0
+        )
+
+        self.check(
+            "Test of Tokenization 10",
+            ex.eval("funC(\n1,\r\n2\t)"),
+            1.0 + 2.0
+        )
+
+        self.check(
+            "Test of Tokenization 11",
+            ex.eval("3*funC(1,2)/2"),
+            3.0 * (1.0 + 2.0) / 2.0
+        )
+
+        self.check(
+            "Test of Tokenization 12",
+            ex.eval("3*(-funC(1,2)+2)"),
+            3.0 * (-(1.0 + 2.0) + 2.0)
         )
 
 
