@@ -168,7 +168,7 @@ class Exevalator:
         raise ExevalatorException(ErrorMessages.REEVAL_NOT_AVAILABLE)
 
 
-    def declareVariable(self, name: str) -> int:
+    def declare_variable(self, name: str) -> int:
         """
         Declares a new variable, for using the value of it in expressions.
 
@@ -205,7 +205,7 @@ class Exevalator:
         return address
 
 
-    def writeVariable(self, name: str, value: float) -> None:
+    def write_variable(self, name: str, value: float) -> None:
         """
         Writes the value to the variable having the specified name.
 
@@ -224,13 +224,13 @@ class Exevalator:
                 ErrorMessages.VARIABLE_NOT_FOUND.replace("$0", name)
             )
         address = self.variable_table[name]
-        self.writeVariableAt(address, value)
+        self.write_variable_at(address, value)
 
 
-    def writeVariableAt(self, address: int, value: float) -> None:
+    def write_variable_at(self, address: int, value: float) -> None:
         """
         Writes the value to the variable at the specified virtual address.
-        This method is more efficient than `writeVariable`.
+        This method is more efficient than `write_variable`.
 
         Args:
             address (int): The virtual address of the variable to be written.
@@ -243,7 +243,7 @@ class Exevalator:
         self.memory[address] = value
 
 
-    def readVariable(self, name: str) -> float:
+    def read_variable(self, name: str) -> float:
         """
         Reads the value of the variable having the specified name.
 
@@ -264,13 +264,13 @@ class Exevalator:
                 ErrorMessages.VARIABLE_NOT_FOUND.replace("$0", name)
             )
         address = self.variable_table[name]
-        return self.readVariableAt(address)
+        return self.read_variable_at(address)
 
 
-    def readVariableAt(self, address: int) -> float:
+    def read_variable_at(self, address: int) -> float:
         """
         Reads the value of the variable at the specified virtual address.
-        This method is more efficient than `readVariable`.
+        This method is more efficient than `read_variable`.
 
         Args:
             address (int): The virtual address of the variable to be read.
@@ -285,7 +285,7 @@ class Exevalator:
         return self.memory[address]
 
 
-    def connectFunction(self, name: str, function: FunctionInterface) -> None:
+    def connect_function(self, name: str, function: FunctionInterface) -> None:
         """
         Connects a function, for using it in expressions.
 
