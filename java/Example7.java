@@ -32,6 +32,7 @@ public class Example7 {
                 lowerLimit = Double.parseDouble(lowerLimitStr);
             } catch (NumberFormatException nfe) {
                 System.err.println("Invalid lower-limit value:" + lowerLimitStr);
+                scanner.close();
                 return;
             }
         }
@@ -45,6 +46,7 @@ public class Example7 {
                 upperLimit = Double.parseDouble(upperLimitStr);
             } catch (NumberFormatException nfe) {
                 System.err.println("Invalid upper-limit value:" + upperLimitStr);
+                scanner.close();
                 return;
             }
         }
