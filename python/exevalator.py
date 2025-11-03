@@ -392,10 +392,6 @@ class LexicalAnalyzer:
         return tokens
 
 
-    # ------------------------
-    # Below: not implemented yet (移植しながら埋める)
-    # ------------------------
-
     @staticmethod
     def _escape_number_literals(expression: str, number_literal_list: List[str]) -> str:
         """
@@ -417,6 +413,7 @@ class LexicalAnalyzer:
         replaced = pattern.sub(StaticSettings.ESCAPED_NUMBER_LITERAL, expression)
 
         return replaced
+
 
     @staticmethod
     def _create_tokens_from_token_words(token_words: List[str],
