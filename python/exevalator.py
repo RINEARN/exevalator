@@ -886,9 +886,9 @@ class Evaluator:
 
     def update(
         self,
-        ast: "AstNode",
+        ast: AstNode,
         variable_table: Dict[str, int],
-        function_table: Dict[str, "FunctionInterface"],
+        function_table: Dict[str, FunctionInterface],
     ) -> None:
         """
         Updates the state to evaluate the value of the AST.
