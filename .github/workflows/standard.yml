@@ -11,7 +11,7 @@ jobs:
       uses: actions/setup-java@v5
       with:
         distribution: 'temurin'
-        java-version: 22
+        java-version: 25
 
     - name: Compile Exevalator
       run: javac Exevalator.java
@@ -140,12 +140,12 @@ jobs:
     - uses: actions/checkout@v5
     - uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: '7.0.x'
+        dotnet-version: '9.0.x'
 
     - name: Run Example Code
       run: |
         dotnet new console -n Examples
-        sed -i -e "s@<TargetFramework>.*</TargetFramework>@<TargetFramework>net7.0</TargetFramework>@g" ./Examples/Examples.csproj
+        sed -i -e "s@<TargetFramework>.*</TargetFramework>@<TargetFramework>net9.0</TargetFramework>@g" ./Examples/Examples.csproj
         cp ./Exevalator.cs ./Examples/Exevalator.cs
         cp -f ./Example1.cs ./Examples/Program.cs
         dotnet run --project ./Examples
@@ -166,7 +166,7 @@ jobs:
     - name: Run Test Code
       run: |
         dotnet new console -n Test
-        sed -i -e "s@<TargetFramework>.*</TargetFramework>@<TargetFramework>net7.0</TargetFramework>@g" ./Test/Test.csproj
+        sed -i -e "s@<TargetFramework>.*</TargetFramework>@<TargetFramework>net9.0</TargetFramework>@g" ./Test/Test.csproj
         cp ./Exevalator.cs ./Test/Exevalator.cs
         cp -f ./Test.cs ./Test/Program.cs
         dotnet run --project ./Test
@@ -179,12 +179,12 @@ jobs:
     - uses: actions/checkout@v5
     - uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: '7.0.x'
+        dotnet-version: '9.0.x'
 
     - name: Run Example Code
       run: |
         dotnet new console -n Examples --language VB
-        sed -i -e "s@<TargetFramework>.*</TargetFramework>@<TargetFramework>net7.0</TargetFramework>@g" ./Examples/Examples.vbproj
+        sed -i -e "s@<TargetFramework>.*</TargetFramework>@<TargetFramework>net9.0</TargetFramework>@g" ./Examples/Examples.vbproj
         cp ./Exevalator.vb ./Examples/Exevalator.vb
         cp -f ./Example1.vb ./Examples/Program.vb
         sed -i -e "s@Imports Rinearn\.ExevalatorVB@Imports Examples\.Rinearn\.ExevalatorVB@g" ./Examples/Program.vb
@@ -212,7 +212,7 @@ jobs:
     - name: Run Test Code
       run: |
         dotnet new console -n Test --language VB
-        sed -i -e "s@<TargetFramework>.*</TargetFramework>@<TargetFramework>net7.0</TargetFramework>@g" ./Test/Test.vbproj
+        sed -i -e "s@<TargetFramework>.*</TargetFramework>@<TargetFramework>net9.0</TargetFramework>@g" ./Test/Test.vbproj
         cp ./Exevalator.vb ./Test/Exevalator.vb
         cp -f ./Test.vb ./Test/Program.vb
         sed -i -e "s@Imports Rinearn\.ExevalatorVB@Imports Test\.Rinearn\.ExevalatorVB@g" ./Test/Program.vb
@@ -228,7 +228,7 @@ jobs:
     - name: Set-up Environment (Node)
       uses: actions/setup-node@v6
       with:
-        node-version: '20'
+        node-version: '24'
 
     - name: Set-up Environment (Other tools)
       run: |
