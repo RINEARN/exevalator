@@ -5,11 +5,12 @@ jobs:
   test-for-java:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v5
 
     - name: Set-up Environment
-      uses: actions/setup-java@v1
+      uses: actions/setup-java@v5
       with:
+        distribution: 'temurin'
         java-version: 8
 
     - name: Compile Exevalator
@@ -51,7 +52,7 @@ jobs:
   test-for-cpp:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v5
 
     - name: Set-up Environment
       run: |
@@ -93,8 +94,8 @@ jobs:
   test-for-csharp:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-dotnet@v1
+    - uses: actions/checkout@v5
+    - uses: actions/setup-dotnet@v5
       with:
         dotnet-version: '6.0.x'
 
@@ -132,8 +133,8 @@ jobs:
   test-for-visual-basic:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-dotnet@v1
+    - uses: actions/checkout@v5
+    - uses: actions/setup-dotnet@v5
       with:
         dotnet-version: '6.0.x'
 
@@ -179,10 +180,10 @@ jobs:
   test-for-typescript:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v5
 
     - name: Set-up Environment (Node)
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
         node-version: '16'
 
