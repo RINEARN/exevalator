@@ -1546,7 +1546,7 @@ final class StaticSettings {
     public static final String NUMBER_LITERAL_REGEX =
         "(?<=(\\s|\\+|-|\\*|/|\\(|\\)|,|^))" + // Token splitters or start of expression
         "([0-9]+(\\.[0-9]+)?)" +               // Significand part
-        "((e|E)(\\+|-)?[0-9]+)?";              // Exponent part
+        "([eE][+\\-]?[0-9]+)?";              // Exponent part
 
     /** The escaped representation of number literals in expressions */
     public static final String ESCAPED_NUMBER_LITERAL = "@NUMBER_LITERAL@";

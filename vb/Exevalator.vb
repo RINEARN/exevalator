@@ -1602,7 +1602,7 @@ Namespace Rinearn.ExevalatorVB
         Public Const NumberLiteralRegex As String =
             "(?<=(\s|\+|-|\*|/|\(|\)|,|^))" + ' Token splitters or start of expression
             "([0-9]+(\.[0-9]+)?)" +           ' Significand part
-            "((e|E)(\+|-)?[0-9]+)?"           ' Exponent part
+            "([eE][+\\-]?[0-9]+)?"           ' Exponent part
 
         ''' <summary>The escaped representation of number literals in expressions.</summary>
         Public Const EscapedNumberLiteral As String = "@NUMBER_LITERAL@"

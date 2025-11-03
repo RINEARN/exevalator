@@ -1560,7 +1560,7 @@ export class StaticSettings {
     public static readonly NUMBER_LITERAL_REGEX: string =
         "(?<=(\\s|\\+|-|\\*|/|\\(|\\)|,|^))" + // Token splitters or start of expression
         "([0-9]+(\\.[0-9]+)?)" +               // Significand part
-        "((e|E)(\\+|-)?[0-9]+)?";              // Exponent part
+        "([eE][+\\-]?[0-9]+)?";              // Exponent part
 
     /** The escaped representation of number literals in expressions */
     public static readonly ESCAPED_NUMBER_LITERAL: string = "@NUMBER_LITERAL@";

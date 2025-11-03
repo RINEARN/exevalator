@@ -1376,7 +1376,7 @@ class StaticSettings:
     NUMBER_LITERAL_REGEX: str = (
         r"(?:^|(?<=[\s\+\-\*/\(\),]))"    # token splitters or start
         r"([0-9]+(\.[0-9]+)?)"            # significand
-        r"((e|E)(\+|-)?[0-9]+)?"         # exponent
+        r"([eE][+\-]?[0-9]+)?"         # exponent
     )
     NUMBER_LITERAL_REGEX_COMPILED = re.compile(NUMBER_LITERAL_REGEX)
 
