@@ -2,7 +2,7 @@
 
 ![logo](logo.png)
 
-Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムやアプリ内に組み込んで、式の値の計算に使うための、コンパクトで高速なインタープリタです。複数言語対応で、Java&trade;言語、Rust、C#、C++、Visual Basic&reg;, TypeScript 製のプログラムに組み込んで使用できます。
+Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムやアプリ内に組み込んで、式の値の計算に使うための、コンパクトで高速なインタープリタです。複数言語対応で、Java&trade;言語、Rust、C#、C++、Visual Basic&reg;, TypeScript, Python 製のプログラムに組み込んで使用できます。
 
 &raquo; [English README](./README.md)
 
@@ -22,6 +22,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 	- <a href="#how-to-use-cpp">C++での使用方法</a>
 	- <a href="#how-to-use-vb">Visual Basic での使用方法</a>
 	- <a href="#how-to-use-typescript">TypeScript での使用方法</a>
+	- <a href="#how-to-use-python">Python での使用方法</a>
 - <a href="#customize-error-languages">エラーメッセージの日本語化やカスタマイズ</a>
 - <a href="#performance">処理速度</a>
 - <a href="#about-us">開発元について</a>
@@ -217,6 +218,30 @@ Webブラウザ上で動作させる場合は、esbuild 等のバンドラツー
 より詳しい解説や機能一覧については [TypeScript 用README](./typescript/README_JAPANESE.md) をご参照ください。
 
 
+<a id="how-to-use-python"></a>
+### Python での使用方法
+
+「 python 」フォルダ内に、Python実装版の Exevalator と用例サンプルコード類、および [Python用README](./python/README_JAPANESE.md) があります。
+最もシンプルな用例は「 example1.py 」で、以下のように単純な式「 1.2 + 3.4 」を計算する内容になっています：
+
+	(in python/example1.java)
+
+	ex = Exevalator()
+	result = ex.eval("1.2 + 3.4")
+	print(f"result: {result}")
+
+このコードを実行するには：
+
+	cd python
+	python example1.py
+
+結果は以下の通りです：
+
+	result: 4.6
+
+より詳しい解説や機能一覧については [Python用README](./python/README_JAPANESE.md) をご参照ください。
+
+
 <a id="customize-error-languages"></a>
 ## エラーメッセージの日本語化やカスタマイズ
 
@@ -253,7 +278,12 @@ Exevalator は、計算/データ解析用のソフトなどでの利用を考�
 
 上記自体は意味のないコードですが、似たような形の処理は、計算用途などではよくあります。
 
-このコードのループは、環境にもよりますが、だいたい数千万回/秒くらいのスピードで回ります。従って演算速度は数億回/秒（数百 MFLOPS）程度の水準になります。これは、それなりの長さの配列データに変換をかけたり、密に刻んだ点で式の座標値をサンプリングしたりするのに実用的な速度です。
+このコードのループは、環境にもよりますが、だいたい数千万回/秒くらいのスピードで回ります。従って演算速度は数億回/秒（数百 MFLOPS, ※）程度の水準になります。これは、それなりの長さの配列データに変換をかけたり、密に刻んだ点で式の座標値をサンプリングしたりするのに実用的な速度です。
+
+> ※ 処理速度は、どの言語での実装版かによって大きく異なります。数百 MFLOPS は、コンパイラ型言語や、JITを備えるスクリプト言語処理系での目安です。
+> 
+> 逆に、Python版で、それらを備えない標準環境では、処理速度は 1 ～ 2 桁程度遅くなります（数 M ～ 10 MFLOPS 程度の水準）。
+
 
 ### 式が頻繁に変化する場合のパフォーマンスチューニング
 
@@ -319,6 +349,8 @@ Exevalator についての情報をもっと知りたい場合は、以下のウ
 - Linux は、Linus Torvalds 氏の米国およびその他の国における商標または登録商標です。
 
 - Node.js は、OpenJS Foundation による米国またはその他の国における商標または登録商標です。
+
+- Python は、 Python Software Foundation の米国及びその他の国における登録商標です。
 
 - ChatGPT は、米国 OpenAI OpCo, LLC による米国またはその他の国における商標または登録商標です。
 

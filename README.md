@@ -2,7 +2,7 @@
 
 ![logo](logo.png)
 
-Exevalator, an abbreviation for "**Ex**pression-**Eval**u**ator**," is a compact and high-speed interpreter that can be embedded in your programs or apps for computing the values of expressions. Exevalator is currently available for programs and apps written in Java&trade;, Rust, C#, C++, Visual Basic&reg;, and TypeScript.
+Exevalator, an abbreviation for "**Ex**pression-**Eval**u**ator**," is a compact and high-speed interpreter that can be embedded in your programs or apps for computing the values of expressions. Exevalator is currently available for programs and apps written in Java&trade;, Rust, C#, C++, Visual Basic&reg;, TypeScript, and Python.
 
 
 &raquo; [Japanese README](./README_JAPANESE.md)
@@ -23,6 +23,7 @@ Exevalator, an abbreviation for "**Ex**pression-**Eval**u**ator**," is a compact
 	- <a href="#how-to-use-cpp">How to Use in C++</a>
 	- <a href="#how-to-use-vb">How to Use in Visual Basic</a>
 	- <a href="#how-to-use-typescript">How to Use in TypeScript</a>
+	- <a href="#how-to-use-python">How to Use in Python</a>
 - <a href="#customize-error-languages">Localizing or Customizing Error Messages</a>
 - <a href="#performance">Performance</a>
 - <a href="#about-us">About Us</a>
@@ -212,6 +213,28 @@ If you want to run it in a web browser, you can easily bundle the code into a si
 For more detailed explanations and a list of features, please refer to the [README for TypeScript](./typescript/README.md).
 
 
+<a id="how-to-use-python"></a>
+### How to Use in Python
+
+In the "python" folder, you'll find the Python implementation of Exevalator, various example codes, and a [README for using in Python](./python/README.md). The simplest example code is "example1.py", which computes the value of the expression "1.2 + 3.4" as follows:
+
+	(in python/Example1.py)
+
+	ex = Exevalator()
+	result = ex.eval("1.2 + 3.4")
+	print(f"result: {result}")
+
+To run this code:
+
+	cd python
+	python example1.py
+
+The result is:
+
+	result: 4.6
+
+For more details, see the [README for using in Python](./python/README.md).
+
 
 <a id="customize-error-languages"></a>
 ## Localizing or Customizing Error Messages
@@ -251,6 +274,10 @@ Exevalator is particularly efficient when evaluating the same expression repeate
 While the example above may seem trivial or practically useless, it serves to demonstrate how Exevalator handles repetitive numerical operations efficiently. Many practical calculation tasks follow a similar pattern, even though they perform meaningful computations.
 
 In this code, the for-loop can process **tens of millions of cycles per second**, depending on your environment. Since each cycle includes 10 numerical operations, the effective processing speed reaches **several hundred MFLOPS**. We believe this speed is sufficient for a variety of tasks, including transforming array values and sampling curve coordinates from expressions, among others.
+
+> Note: Performance varies significantly depending on the implementation language. "Hundreds of MFLOPS" is a reference level for implementations in compiled languages or scripting runtimes with a JIT.
+> 
+> By contrast, in the Python edition on a standard environment without those (i.e., CPython), throughput is typically 1-2 orders of magnitude lower (on the order of a few to about 10 MFLOPS).
 
 
 ### How to Tune Performance When Different Expressions Are Frequently Inputted
@@ -319,6 +346,8 @@ The following webpages may be useful if you need more information about Exevalat
 - Linux is a trademark of linus torvalds in the United States and/or other countries.
 
 - Node.js is a trademark or a registered trademark of OpenJS Foundation in the United States and other countries.
+
+- Python is a trademark or a registered trademark of Python Software Foundation in the United States and other countries.
 
 - ChatGPT is a trademark or a registered trademark of OpenAI OpCo, LLC in the United States and other countries.
 

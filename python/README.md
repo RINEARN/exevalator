@@ -83,6 +83,13 @@ You can run the other examples (`example2.py` ... `example7.py`) in the same man
 
 Additionally, a benchmark program `python/benchmark.py` is included for measuring Exevalator's processing speed.
 
+> Performance considerations:
+> 
+> In implementations for compiled languages or scripting runtimes with a JIT, Exevalator typically reaches a performance level on the order of several hundred MFLOPS.
+> 
+> In the Python edition, performance is 1-2 orders of magnitude slower (on the order of a few to about 10 MFLOPS under standard CPython). 
+> This gap should be taken into account when adopting Exevalator. That said, it is still significantly faster than the language’s built-in eval.
+
 
 <a id="features"></a>
 ## Features
