@@ -19,7 +19,7 @@
 	- [write_variable_at(address: int, value: float) -> None](#methods-write-variable-at)
 	- [read_variable(name: str) -> float](#methods-read-variable)
 	- [read_variable_at(address: int) -> float](#methods-read-variable-at)
-	- [void connect_function(name: str, function: FunctionInterface) -> None](#methods-connect-function)
+	- [void connect_function(name: str, function: ExevalatorFunctionInterface) -> None](#methods-connect-function)
 
 
 
@@ -142,12 +142,12 @@ Exevalator のインタープリタは、単一のファイル「 python/exevala
 
 ### 3. 関数の使用
 
-式の中で使用するための関数も作成できます。それには、抽象クラス FunctionInterface を実装したクラスを作成します：
+式の中で使用するための関数も作成できます。それには、抽象クラス ExevalatorFunctionInterface を実装したクラスを作成します：
 
-	from exevalator import Exevalator, FunctionInterface, ExevalatorException
+	from exevalator import Exevalator, ExevalatorFunctionInterface, ExevalatorException
 
 	# 式内で使用できる関数を作成
-	class MyFunction(FunctionInterface):
+	class MyFunction(ExevalatorFunctionInterface):
     	def invoke(self, arguments: list[float]) -> float:
 		if len(arguments) != 2:
 			raise ExevalatorException("Incorrect number of arguments")
@@ -177,7 +177,7 @@ Exevalator クラスで提供されている各メソッドの一覧と詳細仕
 - [write_variable_at(address: int, value: float) -> None](#methods-write-variable-at)
 - [read_variable(name: str) -> float](#methods-read-variable)
 - [read_variable_at(address: int) -> float](#methods-read-variable-at)
-- [connect_function(name: str, function: FunctionInterface) -> None](#methods-connect-function)
+- [connect_function(name: str, function: ExevalatorFunctionInterface) -> None](#methods-connect-function)
 
 
 <a id="methods-constructor"></a>
@@ -252,10 +252,10 @@ Exevalator クラスで提供されている各メソッドの一覧と詳細仕
 
 
 <a id="methods-connect-function"></a>
-| 形式 | connect_function(name: str, function: FunctionInterface) -> None |
+| 形式 | connect_function(name: str, function: ExevalatorFunctionInterface) -> None |
 |:---|:---|
 | 説明 | 式の中で使用するための関数を接続します。 |
-| 引数 | name: 接続する関数の名前<br>function: 関数の処理を提供する ExevalatorFunctionInterface 実装クラスのインスタンス<br>（FunctionInterface には `invoke(self, arguments: List[float]) -> float` メソッドのみが定義されており、このメソッドに関数処理を実装します） |
+| 引数 | name: 接続する関数の名前<br>function: 関数の処理を提供する ExevalatorFunctionInterface 実装クラスのインスタンス<br>ExevalatorFunctionInterface には `invoke(self, arguments: List[float]) -> float` メソッドのみが定義されており、このメソッドに関数処理を実装します） |
 | 戻り値 | なし |
 | 例外 | 無効な関数名が指定された場合に ExevalatorException がスローされます。 |
 

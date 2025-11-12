@@ -1,6 +1,6 @@
-from exevalator import Exevalator, FunctionInterface, ExevalatorException
+from exevalator import Exevalator, ExevalatorFunctionInterface, ExevalatorException
 
-class MyFunction(FunctionInterface):
+class MyFunction(ExevalatorFunctionInterface):
     """Function available in expressions: returns sum of two args."""
     def invoke(self, arguments: list[float]) -> float:
         if len(arguments) != 2:

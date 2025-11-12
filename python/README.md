@@ -18,7 +18,7 @@
 	- [write_variable_at(address: int, value: float) -> None](#methods-write-variable-at)
 	- [read_variable(name: str) -> float](#methods-read-variable)
 	- [read_variable_at(address: int) -> float](#methods-read-variable-at)
-	- [void connect_function(name: str, function: FunctionInterface) -> None](#methods-connect-function)
+	- [void connect_function(name: str, function: ExevalatorFunctionInterface) -> None](#methods-connect-function)
 
 
 
@@ -140,13 +140,13 @@ For frequent updates, access variables by address for faster performance:
 
 ### 3. Use Functions
 
-Provide custom functions by implementing the simple callable protocol `FunctionInterface` and connect them by name:
+Provide custom functions by implementing the simple callable protocol `ExevalatorFunctionInterface` and connect them by name:
 
 	from typing import Sequence
-	from exevalator import Exevalator, FunctionInterface, ExevalatorException
+	from exevalator import Exevalator, ExevalatorFunctionInterface, ExevalatorException
 
 	# Create a function available in expressions
-	class MyFunction(FunctionInterface):
+	class MyFunction(ExevalatorFunctionInterface):
     	def invoke(self, arguments: list[float]) -> float:
 		if len(arguments) != 2:
 			raise ExevalatorException("Incorrect number of arguments")
@@ -178,7 +178,7 @@ Here is a list of methods for the Exevalator class, along with their specificati
 - [write_variable_at(address: int, value: float) -> None](#methods-write-variable-at)
 - [read_variable(name: str) -> float](#methods-read-variable)
 - [read_variable_at(address: int) -> float](#methods-read-variable-at)
-- [connect_function(name: str, function: FunctionInterface) -> None](#methods-connect-function)
+- [connect_function(name: str, function: ExevalatorFunctionInterface) -> None](#methods-connect-function)
 
 
 <a id="methods-constructor"></a>
@@ -253,10 +253,10 @@ Here is a list of methods for the Exevalator class, along with their specificati
 
 
 <a id="methods-connect-function"></a>
-| Signature | connect_function(name: str, function: FunctionInterface) -> None |
+| Signature | connect_function(name: str, function: ExevalatorFunctionInterface) -> None |
 |:---|:---|
 | Description | Connects a function to be used in expressions. |
-| Parameters | name (str): The function name as used in expressions.<br>function (FunctionInterface): An instance of a class implementing the `FunctionInterface`, which must define the method `invoke(self, arguments: List[float]) -> float` to process the function. |
+| Parameters | name (str): The function name as used in expressions.<br>function (ExevalatorFunctionInterface): An instance of a class implementing the `ExevalatorFunctionInterface`, which must define the method `invoke(self, arguments: List[float]) -> float` to process the function. |
 | Return | None |
 | Exception | `ExevalatorException` is thrown if an invalid name is specified. |
 

@@ -309,7 +309,7 @@ class Exevalator:
         self.function_table[name] = function
 
 
-class FunctionInterface(ABC):
+class ExevalatorFunctionInterface(ABC):
     """The interface to implement functions available in expressions."""
 
     @abstractmethod

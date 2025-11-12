@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Callable, Type
 import math
 
-from exevalator import Exevalator, ExevalatorException, FunctionInterface
+from exevalator import Exevalator, ExevalatorException, ExevalatorFunctionInterface
 
 ALLOWABLE_ERROR: float = 1.0e-12
 
@@ -902,28 +902,28 @@ class Test:
         )
 
 
-class FunctionA(FunctionInterface):
+class FunctionA(ExevalatorFunctionInterface):
     def invoke(self, arguments: list[float]) -> float:
         if len(arguments) != 0:
             raise ExevalatorException("Incorrect number of arguments")
         return 1.25
 
 
-class FunctionB(FunctionInterface):
+class FunctionB(ExevalatorFunctionInterface):
     def invoke(self, arguments: list[float]) -> float:
         if len(arguments) != 1:
             raise ExevalatorException("Incorrect number of arguments")
         return arguments[0]
 
 
-class FunctionC(FunctionInterface):
+class FunctionC(ExevalatorFunctionInterface):
     def invoke(self, arguments: list[float]) -> float:
         if len(arguments) != 2:
             raise ExevalatorException("Incorrect number of arguments")
         return arguments[0] + arguments[1]
 
 
-class FunctionD(FunctionInterface):
+class FunctionD(ExevalatorFunctionInterface):
     def invoke(self, arguments: list[float]) -> float:
         if len(arguments) != 3:
             raise ExevalatorException("Incorrect number of arguments")
