@@ -43,7 +43,7 @@ Exevalator raises an error if anything other than expression evaluation is attem
 
 Installed as dependencies (via the steps below):
 
-* Python 3.9 – 3.13, or later
+* Python 3.10 – 3.13, or later
 * MCP Python SDK
 
 
@@ -76,7 +76,7 @@ Use uv to set up the required runtime:
     uv init -p 3.13 --name exevalator-mcp .
     uv add "mcp[cli]"
 
-The -p 3.13 part specifies the Python version. Change it as needed (Exevalator works with 3.9 or later).
+The -p 3.13 part specifies the Python version. Change it as needed (Exevalator works with 3.10 or later).
 
 Now try running it:
 
