@@ -81,7 +81,7 @@ def init_exevalator() -> None:
         def invoke(self, arguments: list[float]) -> float:
             if len(arguments) != 1:
                 raise ExevalatorException("Incorrect number of arguments")
-            return math.abs(arguments[0])
+            return abs(arguments[0])
     exevalator.connect_function("abs", AbsFunction())
 
     # Register sqrt(x) function
