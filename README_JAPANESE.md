@@ -2,7 +2,11 @@
 
 ![logo](logo.png)
 
-Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムやアプリ内に組み込んで、式の値の計算に使うための、コンパクトで高速なインタープリタです。複数言語対応で、Java&trade;言語、Rust、C#、C++、Visual Basic&reg;, TypeScript, Python 製のプログラムに組み込んで使用できます。
+Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムやアプリ内に組み込んで、式の値の計算に使うための、コンパクトで高速なインタープリタです。
+
+複数言語対応で、Java&trade;言語、Rust、C#、C++、Visual Basic&reg;, TypeScript, Python 製のプログラムに組み込んで使用できます。
+
+加えて MCP もサポートしており、AI用の計算ツールとしても使用できます。
 
 &raquo; [English README](./README.md)
 
@@ -23,6 +27,7 @@ Exevalator（**Ex**pression-**Eval**u**ator** の略） は、プログラムや
 	- <a href="#how-to-use-vb">Visual Basic での使用方法</a>
 	- <a href="#how-to-use-typescript">TypeScript での使用方法</a>
 	- <a href="#how-to-use-python">Python での使用方法</a>
+	- <a href="#how-to-use-mcp">MCP での使用方法</a>
 - <a href="#customize-error-languages">エラーメッセージの日本語化やカスタマイズ</a>
 - <a href="#performance">処理速度</a>
 - <a href="#about-us">開発元について</a>
@@ -242,6 +247,57 @@ Webブラウザ上で動作させる場合は、esbuild 等のバンドラツー
 より詳しい解説や機能一覧については [Python用README](./python/README_JAPANESE.md) をご参照ください。
 
 
+<a id="how-to-use-mcp"></a>
+### MCP での使用方法
+
+Exevalator は MCP (Model Context Protocol) をサポートしており、AI用の計算ツールとしても利用可能です。
+「 mcp 」フォルダ内に、そのためのコード類と [MCP用README](./mcp/README_JAPANESE.md) があります。
+
+要点のみ抜き出すと、まず home 直下などの適当な場所に Exealator のパッケージを配置し、その中の mcp フォルダ内に環境を構築します：
+
+	# 適当な場所（ここでは home 直下）にMCPツール置き場を作る
+	cd ~
+	mkdir mcp-tools
+	cd mcp-tools
+	
+	# Exevalator のパッケージを配置
+	git clone https://github.com/RINEARN/exevalator.git
+
+	# その中の mcp フォルダ内に環境を構築
+	cd exevalator/mcp
+	uv init -p 3.13 --name exevalator-mcp .
+	uv add "mcp[cli]"
+
+続いて、AI利用環境（例: Visual Studio Code + Cline 拡張など）のMCPサーバ指定ファイルに、以下の例のように追記して登録します：
+
+	{
+		"mcpServers": {
+			...
+			ここに既存のMCPツールの記述が記載されている（あれば）
+			...
+			"Exevalator": {
+				"command": "uv",
+				"args": [
+					"--directory", "/home/your-user-name/mcp-tools/exevalator/mcp/",
+					"run", "exevalator_mcp.py"
+				]
+			}
+		}
+	}
+
+登録できたら、AIに以下のように聞いてみましょう：
+
+	MCPサーバーの Exevalator を用いて、「1.2 + 3.4」の値を計算してください。
+	他の方法ではなく、必ず exevalator を用いてください。
+
+正常に動いている場合の返答例は：
+
+	Exevalator MCPサーバーの evaluate_expression で「1.2 + 3.4」を計算し、結果は 4.6 であることを確認しました。
+	指定どおり Exevalator を用いて算出しています。
+
+より詳しい解説や機能一覧については [MCP用README](./mcp/README_JAPANESE.md) をご参照ください。
+
+
 <a id="customize-error-languages"></a>
 ## エラーメッセージの日本語化やカスタマイズ
 
@@ -351,6 +407,16 @@ Exevalator についての情報をもっと知りたい場合は、以下のウ
 - Node.js は、OpenJS Foundation による米国またはその他の国における商標または登録商標です。
 
 - Python は、 Python Software Foundation の米国及びその他の国における登録商標です。
+
+- MCP (Model Context Protocol) は、Anthropic 社 (Anthropic, PBC) が提唱した通信プロトコルです。
+
+- Visual Studio Code は、米国 Microsoft Corporation の米国およびその他の国における登録商標です。
+
+- Cline は、米国 Cline Bot Inc. によるAIツールです。
+
+- uv は、Astral社によるPython用のパッケージ管理ツールです。
+
+- Git は、Software Freedom Conservancy, Inc. の米国およびその他の国における商標または登録商標です。
 
 - ChatGPT は、米国 OpenAI OpCo, LLC による米国またはその他の国における商標または登録商標です。
 
