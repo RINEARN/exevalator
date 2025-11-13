@@ -2,7 +2,6 @@
 
 from mcp.server.fastmcp import FastMCP
 from exevalator import Exevalator, ExevalatorException, ExevalatorFunctionInterface
-import math
 
 mcp = FastMCP("Exevalator MCP")
 exevalator = None
