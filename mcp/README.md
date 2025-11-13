@@ -113,7 +113,27 @@ This opens `cline_mcp_settings.json`. Under "mcpServers", append an entry for th
 
         }
     }
+
 Replace "/home/your-user-name/mcp-tools/exevalator/mcp/" with the actual path where you placed Exevalator. Following the steps above, `your-user-name` should be your system user name.
+
+Note: The configuration above registers the minimal Exevalator MCP tool, which does not include math functions. If you want to use math functions in expressions, specify `exevalator-mcp-math-preset.py` instead of `exevalator-mcp.py`:
+
+    {
+        "mcpServers": {
+            ...
+            // Existing MCP tool entries (if any)
+            ...
+
+            "Exevalator": {
+                "command": "uv",
+                "args": [
+                    "--directory", "/home/your-user-name/mcp-tools/exevalator/mcp/",
+                    "run", "exevalator-mcp-math-preset.py"
+                ]
+            }
+
+        }
+    }
 
 When you're done editing, click **Done** in the Cline panel on the left. The tool should now be registered as an MCP server.
 
@@ -257,6 +277,51 @@ A typical final answer will be:
     The value of myfunc(1.2, 3.4) is 4.6. It was correctly evaluated using the registered `myfunc` on the `Exevalator` MCP server.
 
 This confirms that `myfunc` is being called correctly.
+
+
+### 4. Using Math Functions
+
+Since math functions like `sqrt(x)` and `sin(x)` are used frequently, registering them one by one can be tedious.
+
+To simplify this, when registering Exevalator in your AI environment, register `exevalator-mcp-math-preset.py` instead of `exevalator-mcp.py`. This preset starts with commonly used math functions pre-registered.
+
+    {
+        "mcpServers": {
+            ...
+            // Existing MCP tool entries (if any)
+            ...
+
+            "Exevalator": {
+                "command": "uv",
+                "args": [
+                    "--directory", "/home/your-user-name/mcp-tools/exevalator/mcp/",
+                    "run", "exevalator-mcp-math-preset.py"
+                ]
+            }
+
+        }
+    }
+
+The available math functions are:
+`sin(x)`, `cos(x)`, `tan(x)`, `asin(x)`, `acos(x)`, `atan(x)`, `abs(x)`, `sqrt(x)`, `pow(x, p)`, `exp(x)`, `ln(x)`, `log10(x)`, `log2(x)`.
+You can also use the constant `pi`.
+
+> Note: The natural logarithm is ln(x), not log(x).
+
+Try it:
+
+    Using the Exevalator MCP server, evaluate the following expression:
+    pow(sin(1.2), 2) + pow(cos(1.2), 2)
+
+Exevalator will receive the evaluation request and return a response.
+A typical final answer from the AI would be:
+
+    The result of pow(sin(1.2), 2) + pow(cos(1.2), 2) is 1.0. 
+    By the trigonometric identity sin^2(x) + cos^2(x) = 1, it equals 1 for any real x.
+
+Everything is working as expected.
+
+As in the previous section, you can open and edit `exevalator-mcp-math-preset.py` to add more available functions. Customize freely!
 
 
 <a id="acknowledgement"></a>
