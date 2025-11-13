@@ -80,7 +80,7 @@ The -p 3.13 part specifies the Python version. Change it as needed (Exevalator w
 
 Now try running it:
 
-    uv run exevalator-mcp.py
+    uv run exevalator_mcp.py
 
 If you see no errors and it sits idle waiting, it's working. Press Ctrl+C a couple of times to exit.
 
@@ -107,7 +107,7 @@ This opens `cline_mcp_settings.json`. Under "mcpServers", append an entry for th
                 "command": "uv",
                 "args": [
                     "--directory", "/home/your-user-name/mcp-tools/exevalator/mcp/",
-                    "run", "exevalator-mcp.py"
+                    "run", "exevalator_mcp.py"
                 ]
             }
 
@@ -116,7 +116,7 @@ This opens `cline_mcp_settings.json`. Under "mcpServers", append an entry for th
 
 Replace "/home/your-user-name/mcp-tools/exevalator/mcp/" with the actual path where you placed Exevalator. Following the steps above, `your-user-name` should be your system user name.
 
-Note: The configuration above registers the minimal Exevalator MCP tool, which does not include math functions. If you want to use math functions in expressions, specify `exevalator-mcp-math-preset.py` instead of `exevalator-mcp.py`:
+Note: The configuration above registers the minimal Exevalator MCP tool, which does not include math functions. If you want to use math functions in expressions, specify `exevalator_mcp_math_preset.py` instead of `exevalator_mcp.py`:
 
     {
         "mcpServers": {
@@ -128,7 +128,7 @@ Note: The configuration above registers the minimal Exevalator MCP tool, which d
                 "command": "uv",
                 "args": [
                     "--directory", "/home/your-user-name/mcp-tools/exevalator/mcp/",
-                    "run", "exevalator-mcp-math-preset.py"
+                    "run", "exevalator_mcp_math_preset.py"
                 ]
             }
 
@@ -224,7 +224,7 @@ Note: Depending on the model's capabilities and behavior, it may try to skip ste
 You can register any number of custom functions and call them from expressions.
 
 For security reasons, custom function implementation/registration is not exposed via the AI. Instead, edit your local file at
-`/home/your-user-name/mcp-tools/exevalator/mcp/exevalator-mcp.py`.
+`/home/your-user-name/mcp-tools/exevalator/mcp/exevalator_mcp.py`.
 
 Open that file and look for the `init_exevalator()` function near the top. It includes a commented example showing how to register a custom function:
 
@@ -283,7 +283,7 @@ This confirms that `myfunc` is being called correctly.
 
 Since math functions like `sqrt(x)` and `sin(x)` are used frequently, registering them one by one can be tedious.
 
-To simplify this, when registering Exevalator in your AI environment, register `exevalator-mcp-math-preset.py` instead of `exevalator-mcp.py`. This preset starts with commonly used math functions pre-registered.
+To simplify this, when registering Exevalator in your AI environment, register `exevalator_mcp_math_preset.py` instead of `exevalator_mcp.py`. This preset starts with commonly used math functions pre-registered.
 
     {
         "mcpServers": {
@@ -295,7 +295,7 @@ To simplify this, when registering Exevalator in your AI environment, register `
                 "command": "uv",
                 "args": [
                     "--directory", "/home/your-user-name/mcp-tools/exevalator/mcp/",
-                    "run", "exevalator-mcp-math-preset.py"
+                    "run", "exevalator_mcp_math_preset.py"
                 ]
             }
 
@@ -321,7 +321,7 @@ A typical final answer from the AI would be:
 
 Everything is working as expected.
 
-As in the previous section, you can open and edit `exevalator-mcp-math-preset.py` to add more available functions. Customize freely!
+As in the previous section, you can open and edit `exevalator_mcp_math_preset.py` to add more available functions. Customize freely!
 
 
 <a id="acknowledgement"></a>

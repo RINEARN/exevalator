@@ -78,7 +78,7 @@ Exevalator のMCP用ディレクトリ内に移動します：
 
 これで導入は完了です。実行してみます：
 
-    uv run exevalator-mcp.py
+    uv run exevalator_mcp.py
 
 これで何もエラーが出ず、無言待機状態になれば成功です。`Ctrl+C` の連打で終了させます。
 
@@ -105,7 +105,7 @@ Exevalator のMCP用ディレクトリ内に移動します：
                 "command": "uv",
                 "args": [
                     "--directory", "/home/your-user-name/mcp-tools/exevalator/mcp/",
-                    "run", "exevalator-mcp.py"
+                    "run", "exevalator_mcp.py"
                 ]
             }
 
@@ -114,7 +114,7 @@ Exevalator のMCP用ディレクトリ内に移動します：
 
 ここで `/home/your-user-name/mcp-tools/exevalator/mcp/` の部分は、実際に Exevalator を配置した場所で置き換えてください。先ほどの手順の通りだと、 `your-user-name` の箇所はPCのユーザー名になるはずです。
 
-なお、上の設定内容では、数学関数などが使用できない、最小構成の Exevalator MCPツールが登録されます。式の中で数学関数を使用したい場合には、"exevalator-mcp.py" の代わりに "exevalator-mcp-math-preset.py" を指定してください：
+なお、上の設定内容では、数学関数などが使用できない、最小構成の Exevalator MCPツールが登録されます。式の中で数学関数を使用したい場合には、"exevalator_mcp.py" の代わりに "exevalator_mcp_math_preset.py" を指定してください：
 
     {
         "mcpServers": {
@@ -126,7 +126,7 @@ Exevalator のMCP用ディレクトリ内に移動します：
                 "command": "uv",
                 "args": [
                     "--directory", "/home/your-user-name/mcp-tools/exevalator/mcp/",
-                    "run", "exevalator-mcp-math-preset.py"
+                    "run", "exevalator_mcp_math_preset.py"
                 ]
             }
 
@@ -226,7 +226,7 @@ Exevalator では、いくつでも自作の関数を登録し、計算式の中
 
 ただし、関数の自作や登録は、AI側からの操作ではできません（セキュリティ上もその方が安全です）。
 
-そのため、最初にPC内に配置した `/home/your-user-name/mcp-tools/exevalator/mcp/` 内にある、`exevalator-mcp.py` を開いて、中身を編集して登録します。冒頭付近に init_exevalator() 関数があり、その中に、自作関数の登録例がコメントアウトされた形で記載されています：
+そのため、最初にPC内に配置した `/home/your-user-name/mcp-tools/exevalator/mcp/` 内にある、`exevalator_mcp.py` を開いて、中身を編集して登録します。冒頭付近に init_exevalator() 関数があり、その中に、自作関数の登録例がコメントアウトされた形で記載されています：
 
     ...
 
@@ -284,7 +284,7 @@ Exevalator では、いくつでも自作の関数を登録し、計算式の中
 
 sqrt(x) や sin(x) などの数学関数は頻繁に使用されるため、いちいち登録するのは面倒ですよね。
 
-そこで、AI利用環境に Exevalator を登録する際、 `exevalator-mcp.py` の代わりに `exevalator-mcp-math-preset.py` を登録すると、よく使われる数学関数があらかじめ登録されている状態になります。
+そこで、AI利用環境に Exevalator を登録する際、 `exevalator_mcp.py` の代わりに `exevalator_mcp_math_preset.py` を登録すると、よく使われる数学関数があらかじめ登録されている状態になります。
 
     {
         "mcpServers": {
@@ -296,7 +296,7 @@ sqrt(x) や sin(x) などの数学関数は頻繁に使用されるため、い�
                 "command": "uv",
                 "args": [
                     "--directory", "/home/your-user-name/mcp-tools/exevalator/mcp/",
-                    "run", "exevalator-mcp-math-preset.py"
+                    "run", "exevalator_mcp_math_preset.py"
                 ]
             }
 
@@ -319,7 +319,7 @@ AIの最終回答は：
 
 きちんと計算できていますね。
 
-前項で解説したのと同様、`exevalator-mcp-math-preset.py` を開いて編集する事で、使える関数をさらに追加する事も可能です。自由にカスタマイズしてください！
+前項で解説したのと同様、`exevalator_mcp_math_preset.py` を開いて編集する事で、使える関数をさらに追加する事も可能です。自由にカスタマイズしてください！
 
 
 <a id="acknowledgement"></a>
