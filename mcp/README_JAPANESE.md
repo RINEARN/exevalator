@@ -114,7 +114,26 @@ Exevalator のMCP用ディレクトリ内に移動します：
 
 ここで `/home/your-user-name/mcp-tools/exevalator/mcp/` の部分は、実際に Exevalator を配置した場所で置き換えてください。先ほどの手順の通りだと、 `your-user-name` の箇所はPCのユーザー名になるはずです。
 
-編集が完了したら、画面左のCline操作列から「Done」ボタンを押すと、MCPツールとして登録されるはずです。
+なお、上の設定内容では、数学関数などが使用できない、最小構成の Exevalator MCPツールが登録されます。式の中で数学関数を使用したい場合には、"exevalator-mcp.py" の代わりに "exevalator-mcp-math-preset.py" を指定してください：
+
+    {
+        "mcpServers": {
+            ...
+            ここに既存のMCPツールの記述が記載されている（あれば）
+            ...
+
+            "Exevalator": {
+                "command": "uv",
+                "args": [
+                    "--directory", "/home/your-user-name/mcp-tools/exevalator/mcp/",
+                    "run", "exevalator-mcp-math-preset.py"
+                ]
+            }
+
+        }
+    }
+
+以上のように編集が完了したら、画面左のCline操作列から「Done」ボタンを押すと、MCPツールとして登録されるはずです。
 
 ### 使用する
 
@@ -175,7 +194,7 @@ Exevalator のMCP用ディレクトリ内に移動します：
 
 ### 2. 変数の使用
 
-変数を宣言し、値を設定して、式の計算で使用できます。
+変数を宣言し、値を設定して、式の計算で使用できます：
 
     MCPサーバーの Exevalator を用いて、以下の一連の計算手続きを行ってください。
 
@@ -259,6 +278,48 @@ Exevalator では、いくつでも自作の関数を登録し、計算式の中
     Exevalator MCPサーバー上で登録済みの myfunc を用いて正しく評価しました。
 
 正しく関数 myfunc を呼べている事がわかります。
+
+
+### 4. 数学関数の使用
+
+sqrt(x) や sin(x) などの数学関数は頻繁に使用されるため、いちいち登録するのは面倒ですよね。
+
+そこで、AI利用環境に Exevalator を登録する際、 `exevalator-mcp.py` の代わりに `exevalator-mcp-math-preset.py` を登録すると、よく使われる数学関数があらかじめ登録されている状態になります。
+
+    {
+        "mcpServers": {
+            ...
+            ここに既存のMCPツールの記述が記載されている（あれば）
+            ...
+
+            "Exevalator": {
+                "command": "uv",
+                "args": [
+                    "--directory", "/home/your-user-name/mcp-tools/exevalator/mcp/",
+                    "run", "exevalator-mcp-math-preset.py"
+                ]
+            }
+
+        }
+    }
+
+使える数学関数の一覧は sin(x), cos(x), tan(x), asin(x), acos(x), atan(x), abs(x), sqrt(x), pow(x, p), exp(x), ln(x), log10(x), log2(x) です。また、円周率の変数 pi も使用できます。
+
+> 自然対数は log(x) ではなく ln(x) である事に注意してください。
+
+実際に使用してみましょう：
+
+    MCPサーバーの Exevalator を用いて、以下の式を計算してください：
+    pow(sin(1.2), 2) + pow(cos(1.2), 2)
+
+すると Exevalator に計算リクエストが投げられ、レスポンスが返ります。
+AIの最終回答は：
+
+    式 pow(sin(1.2), 2) + pow(cos(1.2), 2) の計算結果は 1.0 です。三角恒等式 sin^2(x) + cos^2(x) = 1 に従い、任意の実数 x で 1 になります。
+
+きちんと計算できていますね。
+
+前項で解説したのと同様、`exevalator-mcp-math-preset.py` を開いて編集する事で、使える関数をさらに追加する事も可能です。自由にカスタマイズしてください！
 
 
 <a id="acknowledgement"></a>
