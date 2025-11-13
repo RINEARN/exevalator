@@ -132,9 +132,11 @@ def init_exevalator() -> None:
             return math.log2(arguments[0])
     exevalator.connect_function("log2", Log2Function())
 
-    # Register variable `pi`
+    # Register variable `pi` (or `PI`)
     exevalator.declare_variable("pi")
     exevalator.write_variable("pi", math.pi)
+    exevalator.declare_variable("PI")
+    exevalator.write_variable("PI", math.pi)
 
 
 @mcp.tool()
@@ -145,7 +147,7 @@ def evaluate_expression(expression: str) -> float:
     In expressions, you can use the following functions:
     sin(x), cos(x), tan(x), asin(x), acos(x), atan(x), 
     abs(x), sqrt(x), pow(x, p), exp(x), ln(x), log10(x), log2(x).
-    The variable `pi` is also available.
+    The variable `pi` (or `PI`) is also available.
 
     Important note: Use ln(x) instead of log(x).
 
