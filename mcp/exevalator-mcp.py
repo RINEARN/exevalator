@@ -66,6 +66,20 @@ def set_variable_value(variable_name: str, variable_value: float) -> None:
     exevalator.write_variable(variable_name, variable_value)
 
 
+@mcp.tool()
+def get_variable_value(variable_name: str) -> float:
+    """
+    Gets the current value of the variable having the specified name.
+
+    Args:
+        name (str): The name of the variable.
+
+    Returns:
+        float: The current value of the variable.
+    """
+    return exevalator.read_variable(variable_name)
+
+
 if __name__ == "__main__":
     init_exevalator()
     mcp.run(transport="stdio")
