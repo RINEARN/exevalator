@@ -120,13 +120,13 @@ Exevalator のMCP用ディレクトリ内に移動します：
 
 実際に使用してみましょう。Cline のチャット欄に、以下のように入力します：
 
-    MCPサーバーの exevalator を用いて、「1.2 + 3.4」の値を計算してください。他の方法ではなく、必ず exevalator を用いてください。
+    MCPサーバーの Exevalator を用いて、「1.2 + 3.4」の値を計算してください。他の方法ではなく、必ず exevalator を用いてください。
 
-このように「exevalator を用いて」と念押ししているのは、そうしないと、スクリプトを書いて実行しようとしがちだからです。
+このように「Exevalator を用いて」と念押ししているのは、そうしないと、スクリプトを書いて実行しようとしがちだからです。
 
 さて、権限設定によっては、以下のようなメッセージと共に、MCPツールを使用する許可がリクエストされます：
 
-    Cline wants to use a tool on the `exevalator` MCP server:
+    Cline wants to use a tool on the `Exevalator` MCP server:
 
     evaluate_expression
     ...
@@ -143,7 +143,7 @@ Exevalator のMCP用ディレクトリ内に移動します：
 
 のようにレスポンスが返った旨が表示され、続けてAIが、以下のように最終回答をしてくれます：
 
-    exevalator MCPサーバーの evaluate_expression で「1.2 + 3.4」を計算し、結果は 4.6 であることを確認しました。指定どおり exevalator を用いて算出しています。
+    Exevalator MCPサーバーの evaluate_expression で「1.2 + 3.4」を計算し、結果は 4.6 であることを確認しました。指定どおり Exevalator を用いて算出しています。
 
 このように、AI側からも正しく結果を取得できている事がわかります。
 
@@ -160,11 +160,11 @@ Exevalator のMCP用ディレクトリ内に移動します：
 
 これまでのセクションでも見てきたように、Exevalator で式の値を計算できます: 
 
-    MCPサーバーの exevalator を用いて、「1.2 + 3.4」の値を計算してください。他の方法ではなく、必ず exevalator を用いてください。
+    MCPサーバーの Exevalator を用いて、「1.2 + 3.4」の値を計算してください。他の方法ではなく、必ず Exevalator を用いてください。
 
 応答は：
 
-    exevalator MCPサーバーの evaluate_expression で「1.2 + 3.4」を計算し、結果は 4.6 であることを確認しました。指定どおり exevalator を用いて算出しています。
+    Exevalator MCPサーバーの evaluate_expression で「1.2 + 3.4」を計算し、結果は 4.6 であることを確認しました。指定どおり Exevalator を用いて算出しています。
 
 上記のように、"+" (足し算)、 "-" (引き算や数値のマイナス化)、"\*" (掛け算)、"/" (割り算) の演算を行えます。なお、掛け算と割り算は、足し算と引き算よりも、順序的に優先されます。
 
@@ -173,7 +173,7 @@ Exevalator のMCP用ディレクトリ内に移動します：
 
 変数を宣言し、値を設定して、式の計算で使用できます。
 
-    MCPサーバーの exevalator を用いて、以下の一連の計算手続きを行ってください。
+    MCPサーバーの Exevalator を用いて、以下の一連の計算手続きを行ってください。
 
     - 変数 x, result1, result2 を宣言します。
     - 変数 x の値を 3.4 に設定します。
@@ -246,11 +246,11 @@ Exevalator では、いくつでも自作の関数を登録し、計算式の中
 
 上で登録した myfunc 関数を、実際に使用してみましょう：
 
-    MCPサーバーの exevalator を用いて、式「myfunc(1.2, 3.4)」の値を計算してください。関数 myfunc は、登録されていて使えるようになっているはずです。
+    MCPサーバーの Exevalator を用いて、式「myfunc(1.2, 3.4)」の値を計算してください。関数 myfunc は、登録されていて使えるようになっているはずです。
 
 すると計算リクエストが走り、以下のようにAIが最終回答してくれます：
 
-    式 myfunc(1.2, 3.4) の値は 4.6 です。exevalator MCPサーバー上で登録済みの myfunc を用いて正しく評価しました。
+    式 myfunc(1.2, 3.4) の値は 4.6 です。Exevalator MCPサーバー上で登録済みの myfunc を用いて正しく評価しました。
 
 正しく関数 myfunc を呼べている事がわかります。
 

@@ -122,14 +122,14 @@ When you're done editing, click **Done** in the Cline panel on the left. The too
 
 Let's try it out. In Cline's chat panel, enter something like:
 
-    Using the `exevalator` MCP server, compute the value of "1.2 + 3.4". 
-    Do not use any other method. Make sure to use `exevalator`.
+    Using the `Exevalator` MCP server, compute the value of "1.2 + 3.4". 
+    Do not use any other method. Make sure to use `Exevalator`.
 
-We explicitly say "use exevalator" because otherwise the AI may prefer to write and run a script.
+We explicitly say "use Exevalator" because otherwise the AI may prefer to write and run a script.
 
 Depending on your permission settings, Cline may request approval to use the MCP tool, showing a message like:
 
-    Cline wants to use a tool on the `exevalator` MCP server:
+    Cline wants to use a tool on the `Exevalator` MCP server:
 
     evaluate_expression
     ...
@@ -146,7 +146,7 @@ Click **Approve**. You should then see a response, for example:
 
 And the AI's final answer might read:
 
-    I computed "1.2 + 3.4" via the `evaluate_expression` tool on the `exevalator` MCP server and confirmed the result is 4.6. As requested, the calculation was performed using `exevalator`.
+    I computed "1.2 + 3.4" via the `evaluate_expression` tool on the `Exevalator` MCP server and confirmed the result is 4.6. As requested, the calculation was performed using `Exevalator`.
 
 This confirms the AI can correctly obtain results through the tool.
 
@@ -163,12 +163,12 @@ Below are the main features of the Exevalator MCP tool.
 
 As shown above, Exevalator can evaluate expressions such as:
 
-    Using the `exevalator` MCP server, compute the value of "1.2 + 3.4". 
-    Do not use any other method. Make sure to use `exevalator`.
+    Using the `Exevalator` MCP server, compute the value of "1.2 + 3.4". 
+    Do not use any other method. Make sure to use `Exevalator`.
 
 A typical final answer would be:
 
-    I computed "1.2 + 3.4" via the `evaluate_expression` tool on the `exevalator` MCP server and confirmed the result is 4.6. As requested, the calculation was performed using `exevalator`.
+    I computed "1.2 + 3.4" via the `evaluate_expression` tool on the `Exevalator` MCP server and confirmed the result is 4.6. As requested, the calculation was performed using `Exevalator`.
 
 The operators `+` (addition), `-` (subtraction and unary minus), `*` (multiplication), and `/` (division) are supported. Multiplication and division take precedence over addition and subtraction.
 
@@ -177,7 +177,7 @@ The operators `+` (addition), `-` (subtraction and unary minus), `*` (multiplica
 
 You can declare variables, assign values, and use them in expressions.
 
-    Using the `exevalator` MCP server, perform the following steps:
+    Using the `Exevalator` MCP server, perform the following steps:
 
     - Declare variables x, result1, and result2.
     - Set x = 3.4.
@@ -247,12 +247,12 @@ You can add as many functions as you need.
 
 Try using the registered `myfunc`:
 
-    Using the `exevalator` MCP server, evaluate the expression "myfunc(1.2, 3.4)". 
+    Using the `Exevalator` MCP server, evaluate the expression "myfunc(1.2, 3.4)". 
     The function `myfunc` should already be registered and available.
 
 A typical final answer will be:
 
-    The value of myfunc(1.2, 3.4) is 4.6. It was correctly evaluated using the registered `myfunc` on the `exevalator` MCP server.
+    The value of myfunc(1.2, 3.4) is 4.6. It was correctly evaluated using the registered `myfunc` on the `Exevalator` MCP server.
 
 This confirms that `myfunc` is being called correctly.
 
