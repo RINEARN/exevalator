@@ -7,13 +7,14 @@
 
 ## 日本語版 目次
 
+- [はじめに](#introduction)
 - [必要な環境](#requirements)
 - [使用方法](#how-to-use)
 - [主な機能](#features)
 - [謝辞（使用している外部コンポーネント、SDK等）](#acknowledgement)
 
 
-<a id="about"></a>
+<a id="introduction"></a>
 ## はじめに
 
 ### MCPによって、Exevalator をAI用の計算ツールとして使える
