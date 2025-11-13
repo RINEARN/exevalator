@@ -286,3 +286,23 @@ jobs:
     - name: Run Test Code
       run: python test.py
       working-directory: ./python
+
+
+  test-for-mcp:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Set-up Environment
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.13'
+
+    - name: Install SDK
+      run: |
+        python -m pip install --upgrade pip
+        pip install "mcp[cli]"
+
+    - name: Run Test Code
+      run: python test.py
+      working-directory: ./mcp
