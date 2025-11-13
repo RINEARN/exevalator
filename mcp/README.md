@@ -166,7 +166,8 @@ Click **Approve**. You should then see a response, for example:
 
 And the AI's final answer might read:
 
-    I computed "1.2 + 3.4" via the `evaluate_expression` tool on the `Exevalator` MCP server and confirmed the result is 4.6.
+    I computed "1.2 + 3.4" via the `evaluate_expression` tool 
+    on the `Exevalator` MCP server and confirmed the result is 4.6.
     As requested, the calculation was performed using `Exevalator`.
 
 This confirms the AI can correctly obtain results through the tool.
@@ -189,7 +190,8 @@ As shown above, Exevalator can evaluate expressions such as:
 
 A typical final answer would be:
 
-    I computed "1.2 + 3.4" via the `evaluate_expression` tool on the `Exevalator` MCP server and confirmed the result is 4.6.
+    I computed "1.2 + 3.4" via the `evaluate_expression` tool 
+    on the `Exevalator` MCP server and confirmed the result is 4.6.
     As requested, the calculation was performed using `Exevalator`.
 
 The operators `+` (addition), `-` (subtraction and unary minus), `*` (multiplication), and `/` (division) are supported. Multiplication and division take precedence over addition and subtraction.

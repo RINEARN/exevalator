@@ -2,7 +2,11 @@
 
 ![logo](logo.png)
 
-Exevalator, an abbreviation for "**Ex**pression-**Eval**u**ator**," is a compact and high-speed interpreter that can be embedded in your programs or apps for computing the values of expressions. Exevalator is currently available for programs and apps written in Java&trade;, Rust, C#, C++, Visual Basic&reg;, TypeScript, and Python.
+Exevalator, an abbreviation for "**Ex**pression-**Eval**u**ator**," is a compact and high-speed interpreter that can be embedded in your programs or apps for computing the values of expressions.
+
+Exevalator is currently available for programs and apps written in Java&trade;, Rust, C#, C++, Visual Basic&reg;, TypeScript, and Python.
+
+In addition, Exevalator supports MCP and can be used as a calculation tool for AI agents.
 
 
 &raquo; [Japanese README](./README_JAPANESE.md)
@@ -24,6 +28,7 @@ Exevalator, an abbreviation for "**Ex**pression-**Eval**u**ator**," is a compact
 	- <a href="#how-to-use-vb">How to Use in Visual Basic</a>
 	- <a href="#how-to-use-typescript">How to Use in TypeScript</a>
 	- <a href="#how-to-use-python">How to Use in Python</a>
+	- <a href="#how-to-use-mcp">How to Use in MCP</a>
 - <a href="#customize-error-languages">Localizing or Customizing Error Messages</a>
 - <a href="#performance">Performance</a>
 - <a href="#about-us">About Us</a>
@@ -236,6 +241,60 @@ The result is:
 For more details, see the [README for using in Python](./python/README.md).
 
 
+<a id="how-to-use-mcp"></a>
+### Using with MCP
+
+Exevalator supports MCP (Model Context Protocol) and can be used as a calculation tool for AI agents.
+The `mcp` folder contains the code and an [README for MCP Use](./mcp/README.md)
+
+In short: place the Exevalator package somewhere convenient (e.g., directly under your home), then set up the environment inside the `mcp` folder:
+
+	# Create a place to keep MCP tools (here, under home)
+	cd ~
+	mkdir mcp-tools
+	cd mcp-tools
+	
+	# Place the Exevalator package
+	git clone https://github.com/RINEARN/exevalator.git
+
+	# Set up the environment inside the mcp folder
+	cd exevalator/mcp
+	uv init -p 3.13 --name exevalator-mcp .
+	uv add "mcp[cli]"
+
+Next, in your AI environment (e.g., Visual Studio Code + Cline extension), 
+open the MCP server settings file, append an entry like the following, and register it:
+
+	{
+		"mcpServers": {
+			...
+			// Existing MCP tool entries (if any)
+			...
+			"Exevalator": {
+				"command": "uv",
+				"args": [
+					"--directory", "/home/your-user-name/mcp-tools/exevalator/mcp/",
+					"run", "exevalator_mcp.py"
+				]
+			}
+		}
+	}
+
+Once registered, try prompting your AI as follows:
+
+	Using the Exevalator MCP server, evaluate "1.2 + 3.4".
+	Do not use any other method. Make sure to use Exevalator.
+
+If everything is working, you should see a reply like:
+
+    I computed "1.2 + 3.4" via the `evaluate_expression` tool 
+    on the `Exevalator` MCP server and confirmed the result is 4.6.
+    As requested, the calculation was performed using `Exevalator`.
+
+For more details and a list of features, see the [README for MCP Use](./mcp/README.md)
+
+
+
 <a id="customize-error-languages"></a>
 ## Localizing or Customizing Error Messages
 
@@ -348,6 +407,16 @@ The following webpages may be useful if you need more information about Exevalat
 - Node.js is a trademark or a registered trademark of OpenJS Foundation in the United States and other countries.
 
 - Python is a trademark or a registered trademark of Python Software Foundation in the United States and other countries.
+
+- MCP (Model Context Protocol) is a communication protocol proposed by Anthropic, PBC.
+
+- Visual Studio Code is either a registered trademarks or trademarks of Microsoft Corporation in the United States and/or other countries.
+
+- Cline is an AI tool by Cline Bot Inc.
+
+- uv is a Python package management tool by Astral.
+
+- Git is a trademark or registered trademark of Software Freedom Conservancy, Inc. in the United States and/or other countries.
 
 - ChatGPT is a trademark or a registered trademark of OpenAI OpCo, LLC in the United States and other countries.
 
