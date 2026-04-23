@@ -41,6 +41,8 @@ enqueue<Page>(pageQueue, newPage("../cpp/README.md", "https://github.com/RINEARN
 enqueue<Page>(pageQueue, newPage("../rust/README.md", "https://github.com/RINEARN/exevalator/blob/main/rust/README.md", "How to Use Exevalator in Rust", "Explains how to use Exevalator in Rust in detail."));
 enqueue<Page>(pageQueue, newPage("../vb/README.md", "https://github.com/RINEARN/exevalator/blob/main/vb/README.md", "How to Use Exevalator in Visual Basic&reg; (VB.NET)", "Explains how to use Exevalator in Visual Basic .NET in detail."));
 enqueue<Page>(pageQueue, newPage("../typescript/README.md", "https://github.com/RINEARN/exevalator/blob/main/typescript/README.md", "How to Use Exevalator in TypeScript", "Explains how to use Exevalator in TypeScript in detail."));
+enqueue<Page>(pageQueue, newPage("../python/README.md", "https://github.com/RINEARN/exevalator/blob/main/python/README.md", "How to Use Exevalator in Python", "Explains how to use Exevalator in Python in detail."));
+enqueue<Page>(pageQueue, newPage("../mcp/README.md", "https://github.com/RINEARN/exevalator/blob/main/mcp/README.md", "How to Use Exevalator in MCP", "Explains how to use Exevalator from AI agents via MCP in detail."));
 
 
 

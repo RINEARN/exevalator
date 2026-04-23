@@ -41,6 +41,8 @@ enqueue<Page>(pageQueue, newPage("../cpp/README_JAPANESE.md", "https://github.co
 enqueue<Page>(pageQueue, newPage("../rust/README_JAPANESE.md", "https://github.com/RINEARN/exevalator/blob/main/rust/README_JAPANESE.md", "Rust での Exevalator の使用方法", "RustでExevalatorを使う方法を詳しく解説しています。"));
 enqueue<Page>(pageQueue, newPage("../vb/README_JAPANESE.md", "https://github.com/RINEARN/exevalator/blob/main/vb/README_JAPANESE.md", "Visual Basic&reg; (VB.NET) での Exevalator の使用方法", "Visual Basic&reg; (VB.NET) でExevalatorを使う方法を詳しく解説しています。"));
 enqueue<Page>(pageQueue, newPage("../typescript/README_JAPANESE.md", "https://github.com/RINEARN/exevalator/blob/main/typescript/README_JAPANESE.md", "TypeScript での Exevalator の使用方法", "TypeScript でExevalatorを使う方法を詳しく解説しています。"));
+enqueue<Page>(pageQueue, newPage("../python/README_JAPANESE.md", "https://github.com/RINEARN/exevalator/blob/main/python/README_JAPANESE.md", "Python での Exevalator の使用方法", "Python でExevalatorを使う方法を詳しく解説しています。"));
+enqueue<Page>(pageQueue, newPage("../mcp/README_JAPANESE.md", "https://github.com/RINEARN/exevalator/blob/main/mcp/README_JAPANESE.md", "MCP での Exevalator の使用方法", "MCP 経由で、AIエージェントからExevalatorを使う方法を詳しく解説しています。"));
 
 
 
