@@ -194,6 +194,7 @@ jobs:
 
     - name: Set-up Environment (Other tools)
       run: |
+        echo '{ "type": "module" }' > package.json
         npm install typescript @types/node
         npm install esbuild
 
