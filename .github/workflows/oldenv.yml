@@ -4,6 +4,10 @@ jobs:
 
   test-for-java:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./java
+
     steps:
     - uses: actions/checkout@v5
 
@@ -15,7 +19,6 @@ jobs:
 
     - name: Compile Exevalator
       run: javac Exevalator.java
-      working-directory: ./java
 
     - name: Compile Example Code
       run: |
@@ -26,7 +29,6 @@ jobs:
         javac Example5.java
         javac Example6.java
         javac Example7.java
-      working-directory: ./java
 
     - name: Run Example Code
       run: |
@@ -37,20 +39,20 @@ jobs:
         java Example5
         yes "" | java Example6
         yes "" | java Example7
-      working-directory: ./java
 
     - name: Compile Test Code
       run: javac Test.java
-      working-directory: ./java
 
     - name: Run Test Code
       run: java Test
-      working-directory: ./java
-
 
 
   test-for-cpp:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./cpp
+
     steps:
     - uses: actions/checkout@v5
 
@@ -68,7 +70,6 @@ jobs:
         clang++ -std=c++17 -Wall -o example5 example5.cpp
         clang++ -std=c++17 -Wall -o example6 example6.cpp
         clang++ -std=c++17 -Wall -o example7 example7.cpp
-      working-directory: ./cpp
 
     - name: Run Example Code
       run: |
@@ -79,20 +80,20 @@ jobs:
         ./example5
         yes "" | ./example6
         yes "" | ./example7
-      working-directory: ./cpp
 
     - name: Compile Test Code
       run: clang++ -std=c++17 -Wall -o test test.cpp
-      working-directory: ./cpp
 
     - name: Run Test Code
       run: ./test
-      working-directory: ./cpp
-
 
 
   test-for-csharp:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./csharp
+
     steps:
     - uses: actions/checkout@v5
     - uses: actions/setup-dotnet@v5
@@ -118,7 +119,6 @@ jobs:
         yes "" | dotnet run --project ./Examples
         cp -f ./Example7.cs ./Examples/Program.cs
         yes "" | dotnet run --project ./Examples
-      working-directory: ./csharp
 
     - name: Run Test Code
       run: |
@@ -127,11 +127,14 @@ jobs:
         cp ./Exevalator.cs ./Test/Exevalator.cs
         cp -f ./Test.cs ./Test/Program.cs
         dotnet run --project ./Test
-      working-directory: ./csharp
 
 
   test-for-visual-basic:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./vb
+
     steps:
     - uses: actions/checkout@v5
     - uses: actions/setup-dotnet@v5
@@ -164,7 +167,6 @@ jobs:
         cp -f ./Example7.vb ./Examples/Program.vb
         sed -i -e "s@Imports Rinearn\.ExevalatorVB@Imports Examples\.Rinearn\.ExevalatorVB@g" ./Examples/Program.vb
         yes "" | dotnet run --project ./Examples
-      working-directory: ./vb
 
     - name: Run Test Code
       run: |
@@ -174,11 +176,14 @@ jobs:
         cp -f ./Test.vb ./Test/Program.vb
         sed -i -e "s@Imports Rinearn\.ExevalatorVB@Imports Test\.Rinearn\.ExevalatorVB@g" ./Test/Program.vb
         dotnet run --project ./Test
-      working-directory: ./vb
 
 
   test-for-typescript:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./typescript
+
     steps:
     - uses: actions/checkout@v5
 
@@ -194,7 +199,6 @@ jobs:
 
     - name: Compile Exevalator
       run: npx tsc exevalator.ts
-      working-directory: ./typescript
 
     - name: Compile Example Code
       run: |
@@ -205,7 +209,6 @@ jobs:
         npx tsc example5.ts
         npx esbuild example6.ts --bundle --outfile=example6.bundle.js
         npx esbuild example7.ts --bundle --outfile=example7.bundle.js
-      working-directory: ./typescript
 
     - name: Run Example Code
       run: |
@@ -214,19 +217,20 @@ jobs:
         node example3.js
         node example4.js
         node example5.js
-      working-directory: ./typescript
 
     - name: Compile Test Code
       run: npx tsc test.ts
-      working-directory: ./typescript
 
     - name: Run Test Code
       run: node test.js
-      working-directory: ./typescript
 
 
   test-for-python:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./python
+
     steps:
     - uses: actions/checkout@v5
 
@@ -238,15 +242,17 @@ jobs:
     - name: Run Example Code
       run: |
         python example1.py
-      working-directory: ./python
 
     - name: Run Test Code
       run: python test.py
-      working-directory: ./python
 
 
   test-for-mcp:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./mcp
+
     steps:
     - uses: actions/checkout@v5
 
@@ -262,4 +268,3 @@ jobs:
 
     - name: Run Test Code
       run: python test.py
-      working-directory: ./mcp
