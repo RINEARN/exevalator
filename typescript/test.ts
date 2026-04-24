@@ -1,4 +1,4 @@
-import Exevalator, { ExevalatorFunctionInterface, ExevalatorError, StaticSettings } from "./exevalator";
+import Exevalator, { ExevalatorFunctionInterface, ExevalatorError, StaticSettings } from "./exevalator.js";
 
 /** The minimum error between two double-type values to regard them almost equal. */
 const ALLOWABLE_ERROR: number = 1.0E-12;
@@ -245,31 +245,31 @@ function testPrecedencesOfOperators() {
     check(
         "Test of Precedences of Operators 16",
         exevalator.eval("1.2*--3.4"),
-        1.2*(-(-3.4))
+        1.2 * (-(-3.4))
     );
 
     check(
         "Test of Precedences of Operators 17",
         exevalator.eval("1.2*---3.4"),
-        1.2*(-(-(-3.4)))
+        1.2 * (-(-(-3.4)))
     );
 
     check(
         "Test of Precedences of Operators 18",
         exevalator.eval("1.2*----3.4"),
-        1.2*(-(-(-(-3.4))))
+        1.2 * (-(-(-(-3.4))))
     );
 
     check(
         "Test of Precedences of Operators 19",
         exevalator.eval("1.2*----3.4-5.6"),
-        1.2*(-(-(-(-3.4))))-5.6
+        1.2 * (-(-(-(-3.4)))) - 5.6
     );
 
     check(
         "Test of Precedences of Operators 20",
         exevalator.eval("1.2-----3.4-5.6"),
-        1.2-(-(-(-(-3.4))))-5.6
+        1.2 - (-(-(-(-3.4)))) - 5.6
     );
 }
 
@@ -779,13 +779,13 @@ function testFunctions() {
         exevalator.eval("funC(funC(funA(), funB(2.5)), funB(1.0))"),
         1.25 + 2.5 + 1.0
     );
-    
+
     check(
         "Test of Function 8",
         exevalator.eval("funC(1.0, 3.5 * funB(2.5) / 2.0)"),
         1.0 + 3.5 * 2.5 / 2.0
     );
-    
+
     check(
         "Test of Functions 9",
         exevalator.eval("funA() * funC(funC(funA(), 3.5 * funB(2.5) / 2.0), funB(1.0))"),
@@ -1028,7 +1028,7 @@ function testAddressFiltering() {
 
 
     // Theoretical upper limit for these bit-mask operations
-    const theoreticalMaxMemoryLength = 2**31;
+    const theoreticalMaxMemoryLength = 2 ** 31;
 
     for (let rawAddress: number = -1000000; rawAddress < 0; rawAddress++) {
         const filteredAddress = ((rawAddress | 0) & ~(rawAddress >> 31)) & ((theoreticalMaxMemoryLength - 1) | 0);

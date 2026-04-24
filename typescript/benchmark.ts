@@ -1,4 +1,4 @@
-import Exevalator from "./exevalator";
+import Exevalator from "./exevalator.js";
 
 /*
  * A benchmark to measure the speed of repeated calculations.
@@ -16,7 +16,7 @@ let sum: number = 0.0;
 // Measure required time for evaluating a expression repeatedly for 100M times,
 // where each 10 numerical operations are required for each evaluation.
 const beginTime: number = Date.now(); // milliseconds
-for (let i: number =  1; i <= loops; ++i) {
+for (let i: number = 1; i <= loops; ++i) {
     exevalator.writeVariableAt(address, i);
     sum += exevalator.eval("x + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1 + 1 - 1");
 }

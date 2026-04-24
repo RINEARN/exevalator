@@ -1,4 +1,4 @@
-import Exevalator, { ExevalatorFunctionInterface, ExevalatorError } from "./exevalator";
+import Exevalator, { ExevalatorFunctionInterface, ExevalatorError } from "./exevalator.js";
 
 /*
  * An example to create a function for available in expressions.

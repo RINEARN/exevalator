@@ -1,4 +1,4 @@
-import Exevalator from "./exevalator";
+import Exevalator from "./exevalator.js";
 
 /*
  * An example to use various operators and parentheses.

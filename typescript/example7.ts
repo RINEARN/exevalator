@@ -1,4 +1,4 @@
-import Exevalator from "./exevalator";
+import Exevalator from "./exevalator.js";
 
 /*
  * An example to compute the numerical integration value of the inputted expression f(x).
@@ -22,7 +22,7 @@ import Exevalator from "./exevalator";
 // Get the expression from the user
 const defaultExpression: string = "3*x*x + 2*x + 1";
 let promptMessage: string = "This program computes the value of f(x) at x.\n"
-        + `f(x) = ?      (default: ${defaultExpression})`
+    + `f(x) = ?      (default: ${defaultExpression})`
 let expression: string | null = window.prompt(promptMessage, defaultExpression);
 if (expression === null) {
     expression = defaultExpression;
@@ -71,7 +71,7 @@ for (let i: number = 0; i < numberOfSteps; i++) {
     exevalator.writeVariableAt(xAddress, x + delta);
     const fxRight: number = exevalator.eval(expression);
 
-    exevalator.writeVariableAt(xAddress, x + delta/2.0);
+    exevalator.writeVariableAt(xAddress, x + delta / 2.0);
     const fxCenter: number = exevalator.eval(expression);
 
     result += (fxLeft + fxRight + 4.0 * fxCenter) * delta / 6.0;

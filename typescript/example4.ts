@@ -1,4 +1,4 @@
-import Exevalator from "./exevalator";
+import Exevalator from "./exevalator.js";
 
 /*
  * An example to access a variable by its address.

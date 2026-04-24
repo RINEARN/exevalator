@@ -1,4 +1,4 @@
-import Exevalator from "./exevalator";
+import Exevalator from "./exevalator.js";
 
 /*
  * A simple example to use Exevalator.

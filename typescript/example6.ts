@@ -1,4 +1,4 @@
-import Exevalator from "./exevalator";
+import Exevalator from "./exevalator.js";
 
 /*
  * An example to compute the value of the inputted expression f(x) at the inputted x.
@@ -19,7 +19,7 @@ import Exevalator from "./exevalator";
 // Get the expression from the user
 const defaultExpression: string = "3*x*x + 2*x + 1";
 let promptMessage: string = "This program computes the value of f(x) at x.\n"
-        + `f(x) = ?      (default: ${defaultExpression})`
+    + `f(x) = ?      (default: ${defaultExpression})`
 let expression: string | null = window.prompt(promptMessage, defaultExpression);
 if (expression === null) {
     expression = defaultExpression;

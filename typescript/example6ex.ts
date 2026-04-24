@@ -1,4 +1,4 @@
-import Exevalator, {ExevalatorFunctionInterface, ExevalatorError} from "./exevalator";
+import Exevalator, { ExevalatorFunctionInterface, ExevalatorError } from "./exevalator.js";
 
 /*
  * An example to compute the value of the inputted expression f(x) at the inputted x.
